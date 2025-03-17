@@ -2,8 +2,8 @@
 try {
     // Load environment variables
     require_once 'env_load.php';
-    #$env = new EnvLoader(__DIR__ . '/.env');
-    $env = new EnvLoader('.env');
+    
+    $env = new EnvLoader(__DIR__ . '/.env');
     $dbHost = $env->get('DB_HOST');
     $dbUser = $env->get('DB_USER');
     $dbPass = $env->get('DB_PASS');
