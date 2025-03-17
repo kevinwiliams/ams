@@ -2,15 +2,14 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <?php 
+
+
   date_default_timezone_set("America/Jamaica");
 
   ob_start();
   $title = isset($_GET['page']) ? ucwords(str_replace("_", ' ', $_GET['page'])) : "Home";
 
-  // Ensure session is started
-  if (session_status() === PHP_SESSION_NONE) {
-      session_start();
-  }
+
 
   // Check if $_SESSION['system']['name'] is set
   $systemName = isset($_SESSION['system']['name']) ? $_SESSION['system']['name'] : 'Assignment Management System ';

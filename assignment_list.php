@@ -14,21 +14,6 @@ $login_empid = intval($login_empid);
 $sessionempid = $_SESSION['login_empid'];
 $user_role = $_SESSION['role_name'];
 
-// Fetch user details
-$user_details_query = $conn->prepare("SELECT firstname, lastname FROM users WHERE id = ?");
-$user_details_query->bind_param("i", $login_empid);
-$user_details_query->execute();
-$user_details_result = $user_details_query->get_result();
-
-if ($user_details_result->num_rows > 0) {
-    $user_details = $user_details_result->fetch_assoc();
-    $firstname = $user_details['firstname'];
-    $lastname = $user_details['lastname'];
-} else {
-    $firstname = 'Admin';
-    $lastname = '';
-}
-
 // Initialize $assignment_list
 $assignment_list = null;
 
@@ -81,7 +66,6 @@ $query = "SELECT a.*,
             FROM assignment_list a 
             $where
             ORDER BY a.assignment_date DESC";
-
 $assignment_list = $conn->query($query);
 
 // Handle potential errors
@@ -114,7 +98,7 @@ if (!$assignment_list) {
                 $disAllowedRoles = "'ITAdmin', 'Dispatcher', 'Dept Admin', 'Driver'"; // Define allowed role names
 
                 $teamMembersList = $conn->query("
-                    SELECT DISTINCT CONCAT(u.firstname, ' ', u.lastname) AS name 
+                    SELECT CONCAT(u.firstname, ' ', u.lastname) AS name 
                     FROM users u 
                     LEFT JOIN roles r ON u.role_id = r.role_id 
                     WHERE r.role_name NOT IN ($disAllowedRoles)

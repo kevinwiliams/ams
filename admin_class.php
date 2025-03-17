@@ -1,30 +1,25 @@
 <?php
 
-require __DIR__ . '/vendor/autoload.php';
-
 if (session_status() === PHP_SESSION_NONE) {
 	session_start();
 }
-ini_set('display_errors', 1);
 
-use Twilio\Rest\Client;
+ini_set('display_errors', 1);
 
 Class Action {
 	private $db;
 	private $adhocDb;
-	private $twilio;
 	private $env;
 
    
 	public function __construct() {
 		ob_start();
 		
-		include 'db_connect.php';
-		
+		include('db_connect.php');
+	
 		$this->db = $conn;
 		$this->adhocDb = $mssqlconn;
-		$this->env = new EnvLoader(__DIR__ . '/.env');
-		$this->twilio = new Client('TWILIO_SID', 'TWILIO_AUTH_TOKEN');
+		$this->env = new EnvLoader('.env');
 	}
 	function __destruct() {
 	    if ($this->db) {

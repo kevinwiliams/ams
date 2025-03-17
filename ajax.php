@@ -3,7 +3,7 @@ ob_start();
 date_default_timezone_set("America/Jamaica");
 
 include 'admin_class.php';  
-include './db_connect.php'; 
+// include 'db_connect.php'; 
 
 $action = $_GET['action'] ?? '';
 
@@ -64,5 +64,5 @@ if ($action == 'login') {
     $get = $crud ->update_transport_log();
     if ($get) echo $get; 
 }
-$conn->close(); 
+// $conn->close(); 
 ob_end_flush();

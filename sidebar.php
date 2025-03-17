@@ -20,7 +20,7 @@ $login_name = isset($_SESSION['login_name']) ? $_SESSION['login_name'] : 'User';
             <?php else: ?>
                 <h3 class="text-center p-0 m-0"><b>USER</b></h3>
             <?php endif; ?> -->
-            <img src="/assets/uploads/ams_logo.png" class="img" width="60" />
+            <img src="assets/uploads/ams_logo.png" class="img" width="60" />
         </a>
     </div>
 
