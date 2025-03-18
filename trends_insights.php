@@ -1,7 +1,32 @@
 <?php
 include 'db_connect.php'; // Include database connection
 
-// Fetch the number of assignments created per month based on the `date_created` column
+// Fetch the number of assignments per user based on empid in team_members
+$reporter_query = $conn->query("
+    SELECT 
+        u.empid,
+        u.firstname,
+        u.lastname,
+        u.role_id,
+        COUNT(a.id) AS assignments_per_user
+    FROM 
+        assignment_list a
+    JOIN 
+        users u ON FIND_IN_SET(u.empid, a.team_members) > 0
+    GROUP BY 
+        u.empid
+");
+
+// Initialize arrays for the user chart data
+$user_names = [];
+$user_assignments = [];
+
+while ($row = $reporter_query->fetch_assoc()) {
+    $user_names[] = $row['empid'] . ' - ' . $row['firstname'] . ' ' . $row['lastname']; 
+    $user_assignments[] = $row['assignments_per_user'];
+}
+
+// Fetch the number of assignments created per month based on the date_created column
 $query = $conn->query("
     SELECT 
         YEAR(date_created) AS year,
@@ -15,22 +40,23 @@ $query = $conn->query("
         YEAR(date_created) ASC, MONTH(date_created) ASC
 ");
 
-// Initialize empty arrays to hold the chart data
+// Initialize arrays to hold the chart data
 $months = [];
 $assignments = [];
 
 while ($row = $query->fetch_assoc()) {
-    // Convert month number to month name 
     $month_name = date('M', mktime(0, 0, 0, $row['month'], 10));
-    $year_month = $month_name . ' ' . $row['year']; // Format like "Jan 2025"
+    $year_month = $month_name . ' ' . $row['year']; 
     
     $months[] = $year_month;
     $assignments[] = $row['total_assignments'];
 }
 
-// Convert arrays to JSON for use in JavaScript
+// Convert arrays to JSON for JavaScript
 $months_json = json_encode($months);
 $assignments_json = json_encode($assignments);
+$user_names_json = json_encode($user_names);
+$user_assignments_json = json_encode($user_assignments);
 ?>
 
 <!DOCTYPE html>
@@ -43,45 +69,38 @@ $assignments_json = json_encode($assignments);
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+
+    <!-- First Container: Trends - Assignment List Created -->
     <div class="container mt-5">
-        <!-- Centered Trends and Insights Section -->
         <div class="row justify-content-center">
             <div class="col-lg-10">
-                <h2 class="text-center">Trends and Insights</h2>
-
-                <!-- Print Button on the Right -->
-                <button class="btn btn-success mb-3 float-right" onclick="window.print()">Print</button>
-
-                <!-- Trends Chart -->
-                <h3>Trends: Assignment List Created</h3>
-                <canvas id="trendsChart"></canvas>
+                <h2 class="text-center">Assignment List Created</h2>
+                <!-- <button class="btn btn-success mb-3" onclick="printSection('trendsChartContainer')">Print Trends</button> -->
+                <div id="trendsChartContainer">
+                    <canvas id="trendsChart"></canvas>
+                </div>
                 <script>
                     var ctx = document.getElementById('trendsChart').getContext('2d');
                     var trendsChart = new Chart(ctx, {
-                        type: 'bar',  
+                        type: 'bar',
                         data: {
-                            labels: <?php echo $months_json; ?>, // Dynamic months
+                            labels: <?php echo $months_json; ?>,
                             datasets: [{
                                 label: 'Assignments Created',
-                                data: <?php echo $assignments_json; ?>, // Dynamic data
-                                backgroundColor: 'rgba(153, 102, 255, 0.6)', // Bar color
-                                borderColor: 'rgba(153, 102, 255, 1)', // Bar border color
+                                data: <?php echo $assignments_json; ?>,
+                                backgroundColor: 'rgba(153, 102, 255, 0.6)',
+                                borderColor: 'rgba(153, 102, 255, 1)',
                                 borderWidth: 1
                             }]
                         },
                         options: {
-                            responsive: true, 
+                            responsive: true,
                             scales: {
-                                y: {
-                                    beginAtZero: true
-                                }
+                                y: { beginAtZero: true }
                             },
                             plugins: {
-                                legend: {
-                                    display: true,
-                                    position: 'top',
-                                },
-                            },
+                                legend: { display: true, position: 'top' }
+                            }
                         }
                     });
                 </script>
@@ -89,6 +108,58 @@ $assignments_json = json_encode($assignments);
         </div>
     </div>
 
+    <!-- Horizontal Line to Separate Sections -->
+    <hr class="mt-5 mb-5" style="border-top: 2px solid #000;">
+
+    <!-- Second Container: Assignments Per User -->
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <h2 class="text-center">Assignments Per User</h2>
+                <!-- <button class="btn btn-success mb-3" onclick="printSection('userAssignmentsChartContainer')">Print Assignments Per User</button> -->
+                <div id="userAssignmentsChartContainer">
+                    <canvas id="userAssignmentsChart"></canvas>
+                </div>
+                <script>
+                    var ctx2 = document.getElementById('userAssignmentsChart').getContext('2d');
+                    var userAssignmentsChart = new Chart(ctx2, {
+                        type: 'bar',
+                        data: {
+                            labels: <?php echo $user_names_json; ?>,
+                            datasets: [{
+                                label: 'Assignments per User',
+                                data: <?php echo $user_assignments_json; ?>,
+                                backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                                borderColor: 'rgba(75, 192, 192, 1)',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            scales: {
+                                y: { beginAtZero: true }
+                            },
+                            plugins: {
+                                legend: { display: true, position: 'top' }
+                            }
+                        }
+                    });
+                </script>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function printSection(id) {
+            var printContent = document.getElementById(id).innerHTML;
+            var originalContent = document.body.innerHTML;
+            document.body.innerHTML = printContent;
+            window.print();
+            document.body.innerHTML = originalContent;
+        }
+    </script>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 </html>
