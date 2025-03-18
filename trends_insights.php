@@ -14,7 +14,7 @@ $reporter_query = $conn->query("
     JOIN 
         users u ON FIND_IN_SET(u.empid, a.team_members) > 0
     GROUP BY 
-        u.empid
+        u.empid 
 ");
 
 // Initialize arrays for the user chart data
