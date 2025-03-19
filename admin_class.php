@@ -519,7 +519,7 @@ Class Action {
 		$uuid = !empty($uid) ? $uid : uniqid('event_', true);
 		$user_role = $_SESSION['role_name'];
 		$admin_roles = ['Manager', 'ITAdmin', 'Editor', 'Dept Admin'];
-	
+		
 		// Process POST data
 		foreach ($_POST as $key => $value) {
 			if (!empty($value) && !in_array($key, ['id', 'assignee', 'team', 'request', 'request_amount', 'assigned_by']) && !is_numeric($key)) {
@@ -1445,6 +1445,7 @@ Class Action {
 	public function generate_ics_file($info)  {
 		$env = $this->getEnv();
 		$site_url = $env->get('SITE_URL');
+		$folder_loc = $env->get('ICS_FOLDER');
 		$status = ($info['is_cancelled']) ? 'CANCELLED' : 'CONFIRMED';
 
 		$uid = isset($info['uid']) ? $info['uid'] : uniqid('event_', true); // Generate a unique ID if not provided
@@ -1482,7 +1483,7 @@ Class Action {
 		$icsContent .= "END:VCALENDAR\r\n";
 	
 		// Define the folder to store .ics files
-		$icsFolder = $_SERVER['DOCUMENT_ROOT'] . '/calendar_attachments'; 
+		$icsFolder = $folder_loc . '/calendar_attachments'; 
 		if (!is_dir($icsFolder)) {
 			mkdir($icsFolder, 0777, true); // Create the folder if it doesn't exist
 		}

@@ -592,7 +592,7 @@ if ($id) {
                             ?>
                             <!-- Stub out Status -->
                             <input name="status" type="hidden" value="<?php echo htmlspecialchars($currentStatus); ?>">
-                            <input name="uid" type="hidden" value="<?php echo ($uid); ?>">
+                            <input name="uid" type="hidden" value="<?php echo (isset($uid)? $uid : ''); ?>">
                             <input name="transport_confirmed" type="hidden" value="<?php echo htmlspecialchars($transport_confirmed ?? ''); ?>">
                             <?php if($login_role_id < 5){ ?>
                             <div class="form-group d-none">
