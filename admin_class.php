@@ -1483,7 +1483,7 @@ Class Action {
 		$icsContent .= "END:VCALENDAR\r\n";
 	
 		// Define the folder to store .ics files
-		$icsFolder = $folder_loc . '/calendar_attachments'; 
+		$icsFolder = $folder_loc . 'calendar_attachments'; 
 		if (!is_dir($icsFolder)) {
 			mkdir($icsFolder, 0777, true); // Create the folder if it doesn't exist
 		}
