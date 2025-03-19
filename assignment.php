@@ -592,6 +592,7 @@ if ($id) {
                             ?>
                             <!-- Stub out Status -->
                             <input name="status" type="hidden" value="<?php echo htmlspecialchars($currentStatus); ?>">
+                            <input name="uid" type="hidden" value="<?php echo ($uid); ?>">
                             <input name="transport_confirmed" type="hidden" value="<?php echo htmlspecialchars($transport_confirmed ?? ''); ?>">
                             <?php if($login_role_id < 5){ ?>
                             <div class="form-group d-none">
@@ -620,12 +621,27 @@ if ($id) {
                     <hr />
                     <div class="row">
                             <div class="col d-flex justify-content-sm-between">
-                            <label>
+                                <div id="checkboxes">
+                                    <div class="custom-control custom-switch my-2">
+                                        <input type="checkbox" class="custom-control-input" id="send_notification" name="send_notification" checked <?php //echo isset($send_notification) && $send_notification == 1 ? 'checked' : '' ?>>
+                                        <label class="custom-control-label font-weight-light" for="send_notification">
+                                        <?php echo (isset($send_notification) && $send_notification == 1) ? 'Notification Sent (uncheck if you do not wish to send another)' : 'Send Notification'; ?>
+                                        </label>
+                                    </div>
+                                    <?php if (isset($_GET['id'])){?>
+                                    <div class="custom-control custom-switch">
+                                        <input type="checkbox" class="custom-control-input text-danger" id="is_cancelled" name="is_cancelled"  <?php //echo isset($is_cancelled) && $is_cancelled == 1 ? 'checked' : '' ?>>
+                                        <label class="custom-control-label text-danger" for="is_cancelled">Cancel Assignment</label>
+                                    </div>
+                                    <?php } ?>  
+                                </div>
+                            
+                            <!-- <label>
                                 <input type="checkbox" name="send_notification" class="checkbox"  checked <?php //echo isset($send_notification) && $send_notification == 1 ? 'checked' : '' ?>>
                                 <span class="font-weight-light "> 
                                     <?php echo (isset($send_notification) && $send_notification == 1) ? 'Notification Sent (uncheck if you do not wish to send another)' : 'Send Notification'; ?>
                                 </span>
-                            </label>
+                            </label> -->
                                 <div class="form-group">
                                     <a class="btn btn-secondary mx-5" href="index.php?page=home">Cancel</a>
 

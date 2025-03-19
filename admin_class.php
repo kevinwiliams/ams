@@ -507,184 +507,217 @@ Class Action {
 		$env = $this->getEnv();
 		$site_url = $env->get('SITE_URL');
 		extract($_POST);
-		$data = "";
-		$log = "";
-		$status="";
-		$date = new DateTime();
-		$timestamp = $date->format('Y-m-d H:i:s');
-		$assignmentDate = $_POST['assignment_date'];
-		$notify = (isset($send_notification)) ? true : false; // Flag to send notifications
-		$logged = false; // Check transport log
-
-		$admin_roles = ['Manager', 'ITAdmin', 'Editor', 'Dept Admin'];
+	
+		// Initialize variables
+		$data = [];
+		$log = [];
+		$status = '';
+		$timestamp = (new DateTime())->format('Y-m-d H:i:s');
+		$assignmentDate = $_POST['assignment_date'] ?? '';
+		$notify = isset($send_notification);
+		$cancelled = isset($is_cancelled);
+		$uuid = !empty($uid) ? $uid : uniqid('event_', true);
 		$user_role = $_SESSION['role_name'];
-
+		$admin_roles = ['Manager', 'ITAdmin', 'Editor', 'Dept Admin'];
+	
+		// Process POST data
 		foreach ($_POST as $key => $value) {
-			// filter and assign POST data excluding non-db fields
-			if (!in_array($key, ['id', 'assignee', 'team', 'request', 'request_amount', 'assigned_by']) && !is_numeric($key)) {
-				// Escape description for HTML entities
-				// if ($key === 'description') {
-				// 	$value = htmlentities(str_replace("'", "&#x2019;", $value));
-				// }
-				// Escape description for HTML entities and SQL
-				if ($key === 'description' || $key === 'title' || $key === 'equipment') {
+			if (!empty($value) && !in_array($key, ['id', 'assignee', 'team', 'request', 'request_amount', 'assigned_by']) && !is_numeric($key)) {
+				// Escape specific fields for HTML entities and SQL
+				if (in_array($key, ['description', 'title', 'equipment'])) {
 					$value = $this->db->real_escape_string(htmlspecialchars($value, ENT_QUOTES, 'UTF-8'));
 				}
-				if ($key === 'status') {
-					$status = $value;
+	
+				// Handle special cases
+				switch ($key) {
+					case 'status':
+						$status = $value;
+						break;
+					case 'send_notification':
+						$value = (int)$value;
+						break;
+					case 'transport_confirmed':
+						$value = (int)$value;
+						break;
+					case 'uid':
+						$value = $uuid;
+						break;
 				}
-				// Append to $data string
-				$data .= empty($data) ? " $key='$value' " : ", $key='$value' ";
+	
+				// Append to $data array
+				$data[$key] = is_int($value) ? $value : "'$value'";
 			}
 		}
-		// Combine assignees into a comma-separated string 
-		$team_members = [];
-		$team = [];
-		if (isset($_POST['assignee']) || isset($_POST['team'])) {
-			
-			$assigneeTeam = isset($_POST['team']) ? array_filter(explode(',', $_POST['team'])) : [];
-			if (isset($_POST['assignee'])){
-				foreach ($_POST['assignee'] as $role => $members) {
-					$team_members = array_merge($team_members, $members);
-				}
-			}
-			$team_members = array_merge($team_members, $assigneeTeam);
-
+	
+		// Combine assignees into a comma-separated string
+		$team_members = $this->get_team_members_from_post($_POST);
+		if (!empty($team_members)) {
 			$team_members_str = implode(',', $team_members);
-			$team = $team_members_str;
-			$data .= ", team_members='$team_members_str' ";
+			$data['team_members'] = "'$team_members_str'";
 		}
-		// Check if there's a double booking for team members
+	
+		// Check for double booking
 		if (empty($id)) {
-			$alreadyAssigned = "";
-			$assignedMembers = []; // Array to hold member names
-
-			foreach ($team_members as $key => $member) {
-				if ($member) {
-					$memberDetails = $this->check_booking($member, $assignmentDate, $_POST['start_time']);
-					if ($memberDetails) {
-						$assignedMembers[] = $memberDetails['firstname'] . " " . $memberDetails['lastname'];
-					}
-				}
+			$alreadyAssigned = $this->check_double_booking($team_members, $assignmentDate, $_POST['start_time']);
+			if ($alreadyAssigned) {
+				return $alreadyAssigned . ' is already assigned!';
 			}
-
-			if (count($assignedMembers) > 1) {
-				$lastMember = array_pop($assignedMembers); // Remove the last member
-				$alreadyAssigned = implode(", ", $assignedMembers) . ", " . $lastMember;
-			} else {
-				$alreadyAssigned = implode("", $assignedMembers); // Single result or empty
-			}
-
-			// Output the result
-			if($alreadyAssigned)
-				return $alreadyAssigned.' is aleady assigned!';
 		}
+	
 		// Log dispatch details
 		if (isset($_POST['transport_id']) && $status == 'Approved') {
-			$log .= "assignment_id='" . $id . "' ";
-			$log .= ", transport_id='" . $transport_id . "' ";
-			$log .= ", created_by='" . $_SESSION['login_id'] . "' ";
+			$log['assignment_id'] = $id;
+			$log['transport_id'] = $_POST['transport_id'] ?? null;
+			$log['created_by'] = $_SESSION['login_id'];
 		}
-		// Update assigned by field if done by an Admin
-		if (in_array($user_role, $admin_roles) ) {
-			$data .= ", assigned_by='" . $_SESSION['login_id'] . "' ";
+	
+		// Update assigned_by if user is an admin
+		if (in_array($user_role, $admin_roles)) {
+			$data['assigned_by'] = "'" . $_SESSION['login_id'] . "'";
 		}
+	
 		// Always capture last user to edit assignment
-		$data .= ", edited_by='" . $_SESSION['login_id'] . "' ";
+		$data['edited_by'] = "'" . $_SESSION['login_id'] . "'";
+	
 		// Update Approved User field
 		if (isset($_POST['status']) && $_POST['status'] == 'Pending') {
-			$data .= ", approved_by='" . $_SESSION['login_id'] . "' ";
-			$data .= ", approval_date='" . $timestamp. "' ";
+			$data['approved_by'] = "'" . $_SESSION['login_id'] . "'";
+			$data['approval_date'] = "'$timestamp'";
 		}
-		//Flag if request made for resources
-		$data .= ", photo_requested=" . (isset($_POST['request']['photographer']) ? 1 : 0);
-		$data .= ", video_requested=" . (isset($_POST['request']['videographer']) ? 1 : 0);
-		$data .= ", social_requested=" . (isset($_POST['request']['social']) ? 1 : 0);
-		
-		// Add/udpate transport log if vehicle assigned
-		if(!empty($_POST['transport_id'])){
-			$data .= ", transport_confirmed=1 ";
-			// Check if assignment is already in the transport log table
-			$logged = $this->check_transport_log($id);
-			if ($logged == false) {
-				// Insert new record
-				$logQuery = "INSERT INTO transport_log SET $log";
-			}else{
-				$logQuery = "UPDATE transport_log SET $log where assignment_id=$id";
-			}
-			$saveLog = $this->db->query($logQuery);
+	
+		// Flag resource requests
+		$data['photo_requested'] = isset($_POST['request']['photographer']) ? 1 : 0;
+		$data['video_requested'] = isset($_POST['request']['videographer']) ? 1 : 0;
+		$data['social_requested'] = isset($_POST['request']['social']) ? 1 : 0;
+	
+		// Handle transport log
+		if (!empty($_POST['transport_id'])) {
+			$data['transport_confirmed'] = 1;
+			$this->update_transport_logs($id, $log);
 		}
+	
 		// Check if notification was already sent
-		$notifyAlreadySent = false;
-		if (!empty($id)) {
-			$checkQuery = "SELECT send_notification FROM assignment_list WHERE id = $id";
-			$checkResult = $this->db->query($checkQuery);
-			if ($checkResult) {
-				$row = $checkResult->fetch_assoc();
-				$notifyAlreadySent = ($row['send_notification'] == 1);
-			}
-		}
-		//Get User to attach to notifications
-		$assigned_id = intval($_POST['assigned_by']);
-		$assignedBy = $this->get_user_by_id($assigned_id);
+		$notifyAlreadySent = $this->check_notification_sent($id);
+		$postponed = $this->isPostponement($id, $assignmentDate, $_POST['start_time']);
+	
 		// SAVE ASSIGNMENT
 		if (empty($id)) {
-			// Add create date
-			$data .= ", date_created='" . $timestamp. "' ";
-			// Insert new record
-			$query = "INSERT INTO assignment_list SET $data";
+			// Add create date & UID
+			$data['date_created'] = "'$timestamp'";
+			$data['uid'] = "'$uuid'";
+			$query = "INSERT INTO assignment_list SET " . $this->build_query($data);
 		} else {
-			// Update existing record
-			$query = "UPDATE assignment_list SET $data WHERE id=$id";
+			$query = "UPDATE assignment_list SET " . $this->build_query($data) . " WHERE id=$id";
 		}
+	
 		// Execute the query
+		// echo $query;
 		$save = $this->db->query($query);
 		if ($save) {
-			$lastInsertId = $this->db->insert_id; // Get the last inserted ID to attch to email if notified
- 
-			$id = (!empty($id)) ? $id : $lastInsertId;
-			$assigned_by = (!empty($_POST['id'])) ? $assignedBy['firstname']. ' '. $assignedBy['lastname'] : $_SESSION['login_firstname'].' '.$_SESSION['login_lastname'];
-			// Create json to send notification
-			$assignmentInfo = [
-				'assignment_date' => $_POST['assignment_date'] ?? '',
-				'start_time' => $_POST['start_time'] ?? 'N/A',
-				'end_time' => $_POST['end_time'] ?? 'N/A',
-				'depart_time' => $_POST['depart_time'] ?? 'N/A',
-				'assignment' => $_POST['title'] ?? '',
-				'details' => $_POST['description'] ?? '',
-				'venue' => $_POST['location'] ?? '',
-				'team' => $this->get_team_members($team_members_str),
-				// 'transport_option' => $_POST['drop_option'] ?? 'No transport required',
-				'assigned_by' => $assigned_by,
-				'assigned_by_email' => $assignedBy['email'] ?? $_SESSION['login_email'],
-				'updated_by' => $_SESSION['login_firstname'].' '.$_SESSION['login_lastname'],
-				//'status' => $_POST['status'] ?? 'Pending',
-				'url' => $site_url.'/index.php?page=view_assignment&id='.$id.'&confirm=true',
-			];
-			// Encode as JSON 
+			$lastInsertId = $this->db->insert_id;
+			$id = !empty($id) ? $id : $lastInsertId;
+	
+			// Prepare assignment info for notifications
+			$assignmentInfo = $this->prepare_assignment_info($id, $uuid, $assignmentDate, $team_members_str, $cancelled, $postponed, $site_url);
 			$data_json = json_encode($assignmentInfo);
-			//Send resource mail i
+	
+			// Send resource request emails
 			if (isset($_POST['request'])) {
 				$this->send_resource_request($_POST, $data_json);
 			}
-			
-			// Construct subject for email for updated assignments
-			$subjectTxt = "Assignment - " . date("D, M d, Y", strtotime($assignmentInfo['assignment_date']));
-			if ($notifyAlreadySent) {
-				$subjectTxt .= " (Updated)";
-			}
-
-			// Send notification to team members involved in the assignment
+	
+			// Send notifications
 			if ($notify) {
-				// Send a single email to all team members and individual SMS/WhatsApp messages
+				$subjectTxt = $this->build_email_subject($assignmentDate, $notifyAlreadySent, $cancelled, $postponed);
 				$this->send_notifications($team_members, $data_json, $subjectTxt);
 			}
-
-			return 1;
+			$success = 1;
+			return $success;
 		} else {
 			return "Error saving record: " . $this->db->error;
 		}
+	}
+	
+	// Helper Functions
+	function get_team_members_from_post($postData) {
+		$team_members = [];
+		if (isset($postData['assignee'])) {
+			foreach ($postData['assignee'] as $role => $members) {
+				$team_members = array_merge($team_members, $members);
+			}
+		}
+		if (isset($postData['team'])) {
+			$team_members = array_merge($team_members, array_filter(explode(',', $postData['team'])));
+		}
+		return $team_members;
+	}
+	
+	function check_double_booking($team_members, $assignmentDate, $startTime) {
+		$assignedMembers = [];
+		foreach ($team_members as $member) {
+			if ($member) {
+				$memberDetails = $this->check_booking($member, $assignmentDate, $startTime);
+				if ($memberDetails) {
+					$assignedMembers[] = $memberDetails['firstname'] . " " . $memberDetails['lastname'];
+				}
+			}
+		}
+		return count($assignedMembers) > 0 ? implode(", ", $assignedMembers) : false;
+	}
+	
+	function update_transport_logs($assignmentId, $logData) {
+		$logged = $this->check_transport_log($assignmentId);
+		$logQuery = $logged ? "UPDATE transport_log SET " . $this->build_query($logData) . " WHERE assignment_id=$assignmentId"
+							: "INSERT INTO transport_log SET " . $this->build_query($logData);
+		$this->db->query($logQuery);
+	}
+	
+	function check_notification_sent($assignmentId) {
+		if (!empty($assignmentId)) {
+			$checkQuery = "SELECT send_notification FROM assignment_list WHERE id = $assignmentId";
+			$checkResult = $this->db->query($checkQuery);
+			return $checkResult ? $checkResult->fetch_assoc()['send_notification'] == 1 : false;
+		}
+		return false;
+	}
+	
+	function build_query($data) {
+		return implode(', ', array_map(fn($k, $v) => "$k=$v", array_keys($data), $data));
+	}
+	
+	function prepare_assignment_info($id, $uuid, $assignmentDate, $team_members_str, $cancelled, $postponed, $site_url) {
+		$assigned_id = intval($_POST['assigned_by']);
+		$assignedBy = $this->get_user_by_id($assigned_id);
+		$assigned_by = (!empty($_POST['id'])) ? $assignedBy['firstname']. ' '. $assignedBy['lastname'] : $_SESSION['login_firstname'].' '.$_SESSION['login_lastname'];
 
+		return [
+			'assignment_date' => $assignmentDate,
+			'start_time' => $_POST['start_time'] ?? 'N/A',
+			'end_time' => $_POST['end_time'] ?? 'N/A',
+			'depart_time' => $_POST['depart_time'] ?? 'N/A',
+			'assignment' => $_POST['title'] ?? '',
+			'details' => $_POST['description'] ?? '',
+			'venue' => $_POST['location'] ?? '',
+			'team' => $this->get_team_members($team_members_str),
+			'assigned_by' => $assigned_by,
+			'assigned_by_email' => $assignedBy['email'] ?? $_SESSION['login_email'],
+			'updated_by' => $_SESSION['login_firstname'] . ' ' . $_SESSION['login_lastname'],
+			'url' => $site_url . '/index.php?page=view_assignment&id=' . $id . '&confirm=true',
+			'uid' => $uuid,
+			'is_cancelled' => $cancelled,
+		];
+	}
+	
+	function build_email_subject($assignmentDate, $notifyAlreadySent, $cancelled, $postponed) {
+		$subjectTxt = "Assignment - " . date("D, M d, Y", strtotime($assignmentDate));
+		if ($notifyAlreadySent) {
+			if ($cancelled) {
+				$subjectTxt .= " (Cancelled)";
+			} else {
+				$subjectTxt .= $postponed ? " (Postponed)" : " (Updated)";
+			}
+		}
+		return $subjectTxt;
 	}
 	// Flag assignment as deleted for archival/reporting purposes
 	function delete_assignment() {
@@ -843,6 +876,8 @@ Class Action {
 			$fromEmail = $emailFrom;   
 			$assignDetails = json_decode($message, true); // Convert back to array
 			// Generate meeting request
+			//$cStatus = $assignDetails['is_cancelled'];
+
 			$icsFilePath = $this->generate_ics_file($assignDetails);
 			$subjectTxt = urlencode($subject);
 			
@@ -853,7 +888,7 @@ Class Action {
 			$htmlContent = '<h3>Assignment Details</h3>';
 			$htmlContent .= '<table style="width: 100%; border-collapse: collapse;">';
 			foreach ($assignDetails as $key => $value) {
-				if($value){
+				if($value && !in_array($key, ['uid', 'is_cancelled'] )){
 				
 					switch ($key) {
 						case 'assignment_date':
@@ -899,7 +934,7 @@ Class Action {
 			}
 
 			if (sqlsrv_execute($stmt)) {
-				// $icsFolder = 'C:\xampp\htdocs\ams\calendar_attachments'; // Local storage folder
+				// $icsFolder = $_SERVER['DOCUMENT_ROOT'].'\calendar_attachments'; // Local storage folder
 				// // Extract the file name from the URL
 				// $icsFileName = basename($icsFilePath);
 
@@ -985,7 +1020,7 @@ Class Action {
 				if($key == 'assignment_date')
 					$value = date("l, M d, Y", strtotime($value));
 				
-				if(!in_array($key, ['assigned_by_email', 'url', 'updated_by']) && !empty($value))
+				if(!in_array($key, ['assigned_by_email', 'url', 'updated_by', 'uid', 'is_cancelled']) && !empty($value))
 					$body .= '<tr>
 							<td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>' . ucfirst(str_replace('_', ' ', $key)) . '</strong></td>
 							<td style="padding: 8px; border-bottom: 1px solid #ddd;">' . htmlspecialchars($value) . '</td>
@@ -1123,8 +1158,27 @@ Class Action {
 			}
 		}
 
-		return 1;
+		// return 1;
 	}
+	public function isPostponement($assignment_id, $assignment_date, $start_time) {
+        $query = "SELECT assignment_date, start_time FROM assignment_list 
+                  WHERE id = ?";
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param("i", $assignment_id);
+        $stmt->execute();
+        $result = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+
+        if ($result) {
+            $existing_date = $result['assignment_date'];
+            $existing_time = $result['start_time'];
+
+            // Check if either the date or time has changed
+            return ($existing_date !== $assignment_date || $existing_time !== $start_time);
+        }
+        return false; // No previous record found, so it's not a postponement
+    }
 	// Check for assignee double bookings
 	function check_booking($empID, $assignDate, $time) {
 		try {
@@ -1388,9 +1442,13 @@ Class Action {
         return preg_replace('/[^0-9+]/', '', $phone); // Keeps only numbers and '+'
     }
 	// Generate ICS file with assignment details to attach to email
-	public function generate_ics_file($info) {
+	public function generate_ics_file($info)  {
 		$env = $this->getEnv();
 		$site_url = $env->get('SITE_URL');
+		$status = ($info['is_cancelled']) ? 'CANCELLED' : 'CONFIRMED';
+
+		$uid = isset($info['uid']) ? $info['uid'] : uniqid('event_', true); // Generate a unique ID if not provided
+		
 		// Convert times from 12-hour format (00:00 AM/PM) to 24-hour format for .ics
 		$startDateTime = date('Ymd\THis', strtotime($info['assignment_date'] . ' ' . $info['start_time']));
 	
@@ -1410,10 +1468,11 @@ Class Action {
 		$icsContent .= "VERSION:2.0\r\n";
 		$icsContent .= "PRODID:-//Jamaica Observer//AMS//EN\r\n";
 		$icsContent .= "BEGIN:VEVENT\r\n";
-		$icsContent .= "UID:" . uniqid() . "\r\n";
+		$icsContent .= "UID:" . $uid . "\r\n";
 		$icsContent .= "DTSTAMP:" . date('Ymd\THis') . "\r\n";
 		$icsContent .= "DTSTART:" . $startDateTime . "\r\n";
 		$icsContent .= "DTEND:" . $endDateTime . "\r\n";
+		$icsContent .= "STATUS:" . $status . "\r\n";
 		$icsContent .= "SUMMARY: Assignment | " . $info['assignment'] . "\r\n";
 		$icsContent .= "DESCRIPTION:" . $info['details'] . "\\n\\nTeam: " . $info['team'] . "\\nAssigned by: " . $info['assigned_by'] . "\\nDeparture Time: " . $departTime . "\r\n";
 		$icsContent .= "LOCATION:" . $info['venue'] . "\r\n";
@@ -1423,13 +1482,13 @@ Class Action {
 		$icsContent .= "END:VCALENDAR\r\n";
 	
 		// Define the folder to store .ics files
-		$icsFolder = 'C:\xampp\htdocs\ams\calendar_attachments'; // Update this path
+		$icsFolder = $_SERVER['DOCUMENT_ROOT'] . '/calendar_attachments'; 
 		if (!is_dir($icsFolder)) {
 			mkdir($icsFolder, 0777, true); // Create the folder if it doesn't exist
 		}
 	
 		// Save the .ics file temporarily
-		$icsFileName = 'event_' . uniqid() . '.ics';
+		$icsFileName = $uid . '.ics';
 		$icsFilePath = $icsFolder . '\\' . $icsFileName;
 		file_put_contents($icsFilePath, $icsContent);
 	

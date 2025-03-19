@@ -48,7 +48,7 @@
   <link rel="stylesheet" href="assets/dist/css/styles.css">
   <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
   <!-- <script src="assets/plugins/jquery/jquery.min.js"></script> -->
-  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/main.min.css" rel="stylesheet">
+  <!-- <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/main.min.css" rel="stylesheet"> -->
 <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js'></script>
 <!-- <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/main.min.js"></script> -->
 
