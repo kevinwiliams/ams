@@ -514,8 +514,9 @@ Class Action {
 		$status = '';
 		$timestamp = (new DateTime())->format('Y-m-d H:i:s');
 		$assignmentDate = $_POST['assignment_date'] ?? '';
-		$notify = isset($send_notification);
-		$cancelled = isset($is_cancelled);
+		$notify = isset($send_notification) ? 1 : 0;
+		$cancelled = isset($is_cancelled) ? 1 : 0;
+		$confirmed_transport = isset($transport_confirmed) ? 1 : 0;
 		$uuid = !empty($uid) ? $uid : uniqid('event_', true);
 		$user_role = $_SESSION['role_name'];
 		$admin_roles = ['Manager', 'ITAdmin', 'Editor', 'Dept Admin'];
@@ -534,10 +535,13 @@ Class Action {
 						$status = $value;
 						break;
 					case 'send_notification':
-						$value = (int)$value;
+						$value = $notify;
+						break;
+					case 'is_cancelled':
+						$value = $cancelled;
 						break;
 					case 'transport_confirmed':
-						$value = (int)$value;
+						$value = $confirmed_transport;
 						break;
 					case 'uid':
 						$value = $uuid;

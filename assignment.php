@@ -628,10 +628,12 @@ if ($id) {
                                         <?php echo (isset($send_notification) && $send_notification == 1) ? 'Notification Sent (uncheck if you do not wish to send another)' : 'Send Notification'; ?>
                                         </label>
                                     </div>
-                                    <?php if (isset($_GET['id'])){?>
+                                    <?php if (isset($_GET['id'])){ ?>
                                     <div class="custom-control custom-switch">
-                                        <input type="checkbox" class="custom-control-input text-danger" id="is_cancelled" name="is_cancelled"  <?php //echo isset($is_cancelled) && $is_cancelled == 1 ? 'checked' : '' ?>>
-                                        <label class="custom-control-label text-danger" for="is_cancelled">Cancel Assignment</label>
+                                        <input type="checkbox" class="custom-control-input text-danger" id="is_cancelled" name="is_cancelled"  <?php echo isset($is_cancelled) && $is_cancelled == 1 ? 'checked' : '' ?>>
+                                        <label class="custom-control-label text-danger" for="is_cancelled">
+                                        <?php echo (isset($send_notification) && $send_notification == 1) ? 'Cancelled' : 'Cancel Assignment'; ?>
+                                        </label>
                                     </div>
                                     <?php } ?>  
                                 </div>
