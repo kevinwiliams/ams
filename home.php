@@ -118,7 +118,7 @@ $options = [
     if(!in_array($user_role, $view_roles))
         $editorQ .= " AND FIND_IN_SET('".$db_empid."', REPLACE(team_members, ' ', '')) > 0 ";
 
-    $query = "SELECT * FROM assignment_list WHERE 1=1 $editorQ ORDER BY assignment_date ";
+    $query = "SELECT * FROM assignment_list WHERE is_cancelled <> 1 $editorQ ORDER BY assignment_date ";
     $result = $conn->query($query);
     while ($row = $result->fetch_assoc()){
         
