@@ -195,6 +195,10 @@ $conn->close();
                     <div class="col-4"><strong>Venue:</strong></div>
                     <div class="col-8"><?php echo htmlspecialchars($location ?? 'N/A'); ?></div>
                 </div>
+                <div class="row mb-3">
+                    <div class="col-4"><strong>Transport Confirmed:</strong></div>
+                    <div class="col-8"><?php echo ($transport_confirmed == 1) ? 'Yes' :  'No'; ?></div>
+                </div>
             </div>
 
             <!-- Additional Information Section -->

@@ -35,9 +35,11 @@ while ($row = $result->fetch_assoc()) {
     $full_datetime = date("Y-m-d H:i:s", strtotime("{$row['assignment_date']} {$row['start_time']}"));
     $events[] = [
         'id' => $row['id'],
-        'title' => htmlspecialchars_decode($row['title']),
+        'title' => ($row['is_cancelled'] == 1 ? 'CANCELLED: ' : '') . htmlspecialchars_decode($row['title']),
         'start' => $full_datetime,
-        'description' => '<b>Venue:</b> '.$row['location'].'<br><b>Start Time:</b> '.$row['start_time'].((!empty($row['end_time'])) ? ' - <b>End Time:</b> '. $row['end_time'] : '').'<br><b>Assigned By:</b> '.$row['assigned_by_name'].'<br><br><small><b>Team:</b> '.$row['team_members_names_with_roles'].'</small><br>'
+        'description' => '<b>Venue:</b> '.$row['location'].'<br><b>Start Time:</b> '.$row['start_time'].((!empty($row['end_time'])) ? ' - <b>End Time:</b> '. $row['end_time'] : '').'<br><b>Assigned By:</b> '.$row['assigned_by_name'].'<br><br><small><b>Team:</b> '.$row['team_members_names_with_roles'].'</small><br>',
+        'textColor' => ($row['is_cancelled'] == 1 ? 'red' : 'black'),
+        'backgroundColor' => ($row['is_cancelled'] == 1 ? 'red' : 'green'),
     ];
 }
 

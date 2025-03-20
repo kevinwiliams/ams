@@ -504,8 +504,7 @@ Class Action {
 	}
 	// Save / Update assignment
 	function save_assignment() {
-		$env = $this->getEnv();
-		$site_url = $env->get('SITE_URL');
+		
 		extract($_POST);
 	
 		// Initialize variables
@@ -627,7 +626,7 @@ Class Action {
 			$id = !empty($id) ? $id : $lastInsertId;
 	
 			// Prepare assignment info for notifications
-			$assignmentInfo = $this->prepare_assignment_info($id, $uuid, $assignmentDate, $team_members_str, $cancelled, $postponed, $site_url);
+			$assignmentInfo = $this->prepare_assignment_info($id, $uuid, $assignmentDate, $team_members_str, $cancelled, $postponed, $confirmed_transport);
 			$data_json = json_encode($assignmentInfo);
 	
 			// Send resource request emails
@@ -694,7 +693,9 @@ Class Action {
 		return implode(', ', array_map(fn($k, $v) => "$k=$v", array_keys($data), $data));
 	}
 	
-	function prepare_assignment_info($id, $uuid, $assignmentDate, $team_members_str, $cancelled, $postponed, $site_url) {
+	function prepare_assignment_info($id, $uuid, $assignmentDate, $team_members_str, $cancelled, $postponed, $transport_confirmed) {
+		$env = $this->getEnv();
+		$site_url = $env->get('SITE_URL');
 		$assigned_id = intval($_POST['assigned_by']);
 		$assignedBy = $this->get_user_by_id($assigned_id);
 		$assigned_by = (!empty($_POST['id'])) ? $assignedBy['firstname']. ' '. $assignedBy['lastname'] : $_SESSION['login_firstname'].' '.$_SESSION['login_lastname'];
@@ -707,6 +708,7 @@ Class Action {
 			'assignment' => $_POST['title'] ?? '',
 			'details' => $_POST['description'] ?? '',
 			'venue' => $_POST['location'] ?? '',
+			'transport_confirmed' => ($transport_confirmed == 1) ? 'Yes' :  'No',
 			'team' => $this->get_team_members($team_members_str),
 			'assigned_by' => $assigned_by,
 			'assigned_by_email' => $assignedBy['email'] ?? $_SESSION['login_email'],
