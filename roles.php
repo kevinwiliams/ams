@@ -77,7 +77,7 @@
                     <tr>
                         <td>
                             <button class="btn btn-sm btn-warning editRole" data-id="<?= $role['role_id'] ?>" data-name="<?= $role['role_name'] ?>"><i class="fas fa-edit"></i></button>
-                            <button class="btn btn-sm btn-danger deleteRole" data-id="<?= $role['role_id'] ?>"><i class="fas fa-trash"></i></button>
+                            <!-- <button class="btn btn-sm btn-danger deleteRole" data-id="<?= $role['role_id'] ?>"><i class="fas fa-trash"></i></button> -->
                         </td>
                         <td><?= $role['role_id'] ?></td>
                         <td><?= $role['role_name'] ?></td>
@@ -139,7 +139,7 @@
             </div>
         </div>
     </div>
-    
+
 </div>
 
 <!-- Custom Script -->
