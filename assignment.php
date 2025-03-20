@@ -178,7 +178,7 @@ if ($id) {
                                         <?php 
                                             $times = [];
                                             for ($i = 0; $i < 24; $i++) {
-                                                for ($j = 0; $j < 60; $j += 30) {
+                                                for ($j = 0; $j < 60; $j += 15) {
                                                     $time = sprintf('%02d:%02d', $i, $j);
                                                     $display_time = date('h:i A', strtotime($time));
                                                     if ($time == '00:00') {
@@ -226,7 +226,7 @@ if ($id) {
                                     // Generate time options
                                     $times = [];
                                     for ($i = 0; $i < 24; $i++) {
-                                        for ($j = 0; $j < 60; $j += 30) {
+                                        for ($j = 0; $j < 60; $j += 15) {
                                             $time = sprintf('%02d:%02d', $i, $j);
                                             $display_time = date('h:i A', strtotime($time));
                                             if ($time == '00:00') {
@@ -255,6 +255,16 @@ if ($id) {
                                 <label class="control-label">Notes</label>
                                 <textarea name="description" class="form-control form-control-sm" <?= $readonly.$readonlyDispatch ?>><?php echo htmlspecialchars_decode($description ?? ''); ?></textarea>
                             </div>
+                            <?php if (isset($_GET['id'])){ ?>
+                            <div class="form-group">
+                                <div class="custom-control custom-switch my-2">
+                                    <input type="checkbox" class="custom-control-input" id="transport_confirmed" name="transport_confirmed" <?php echo isset($transport_confirmed) && $transport_confirmed == 1 ? 'checked' : '' ?>>
+                                    <label class="custom-control-label font-weight-light" for="transport_confirmed">
+                                    <?php echo (isset($transport_confirmed) && $transport_confirmed == 1) ? 'Transportation confirmed' : 'Confirm transportation'; ?>
+                                    </label>
+                                </div>
+                            </div>
+                            <?php } ?>
                            
                         </div>
 
@@ -579,6 +589,7 @@ if ($id) {
                                     </div>
                                 </div>
                             </div>
+                            
                             <!-- Get team members if boxes disabled -->
                             <?php if(!empty($disabled.$disabledDispatch.$disabledEditors)){
                                 $teamRem = implode(',', $all_members);   
@@ -593,7 +604,7 @@ if ($id) {
                             <!-- Stub out Status -->
                             <input name="status" type="hidden" value="<?php echo htmlspecialchars($currentStatus); ?>">
                             <input name="uid" type="hidden" value="<?php echo (isset($uid)? $uid : ''); ?>">
-                            <input name="transport_confirmed" type="hidden" value="<?php echo htmlspecialchars($transport_confirmed ?? ''); ?>">
+                            <!-- <input name="transport_confirmed" type="hidden" value="<?php //echo htmlspecialchars($transport_confirmed ?? ''); ?>"> -->
                             <?php if($login_role_id < 5){ ?>
                             <div class="form-group d-none">
                                 <label for="">Status</label>
@@ -632,7 +643,7 @@ if ($id) {
                                     <div class="custom-control custom-switch">
                                         <input type="checkbox" class="custom-control-input text-danger" id="is_cancelled" name="is_cancelled"  <?php echo isset($is_cancelled) && $is_cancelled == 1 ? 'checked' : '' ?>>
                                         <label class="custom-control-label text-danger" for="is_cancelled">
-                                        <?php echo (isset($send_notification) && $send_notification == 1) ? 'Cancelled' : 'Cancel Assignment'; ?>
+                                        <?php echo (isset($is_cancelled) && $is_cancelled == 1) ? 'Cancelled' : 'Cancel Assignment'; ?>
                                         </label>
                                     </div>
                                     <?php } ?>  

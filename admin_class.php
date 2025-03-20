@@ -520,6 +520,11 @@ Class Action {
 		$uuid = !empty($uid) ? $uid : uniqid('event_', true);
 		$user_role = $_SESSION['role_name'];
 		$admin_roles = ['Manager', 'ITAdmin', 'Editor', 'Dept Admin'];
+
+		// Set default values
+		$data['transport_confirmed'] = $confirmed_transport;
+		$data['send_notification'] = $notify;
+		$data['is_cancelled'] = $cancelled;
 		
 		// Process POST data
 		foreach ($_POST as $key => $value) {
