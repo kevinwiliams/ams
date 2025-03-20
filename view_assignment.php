@@ -153,11 +153,14 @@ $conn->close();
 <div class="container mt-4">
     <div class=" card card-widget widget-assignment shadow">
         <!-- Header -->
-        <div class="widget-assignment-header bg-light text-dark text-center p-4">
-        <h5 class="widget-assignment-title"><?= date("l, M j, Y", strtotime($assignment_date)); ?><?php
+        <div class="widget-assignment-header <?php echo ($is_cancelled == 1) ? 'bg-danger' : 'bg-light'; ?> text-dark text-center p-4">
+        <h5 class="widget-assignment-title">
+                <?php
+                        echo date("l, M j, Y", strtotime($assignment_date));
                         if (date("Y-m-d", strtotime($date_created)) > $assignment_date){
                             echo ' <i class="fas fa-history" title="back-dated entry"></i>';
                         }
+                        echo ($is_cancelled == 1) ? '<br>CANCELLED' : ''; 
                     ?></h5>
         </div>
 
@@ -168,7 +171,7 @@ $conn->close();
                 <h5>Assignment Details</h5>
                 <div class="row mb-3">
                     <div class="col-4"><strong>Assignment:</strong></div>
-                    <div class="col-8"><?php echo htmlspecialchars_decode($title ?? 'No Title'); ?></div>
+                    <div class="col-8"><?php echo ($is_cancelled == 1) ? 'CANCELLED - ' : ''; ?><?php echo htmlspecialchars_decode($title ?? 'No Title'); ?></div>
                 </div>
                 <div class="row mb-3">
                     <div class="col-4"><strong>Start Time:</strong></div>
