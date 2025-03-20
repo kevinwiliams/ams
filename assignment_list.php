@@ -1,7 +1,10 @@
 <style>
     .dataTables_filter {
-    display: none;
-}
+        display: none;
+    }
+    .strike-through {
+        text-decoration: line-through;
+    }
     </style>
 
 <?php 
@@ -192,15 +195,23 @@ if (!$assignment_list) {
                         }
                     ?>
                     </td>
-                    <td> <?php echo $row['start_time'] ?? 'N/A'; ?>  </td>
-                    <td> <?php echo $row['end_time'] ?? 'N/A'; ?>  </td>
+                    <td> <span class="<?php echo ($row['is_cancelled'] == 1) ? 'strike-through' : ''; ?>"><?php echo $row['start_time'] ?? 'N/A'; ?></span>  </td>
+                    <td> <span class="<?php echo ($row['is_cancelled'] == 1) ? 'strike-through' : ''; ?>"><?php echo $row['end_time'] ?? 'N/A'; ?></span>  </td>
 
                     <td>
-                        <?php echo ucwords(htmlspecialchars_decode($row['title']) ?? 'No Title'); ?>
+                        <?php echo ($row['is_cancelled'] == 1) ? '<b>CANCELLED:</b> ' : ''; ?>
+                        <span class="<?php echo ($row['is_cancelled'] == 1) ? 'strike-through' : ''; ?>">
+                            <?php echo ucwords(htmlspecialchars_decode($row['title']) ?? 'No Title'); ?>
+                        </span>
                     </td>
                         <!-- <td><?php echo isset($row['description']) ? htmlspecialchars(substr($row['description'], 0, 15)) . " ..." : 'No Description'; ?></td> -->
-                        <td><?php echo $row['location'] ?? 'N/A'; ?></td>
                         <td>
+                            <span class="<?php echo ($row['is_cancelled'] == 1) ? 'strike-through' : ''; ?>">
+                                <?php echo $row['location'] ?? 'N/A'; ?>
+                            </span>
+                        </td>
+                        <td>
+                            <span class="<?php echo ($row['is_cancelled'] == 1) ? 'strike-through' : ''; ?>">
                             <?php //echo ($row['team_members_names_with_roles']); 
                             
                             $teamMembers = explode(', ', $row['team_members_names_with_roles']);
@@ -217,6 +228,7 @@ if (!$assignment_list) {
                                         }
                                     }
                             ?>
+                            </span>
                         </td>
                         <td>
                             <?php echo ($row['assigned_by_name']); ?>

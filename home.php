@@ -89,7 +89,12 @@ $options = [
     '' => 'N/A' //If empty or null
 ];
 ?>
-
+<style>
+  
+    .strike-through {
+        text-decoration: line-through;
+    }
+    </style>
 <div class="content"><?php //echo $db_empid.' '.$login_role_id.' '.$user_role ?>
     
     <?php
@@ -244,9 +249,11 @@ $options = [
                         <tr class="<?= ($hightlight) ?'table-warning': '' ?>">
                             <!-- <td><?php echo htmlspecialchars($row['assignment_id']); ?></td> -->
                             <td>
+                            <span class="<?php echo ($row['is_cancelled'] == 1) ? 'strike-through' : ''; ?>">
                             <a href="index.php?page=view_assignment&id=<?php echo $row['assignment_id']; ?>" class="text-decoration-none">
                                 <?php echo date("D, M j, Y", strtotime($row['assignment_date'])); ?>
                             </a>
+                            </span>
                             <?php
                                 if (date("Y-m-d", strtotime($row['date_created'])) > $row['assignment_date']){
                                     echo ' <i class="fas fa-history"></i>';
@@ -254,20 +261,22 @@ $options = [
                             ?>
                             </td>
                             <?php if(in_array($user_role,  ['Dispatcher', 'Security'])) :?>
-                            <td><?php echo htmlspecialchars($row['plate_number']); ?></td>
+                            <td><span class="<?php echo ($row['is_cancelled'] == 1) ? 'strike-through' : ''; ?>"><?php echo htmlspecialchars($row['plate_number']); ?></span></td>
                             <?php endif ?>
-                            <td><?php echo htmlspecialchars($row['start_time']); ?></td>
-                            <td><?php echo htmlspecialchars($row['end_time']); ?></td>
+                            <td><span class="<?php echo ($row['is_cancelled'] == 1) ? 'strike-through' : ''; ?>"><?php echo htmlspecialchars($row['start_time']); ?></span></td>
+                            <td><span class="<?php echo ($row['is_cancelled'] == 1) ? 'strike-through' : ''; ?>"><?php echo htmlspecialchars($row['end_time']); ?></span></td>
                             
                             <td>
                                 <!-- <a href="index.php?page=view_assignment&id=<?php echo $row['id']; ?>" class="text-decoration-none"> -->
-                                    <?php echo htmlspecialchars_decode($row['title']); ?>
+                                <?php echo ($row['is_cancelled'] == 1) ? '<b>CANCELLED:</b> ' : ''; ?>
+                                <span class="<?php echo ($row['is_cancelled'] == 1) ? 'strike-through' : ''; ?>"><?php echo htmlspecialchars_decode($row['title']); ?> </span>
                                 <!-- </a> -->
                             </td>
                             <!-- <td><?php echo htmlspecialchars(substr($row['description'], 0, 15)) . " ... " . htmlspecialchars(substr($row['description'], -5)); ?></td> -->
-                            <td><?php echo htmlspecialchars($row['location']); ?></td>
+                            <td><span class="<?php echo ($row['is_cancelled'] == 1) ? 'strike-through' : ''; ?>"><?php echo htmlspecialchars($row['location']); ?></span></td>
                             <!-- <td><?php echo htmlspecialchars(($row['team_members_names'])); ?></td> -->
                             <td>
+                                <span class="<?php echo ($row['is_cancelled'] == 1) ? 'strike-through' : ''; ?>">
                                 <?php 
                                     //echo htmlspecialchars(($row['team_members_names'])); 
                                     $teamMembers = explode(', ', $row['team_members_names']);
@@ -284,13 +293,13 @@ $options = [
                                         }
                                     }
                                 ?>
-                                
+                                </span>
                         
                             </td>
                             <td><?php echo htmlspecialchars($row['assigned_by_name']); ?></td>
                             <?php if(in_array($user_role,  ['Dispatcher', 'Security'])) :?>
-                            <td><?php echo htmlspecialchars($row['status']); ?></td>
-                            <td><?php echo htmlspecialchars($options[$row['drop_option']]) ?? 'N/A'; ?></td>
+                            <td><span class="<?php echo ($row['is_cancelled'] == 1) ? 'strike-through' : ''; ?>"><?php echo htmlspecialchars($row['status']); ?></span></td>
+                            <td><span class="<?php echo ($row['is_cancelled'] == 1) ? 'strike-through' : ''; ?>"><?php echo htmlspecialchars($options[$row['drop_option']]) ?? 'N/A'; ?></span></td>
                             <?php endif ?>
                             <!-- <td><?php echo htmlspecialchars($row['date_created']); ?></td> -->
                             <!-- <td><?php echo htmlspecialchars($row['approved_by_name']); ?></td> -->
