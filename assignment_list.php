@@ -22,7 +22,8 @@ $assignment_list = null;
 
 // Fetch assignment data based on conditions
 $where = "WHERE (a.is_deleted = 0 OR a.is_deleted IS NULL)"; 
-$edit_roles = ['Manager', 'ITAdmin', 'Editor', 'Multimedia', 'Dispatcher', 'Photo Editor', 'Dept Admin'];
+$create_roles = ['Manager', 'ITAdmin', 'Editor', 'Dept Admin', 'Security','Op Manager', 'Broadcast Coordinator' ];
+$edit_roles = ['Manager', 'ITAdmin', 'Editor', 'Multimedia', 'Dispatcher', 'Photo Editor', 'Dept Admin', 'Op Manager'];
 $delete_roles = ['Manager', 'ITAdmin', 'Editor', 'Dept Admin'];
 $digital_roles = ['Photo Editor'];
 $multimedia_roles = ['Multimedia'];
@@ -130,7 +131,7 @@ if (!$assignment_list) {
             </a>
 
             <div class="card-tools">
-                <?php if ($login_role_id < 5): ?>
+                <?php if (in_array($user_role, $create_roles)): ?>
                     <a href="index.php?page=assignment" class="btn btn-danger btn-sm ml-2"><i class="fa fa-plus"></i> Add New Assignment</a>
 
                 <?php endif; ?>

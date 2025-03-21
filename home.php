@@ -15,6 +15,7 @@ $login_empid = intval($login_empid);
 $firstname = $_SESSION['login_firstname'];
 $lastname = $_SESSION['login_lastname'];
 
+$radio_staff = $_SESSION['login_sb_staff'] == 1 ? true : false;
 
 
 //-------------------------------------------------------------------------------//
@@ -25,6 +26,7 @@ $securityQry = "";
 $view_roles = ['Manager', 'ITAdmin', 'Editor', 'Multimedia', 'Dispatcher', 'Photo Editor', 'Dept Admin', 'Security' ];
 $digital_roles = ['Photo Editor'];
 $multimedia_roles = ['Multimedia'];
+$create_roles = ['Manager', 'ITAdmin', 'Editor', 'Dept Admin', 'Security','Op Manager', 'Broadcast Coordinator' ];
 
 if(!in_array($user_role,  $view_roles))
     $editorQry = " AND FIND_IN_SET('".$db_empid."', REPLACE(a.team_members, ' ', '')) > 0 ";
@@ -189,12 +191,7 @@ $options = [
         </div>
     <?php endif; ?>
 </div>
-<div class="d-flex justify-content-end mb-4">
-        <!-- New Assignment Button -->
-        <?php if ($login_role_id < 5): ?>
-            <a href="index.php?page=assignment" class="btn btn-danger ml-2 d-none"><i class="fa fa-plus"></i> Add New Assignment</a>
-        <?php endif; ?>
-    </div>
+
     <!-- Last 50 Assignments -->
     <div class="last-50-assignments">
 
@@ -202,7 +199,7 @@ $options = [
             <div class="card-header d-flex">
             <h4 class="my-0 font-weight-normal flex-grow-1">Recent Assignments</h4>
             <div class="card-tools">
-                <?php if ($login_role_id < 5): ?>
+                <?php if (in_array($user_role, $create_roles)): ?>
                     <a href="index.php?page=assignment" class="btn btn-danger btn-sm"><i class="fa fa-plus"></i> Add New Assignment</a>
 
                 <?php endif; ?>
