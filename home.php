@@ -24,7 +24,7 @@ $dispatchQry = "";
 $securityQry = "";
 $sbQry = "";
 
-$view_roles = ['Manager', 'ITAdmin', 'Editor', 'Multimedia', 'Dispatcher', 'Photo Editor', 'Dept Admin', 'Security', 'Op Manager' ];
+$view_roles = ['Manager', 'ITAdmin', 'Editor', 'Multimedia', 'Dispatcher', 'Photo Editor', 'Dept Admin', 'Security', 'Op Manager', 'Broadcast Coordinator' ];
 $digital_roles = ['Photo Editor'];
 $multimedia_roles = ['Multimedia'];
 $create_roles = ['Manager', 'ITAdmin', 'Editor', 'Dept Admin', 'Security','Op Manager', 'Broadcast Coordinator' ];
