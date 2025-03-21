@@ -66,7 +66,7 @@ if (!$user_list) {
                         <th>Contact Number</th>
                         <th>Role</th>
                         <th>Preferred Channel</th>
-                        <th>&nbsp;</th>
+                        <?php if ($login_role_id < 5) { ?><th>&nbsp;</th> <?php } ?>
                     </tr>
                 </thead>
                 <tbody>
