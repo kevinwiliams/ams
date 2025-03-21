@@ -1,5 +1,7 @@
 <?php
 include 'db_connect.php'; // Include database connection
+$radio_staff = $_SESSION['login_sb_staff'] == 1 ? true : false;
+$sbQry = ($radio_staff) ? " WHERE u.sb_staff = 1 " : "";
 
 // Fetch user performance metrics
 $user_performance = $conn->query("
@@ -15,6 +17,7 @@ $user_performance = $conn->query("
         users u
     LEFT JOIN 
         assignment_list a ON FIND_IN_SET(u.empid, a.team_members) > 0
+        $sbQry 
     GROUP BY 
         u.empid, u.firstname, u.lastname
 ");

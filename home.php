@@ -22,11 +22,14 @@ $radio_staff = $_SESSION['login_sb_staff'] == 1 ? true : false;
 $editorQry = "";
 $dispatchQry = "";
 $securityQry = "";
+$sbQry = "";
 
-$view_roles = ['Manager', 'ITAdmin', 'Editor', 'Multimedia', 'Dispatcher', 'Photo Editor', 'Dept Admin', 'Security' ];
+$view_roles = ['Manager', 'ITAdmin', 'Editor', 'Multimedia', 'Dispatcher', 'Photo Editor', 'Dept Admin', 'Security', 'Op Manager' ];
 $digital_roles = ['Photo Editor'];
 $multimedia_roles = ['Multimedia'];
 $create_roles = ['Manager', 'ITAdmin', 'Editor', 'Dept Admin', 'Security','Op Manager', 'Broadcast Coordinator' ];
+
+$sbQry .= ($radio_staff) ? " AND a.station_show <> '' " : "";
 
 if(!in_array($user_role,  $view_roles))
     $editorQry = " AND FIND_IN_SET('".$db_empid."', REPLACE(a.team_members, ' ', '')) > 0 ";
@@ -79,7 +82,7 @@ $recentQry = "SELECT a.*,t.*,v.*,
                 LEFT JOIN transport_log t ON a.id = t.assignment_id
                 LEFT JOIN transport_vehicles v ON t.transport_id = v.id
                 WHERE  (a.is_deleted = 0 OR a.is_deleted IS NULL) 
-                $editorQry $dispatchQry
+                $editorQry $dispatchQry $sbQry
                 ORDER BY a.assignment_date DESC 
                 LIMIT 20";
 $recentAssignments = $conn->query($recentQry);

@@ -7,6 +7,8 @@ $login_role_id = $_SESSION['role_id'] ?? 5; // Default to 5 (Reporter)
 $login_empid = $_SESSION['login_id'] ?? 0;
 $login_empid = intval($login_empid);
 $sessionempid = $_SESSION['login_empid'] ?? 0; // Ensure proper initialization
+$radio_staff = $_SESSION['login_sb_staff'] == 1 ? true : false;
+
 
 // Fetch user details
 $user_details_query = $conn->prepare("SELECT firstname, lastname FROM users WHERE id = ?");
@@ -23,10 +25,15 @@ if ($user_details_result->num_rows > 0) {
     $lastname = '';
 }
 
+"";
+
+$sbQry = ($radio_staff) ? " WHERE u.sb_staff = 1 " : "";
+
 // Fetch user data (without the `is_deleted` condition)
 $query = "SELECT u.id, u.empid, CONCAT(u.firstname, ' ', u.lastname) AS name, u.email, u.address, u.contact_number, r.role_name, u.preferred_channel
-          FROM users u
+          FROM users u 
           LEFT JOIN roles r ON u.role_id = r.role_id
+          $sbQry
           ORDER BY u.firstname, u.lastname";
 
 $user_list = $conn->query($query);

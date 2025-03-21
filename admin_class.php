@@ -1029,7 +1029,7 @@ Class Action {
         $recip_social = $env->get('EMAIL_SOCIAL_REQUEST');
         $recip_driver = $env->get('EMAIL_DRIVER_REQUEST');
         $recip_dj = '';
-		if (stripos($assignmentInfo['show'], 'FYAH') !== false) {
+		if (str_contains($assignmentInfo['show'], 'FYAH') !== false) {
 			$recip_dj = $env->get('EMAIL_DJ_REQUEST_FYAH');
 		} else {
 			$recip_dj = $env->get('EMAIL_DJ_REQUEST_EDGE');

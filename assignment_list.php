@@ -16,6 +16,7 @@ $login_empid = $_SESSION['login_id'] ?? 0;
 $login_empid = intval($login_empid);
 $sessionempid = $_SESSION['login_empid'];
 $user_role = $_SESSION['role_name'];
+$radio_staff = $_SESSION['login_sb_staff'] == 1 ? true : false;
 
 // Initialize $assignment_list
 $assignment_list = null;
@@ -32,6 +33,9 @@ $freelance_roles = ['Freelancer'];
 if(in_array($user_role,  $freelance_roles)){
     $where .= " AND FIND_IN_SET('" . $sessionempid . "', a.team_members)";
 }
+
+$sbQry = ($radio_staff) ? " AND a.station_show <> '' " : "";
+
 
 // if(!in_array($user_role,  $edit_roles)){
 //     $where .= " AND FIND_IN_SET('" . $sessionempid . "', a.team_members)";
@@ -68,7 +72,7 @@ $query = "SELECT a.*,
                  FROM users u 
                  WHERE u.id = a.approved_by) AS approved_by_name
             FROM assignment_list a 
-            $where
+            $where $sbQry
             ORDER BY a.assignment_date DESC";
 $assignment_list = $conn->query($query);
 

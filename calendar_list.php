@@ -9,7 +9,12 @@ $db_empid = $_SESSION['empid'] ?? '';
 $sessionempid = $_SESSION['login_empid'];
 $user_role = $_SESSION['role_name'];
 $freelance_roles = ['Freelancer'];
+$radio_staff = $_SESSION['login_sb_staff'] == 1 ? true : false;
+
 $where = " WHERE (a.is_deleted = 0 OR a.is_deleted IS NULL)"; 
+
+$sbQry = ($radio_staff) ? " AND a.station_show <> '' " : "";
+
 if(in_array($user_role,  $freelance_roles)){
     $where .= "  AND FIND_IN_SET('".$db_empid."', REPLACE(a.team_members, ' ', '')) > 0 ";
 }
@@ -26,7 +31,7 @@ $query = "SELECT a.*,
      FROM users u 
      WHERE u.id = a.assigned_by) AS assigned_by_name
    
-FROM assignment_list a $where";
+FROM assignment_list a $where $sbQry";
 $result = $conn->query($query);
 
 $events = [];
