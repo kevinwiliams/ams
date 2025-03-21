@@ -7,6 +7,13 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+$user_role = $_SESSION['role_name'];
+$create_roles = ['Manager', 'ITAdmin', 'Editor', 'Dept Admin', 'Security','Op Manager', 'Broadcast Coordinator' ];
+$report_roles = ['Manager', 'ITAdmin', 'Editor', 'Dept Admin','Op Manager' ];
+$show_roles = ['Op Manager' ];
+$it_roles = ['ITAdmin' ];
+
+
 // Check if the required session variables are set, otherwise, default to a safe state
 $login_role_id = $_SESSION['role_id']? $_SESSION['role_id'] : 0;
 $login_name = isset($_SESSION['login_name']) ? $_SESSION['login_name'] : 'User';
@@ -39,12 +46,31 @@ $login_name = isset($_SESSION['login_name']) ? $_SESSION['login_name'] : 'User';
                         <p>Assignments</p>
                     </a>
                 </li>
-                <?php if ($login_role_id < 5): ?>
+                <?php if (in_array($user_role, $show_roles)): ?>
+
+                    <li class="nav-item dropdown">
+                        <a href="./index.php?page=station_shows" class="nav-link nav-user_list">
+                            <i class="nav-icon fa fa-bullhorn"></i>
+                            <p>Shows</p>
+                        </a>
+                    </li>
+                    <?php endif; ?>
+                <?php if (in_array($user_role, $create_roles)): ?>
 
                 <li class="nav-item dropdown">
                     <a href="./index.php?page=user_list" class="nav-link nav-user_list">
                         <i class="nav-icon fas fa-users"></i>
                         <p>Users</p>
+                    </a>
+                </li>
+                <?php endif; ?>
+
+                <?php if (in_array($user_role, $it_roles)): ?>
+
+                <li class="nav-item dropdown">
+                    <a href="./index.php?page=roles" class="nav-link nav-user_list">
+                        <i class="nav-icon fa fa-user-secret"></i>
+                        <p>Roles</p>
                     </a>
                 </li>
                 <?php endif; ?>
@@ -94,16 +120,8 @@ $login_name = isset($_SESSION['login_name']) ? $_SESSION['login_name'] : 'User';
                     </li>
                 <?php endif; ?>
 
-                <!-- <?php if ($login_role_id < 5): ?>
-                    <li class="nav-item">
-                        <a href="./index.php?page=reports" class="nav-link nav-reports">
-                            <i class="fas fa-th-list nav-icon"></i>
-                            <p>Report</p>
-                        </a>
-                    </li>
-                <?php endif; ?>
-                 -->
-                <?php if ($login_role_id < 5): ?>
+            
+                <?php if (in_array($user_role, $report_roles)): ?>
                     <li class="nav-item">
                     <a href="#" class="nav-link nav-reports">
                         <a href="#" class="nav-link nav-reports"></i>
