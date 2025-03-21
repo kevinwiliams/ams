@@ -15,15 +15,17 @@ include 'db_connect.php'; // Removed sidebar and topbar includes
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
-
+$radio_staff = $_SESSION['login_sb_staff'] == 1 ? true : false;
 $login_role_id = $_SESSION['role_id']? $_SESSION['role_id'] : 0;
 $user_role = $_SESSION['role_name'] ?? '';
 
 //Declare user roles for filtering
-$editor_roles = ['Editor', 'Manager', 'Dept Admin'];
+$editor_roles = ['Editor', 'Manager', 'Dept Admin', 'Op Manager'];
 $media_roles = ['Multimedia'];
 $digital_roles = ['Photo Editor'];
 $dispatch_roles = ['Dispatcher'];
+$dj_roles = ['Personality'];
+$broadcast_roles = ['Broadcast Coordinator'];
 
 $readonly = '';
 $disabled = '';
@@ -33,6 +35,9 @@ $requiredDispatch = '';
 $disabledEditors = '';
 $disabledMedia = '';
 $disabledDigital = '';
+$disabledPersonality = '';
+$readonlyPersonality = '';
+$requiredPersonality = '';
 $required = '';
 
 // Check user role and set attributes
@@ -55,6 +60,11 @@ switch (true) {
         $disabled = 'disabled = disabled';
         $disabledDigital = 'disabled = disabled';
         $required = 'required';
+        break;
+    case in_array($user_role, $dj_roles):
+        $disabledPersonality = 'disabled = disabled';
+        $readonlyPersonality = 'readonly = readonly';
+        $requiredPersonality = 'required';
         break;
 }
 
@@ -155,7 +165,7 @@ if ($id) {
 </style>
 
 <div class="container">
-    <? //$user_role.$disabledEditors ?>
+    <?php // 'SB STaff:'.$_SESSION['login_sb_staff'] ?>
     <div class="col-lg-12">
         <div class="card">
             <div class="card-body">
@@ -164,7 +174,7 @@ if ($id) {
                         <div class="col-md-6 border-right">
                             <div class="form-group">
                                 <label for="assignment_date" class="control-label">Assignment Date</label>
-                                <input type="date" name="assignment_date" id="assignment_date" class="form-control form-control-sm" required value="<?php echo htmlspecialchars($assignment_date ?? ''); ?>" <?= $readonly.$readonlyDispatch ?>>
+                                <input type="date" name="assignment_date" id="assignment_date" class="form-control form-control-sm" required value="<?php echo htmlspecialchars($assignment_date ?? ''); ?>" <?= $readonly.$readonlyDispatch.$readonlyPersonality ?>>
                             </div>
                             <div class="form-group row">
                                 <!-- Start Time -->
@@ -220,7 +230,7 @@ if ($id) {
                                 <input type="hidden" name="depart_time" value="<?= $depart_time ?>" />
                                 <?php } ?>
                                 <label for="depart_time" class="control-label">Depart Time (optional)</label>
-                                <select name="depart_time" id="depart_time" class="custom-select custom-select-sm" <?= $disabled.$disabledDispatch ?>>
+                                <select name="depart_time" id="depart_time" class="custom-select custom-select-sm" <?= $disabled.$disabledDispatch.$disabledPersonality ?>>
                                     <option value="" selected="selected">Select Depart Time</option>
                                     <?php 
                                     // Generate time options
@@ -243,19 +253,39 @@ if ($id) {
                                     ?>
                                 </select>
                             </div>
+                            <?php if($radio_staff){?>
+                            <div class="form-group">
+                                <label for="station_show" class="control-label">Select Show</label>
+                                <select name="station_show" id="station_show" class="custom-select custom-select-sm" <?= $disabledPersonality ?>>
+                                    <option value="" selected="selected">Select a Show</option>
+                                    <?php
+                                    // Fetch shows from the database
+                                    $shows_query = $conn->query("SELECT id, show_name, station FROM station_shows ORDER BY station ASC, show_name ASC");
+                                    while ($show = $shows_query->fetch_assoc()) {
+                                        //$station_show = $show['id'];
+                                        $show_name = htmlspecialchars($show['show_name']);
+                                        $station = htmlspecialchars($show['station']);
+                                        $display_text = "$show_name ($station)"; // Concatenate show name and station
+                                        $selected = (isset($station_show) && $station_show == $display_text) ? 'selected' : ''; // Check if selected
+                                        echo '<option value="' . $display_text . '">' . $display_text . '</option>';
+                                    }
+                                    ?>
+                                </select>
+                            </div>
+                        <?php } ?>
                             <div class="form-group">
                                 <label for="title" class="control-label">Assignment</label>
-                                <input type="text" name="title" id="title" class="form-control form-control-sm" required value="<?php echo htmlspecialchars_decode($title ?? ''); ?>" <?= $readonly.$readonlyDispatch ?>>
+                                <input type="text" name="title" id="title" class="form-control form-control-sm" required value="<?php echo htmlspecialchars_decode($title ?? ''); ?>" <?= $readonly.$readonlyDispatch.$readonlyPersonality ?>>
                             </div>
                             <div class="form-group">
                                 <label for="location" class="control-label">Venue</label>
-                                <input type="text" name="location" id="location" class="form-control form-control-sm" required value="<?php echo htmlspecialchars($location ?? ''); ?>" <?= $readonly.$readonlyDispatch ?>>
+                                <input type="text" name="location" id="location" class="form-control form-control-sm" required value="<?php echo htmlspecialchars($location ?? ''); ?>" <?= $readonly.$readonlyDispatch.$readonlyPersonality ?>>
                             </div>
                             <div class="form-group">
                                 <label class="control-label">Notes</label>
-                                <textarea name="description" class="form-control form-control-sm" <?= $readonly.$readonlyDispatch ?>><?php echo htmlspecialchars_decode($description ?? ''); ?></textarea>
+                                <textarea name="description" class="form-control form-control-sm" <?= $readonly.$readonlyDispatch.$readonlyPersonality ?>><?php echo htmlspecialchars_decode($description ?? ''); ?></textarea>
                             </div>
-                            <?php if (isset($_GET['id'])){ ?>
+                            <?php if (isset($_GET['id']) && (in_array($user_role, $editor_roles))){ ?>
                             <div class="form-group">
                                 <div class="custom-control custom-switch my-2">
                                     <input type="checkbox" class="custom-control-input" id="transport_confirmed" name="transport_confirmed" <?php echo isset($transport_confirmed) && $transport_confirmed == 1 ? 'checked' : '' ?>>
@@ -298,8 +328,205 @@ if ($id) {
                             </div>
                             <input type="hidden" name="id" value="<?php echo htmlspecialchars($id ?? ''); ?>">
                             <input type="hidden" name="assigned_by" value="<?php echo htmlspecialchars($assigned_by ?? ''); ?>">
+                            <?php
+                                $all_members = [];
+                                $teamRem = "";
 
+                            ?>
                             <div class="form-group"> 
+                                
+                            <?php if($radio_staff){?>
+                                <!-- Personality -->
+                                <div class="role-group">
+                                    <label>Personality</label>
+                                    <div class="assignee-wrapper">
+                                        <select name="assignee[personality][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabledPersonality ?>>
+                                            <!-- <option value="">Select a reporter</option> -->
+                                            <?php
+                                                $personalities = [];
+
+                                                if(isset($team_members))
+                                                    $all_members = explode(',', $team_members);
+
+                                                // Fetch users with role_id = 5 (for personalities)
+                                                if(isset($team_members))
+                                                    $personalities = explode(',', $team_members);
+                                            
+                                                $user_qry = $conn->query("SELECT u.empid, u.firstname, u.lastname, r.role_name 
+                                                FROM users u 
+                                                JOIN roles r ON r.role_id = u.role_id
+                                                WHERE r.role_name in ('Personality')
+                                                ORDER BY 
+                                                    r.role_name, u.firstname;
+                                                                                             ");
+                                            if ($user_qry) {
+                                                while ($user_row = $user_qry->fetch_assoc()):
+                                                    if(in_array($user_row['empid'], $personalities))
+                                                        if(!empty($disabledEditors))
+                                                            $all_members = array_diff($all_members, [$user_row['empid']]);
+                                                   
+                                            ?>
+                                            <option value="<?php echo htmlspecialchars($user_row['empid']); ?>" <?php  echo isset($personalities) && in_array($user_row['empid'], $personalities) ? 'selected' : '' ?>>
+                                                <?php echo trim($user_row['firstname']) . ' ' . trim($user_row['lastname']).' ('.$user_row['role_name'].')'; ?>
+                                            </option>
+                                            <?php 
+                                                endwhile;
+                                            } else {
+                                                echo "<option>No personalities available</option>";
+                                            }
+                                            ?>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- DJ -->
+                                <div class="role-group">
+                                    <label>DJ</label>
+                                    <div class="assignee-wrapper">
+                                        <select name="assignee[dj][]" class="custom-select custom-select-sm" multiple="multiple">
+                                            <!-- <option value="">Select a reporter</option> -->
+                                            <?php
+                                                $djs = [];
+
+                                                if(isset($team_members))
+                                                    $all_members = explode(',', $team_members);
+
+                                                // Fetch users with role_id = 5 (for djs)
+                                                if(isset($team_members))
+                                                    $djs = explode(',', $team_members);
+                                            
+                                                $user_qry = $conn->query("SELECT u.empid, u.firstname, u.lastname, r.role_name 
+                                                FROM users u 
+                                                JOIN roles r ON r.role_id = u.role_id
+                                                WHERE r.role_name in ('DJ')
+                                                ORDER BY 
+                                                    r.role_name, u.firstname;
+                                                                                             ");
+                                            if ($user_qry) {
+                                                while ($user_row = $user_qry->fetch_assoc()):
+                                                    if(in_array($user_row['empid'], $djs))
+                                                        if(!empty($disabledEditors))
+                                                            $all_members = array_diff($all_members, [$user_row['empid']]);
+                                                   
+                                            ?>
+                                            <option value="<?php echo htmlspecialchars($user_row['empid']); ?>" <?php  echo isset($djs) && in_array($user_row['empid'], $djs) ? 'selected' : '' ?>>
+                                                <?php echo trim($user_row['firstname']) . ' ' . trim($user_row['lastname']).' ('.$user_row['role_name'].')'; ?>
+                                            </option>
+                                            <?php 
+                                                endwhile;
+                                            } else {
+                                                echo "<option>No djs available</option>";
+                                            }
+                                            ?>
+                                        </select>
+                                    </div>
+                                     <!-- Checkbox and Dropdown for Request -->
+                                     <?php //if (isset($disabledEditors)): ?>
+                                    <div class="request-wrapper">
+                                        <label>
+                                            <input type="checkbox" name="request[dj]" class="request-checkbox" <?= $disabledPersonality.''.$requiredPersonality ?> <?php echo isset($dj_requested) && $dj_requested == 1 ? 'checked' : '' ?>><span class="font-weight-light small"> 
+                                            <?php echo (isset($dj_requested) && $dj_requested == 1) ? 'Requested' : 'Request DJ'; ?>
+                                            </span>
+                                        </label>
+                                        <select name="request_amount[dj]" class="request-amount form-control form-control-sm d-none">
+                                            <?php for ($i = 1; $i <= 5; $i++): ?>
+                                                <option value="<?php echo $i; ?>"><?php echo $i; ?></option>
+                                            <?php endfor; ?>
+                                        </select>
+                                    </div>
+                                    <?php //endif; ?>
+                                    <?php if(!empty($disabledMedia) && (isset($dj_requested)) && $dj_requested == 1): ?>
+                                        <input type="hidden" name="request[dj]" value="<?= $dj_requested?>">
+                                    <?php endif; ?>
+                                </div>
+
+                                <!-- Engineer -->
+                                <div class="role-group">
+                                    <label>Engineer</label>
+                                    <div class="assignee-wrapper">
+                                        <select name="assignee[engineer][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabledPersonality ?>>
+                                            <!-- <option value="">Select a reporter</option> -->
+                                            <?php
+                                                $engineers = [];
+
+                                                if(isset($team_members))
+                                                    $all_members = explode(',', $team_members);
+
+                                                // Fetch users with role_id = 5 (for engineers)
+                                                if(isset($team_members))
+                                                    $engineers = explode(',', $team_members);
+                                            
+                                                $user_qry = $conn->query("SELECT u.empid, u.firstname, u.lastname, r.role_name 
+                                                FROM users u 
+                                                JOIN roles r ON r.role_id = u.role_id
+                                                WHERE r.role_name in ('Engineer')
+                                                ORDER BY 
+                                                    r.role_name, u.firstname;
+                                                                                             ");
+                                            if ($user_qry) {
+                                                while ($user_row = $user_qry->fetch_assoc()):
+                                                    if(in_array($user_row['empid'], $engineers))
+                                                        if(!empty($disabledEditors))
+                                                            $all_members = array_diff($all_members, [$user_row['empid']]);
+                                                   
+                                            ?>
+                                            <option value="<?php echo htmlspecialchars($user_row['empid']); ?>" <?php  echo isset($engineers) && in_array($user_row['empid'], $engineers) ? 'selected' : '' ?>>
+                                                <?php echo trim($user_row['firstname']) . ' ' . trim($user_row['lastname']).' ('.$user_row['role_name'].')'; ?>
+                                            </option>
+                                            <?php 
+                                                endwhile;
+                                            } else {
+                                                echo "<option>No engineers available</option>";
+                                            }
+                                            ?>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <!-- Sales Rep -->
+                                <div class="role-group">
+                                    <label>Sales Rep</label>
+                                    <div class="assignee-wrapper">
+                                        <select name="assignee[salesrep][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabledPersonality ?>>
+                                            <!-- <option value="">Select a reporter</option> -->
+                                            <?php
+                                                $salesreps = [];
+
+                                                if(isset($team_members))
+                                                    $all_members = explode(',', $team_members);
+
+                                                // Fetch users with role_id = 5 (for salesreps)
+                                                if(isset($team_members))
+                                                    $salesreps = explode(',', $team_members);
+                                            
+                                                $user_qry = $conn->query("SELECT u.empid, u.firstname, u.lastname, r.role_name 
+                                                FROM users u 
+                                                JOIN roles r ON r.role_id = u.role_id
+                                                WHERE r.role_name in ('Sales Rep')
+                                                ORDER BY 
+                                                    r.role_name, u.firstname;
+                                                                                             ");
+                                            if ($user_qry) {
+                                                while ($user_row = $user_qry->fetch_assoc()):
+                                                    if(in_array($user_row['empid'], $salesreps))
+                                                        if(!empty($disabledEditors))
+                                                            $all_members = array_diff($all_members, [$user_row['empid']]);
+                                                   
+                                            ?>
+                                            <option value="<?php echo htmlspecialchars($user_row['empid']); ?>" <?php  echo isset($salesreps) && in_array($user_row['empid'], $salesreps) ? 'selected' : '' ?>>
+                                                <?php echo trim($user_row['firstname']) . ' ' . trim($user_row['lastname']).' ('.$user_row['role_name'].')'; ?>
+                                            </option>
+                                            <?php 
+                                                endwhile;
+                                            } else {
+                                                echo "<option>No salesreps available</option>";
+                                            }
+                                            ?>
+                                        </select>
+                                    </div>
+                                </div>
+                                <?php } ?>
+                                <?php if(!$radio_staff){?>
                                 <!-- Reporter -->
                                 <div class="role-group">
                                     <label>Reporters</label>
@@ -308,8 +535,6 @@ if ($id) {
                                             <!-- <option value="">Select a reporter</option> -->
                                             <?php
                                                 $reporters = [];
-                                                $all_members = [];
-                                                $teamRem = "";
 
                                                 if(isset($team_members))
                                                     $all_members = explode(',', $team_members);
@@ -512,8 +737,7 @@ if ($id) {
                                         <input type="hidden" name="request[social]" value="<?= $social_requested?>">
                                     <?php endif; ?>
                                 </div>
-                                
-
+                                <?php } ?>
                                  <!-- Drivers -->
                                  <div class="role-group <?= ($user_role == 'Dispatcher') ? '' : 'd-none' ?>" >
                                     <label>Drivers</label>
@@ -634,7 +858,7 @@ if ($id) {
                             <div class="col d-flex justify-content-sm-between">
                                 <div id="checkboxes">
                                     <div class="custom-control custom-switch my-2">
-                                        <input type="checkbox" class="custom-control-input" id="send_notification" name="send_notification" checked <?php //echo isset($send_notification) && $send_notification == 1 ? 'checked' : '' ?>>
+                                        <input type="checkbox" class="custom-control-input" id="send_notification" name="send_notification" <?php echo (!($radio_staff)) && (!in_array($user_role, ['Broadcast Coordinator'])) ? 'checked' : ''; ?> <?php //echo isset($send_notification) && $send_notification == 1 ? 'checked' : '' ?>>
                                         <label class="custom-control-label font-weight-light" for="send_notification">
                                         <?php echo (isset($send_notification) && $send_notification == 1) ? 'Notification Sent (uncheck if you do not wish to send another)' : 'Send Notification'; ?>
                                         </label>
@@ -644,6 +868,14 @@ if ($id) {
                                         <input type="checkbox" class="custom-control-input text-danger" id="is_cancelled" name="is_cancelled"  <?php echo isset($is_cancelled) && $is_cancelled == 1 ? 'checked' : '' ?>>
                                         <label class="custom-control-label text-danger" for="is_cancelled">
                                         <?php echo (isset($is_cancelled) && $is_cancelled == 1) ? 'Cancelled' : 'Cancel Assignment'; ?>
+                                        </label>
+                                    </div>
+                                    <?php } ?>  
+                                    <?php if (!isset($_GET['id'])  && (in_array($user_role, ['Broadcast Coordinator', 'ITAdmin']))){ ?>
+                                    <div class="custom-control custom-switch">
+                                        <input type="checkbox" class="custom-control-input text-primary" id="alert_manager" name="alert_manager">
+                                        <label class="custom-control-label text-primary" for="alert_manager">
+                                        Alert Manager for Approval
                                         </label>
                                     </div>
                                     <?php } ?>  

@@ -58,7 +58,16 @@ if ($id) {
                                 <label for="lastname" class="control-label">Last Name</label>
                                 <input type="text" name="lastname" id="lastname" class="form-control form-control-sm" required value="<?php echo htmlspecialchars($lastname ?? ''); ?>">
                             </div>
-                              
+                            <div class="form-check">
+                                    <input 
+                                        class="form-check-input" 
+                                        type="checkbox" 
+                                        name="sb_staff" 
+                                        id="sb_staff" 
+                                        <?php echo isset($sb_staff) && $sb_staff == 1 ? 'checked' : '' ?>
+                                    >
+                                    <label class="form-check-label" for="whatsapp">S&B Staff</label>
+                                </div>
                                     </div>
                                  <br>
                             <div class="form-group">

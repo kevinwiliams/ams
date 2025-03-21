@@ -13,6 +13,8 @@ if (session_status() === PHP_SESSION_NONE) {
 
 $edit_roles = ['Manager', 'ITAdmin', 'Editor', 'Multimedia', 'Dispatcher', 'Photo Editor', 'Dept Admin'];
 $user_role = $_SESSION['role_name'] ?? '';
+$radio_staff = $_SESSION['login_sb_staff'] == 1 ? true : false;
+
 
 $options = [
     'dropOffOnly' => 'Drop Off Only',
@@ -104,6 +106,9 @@ $confirm = isset($_GET['confirm']) ? boolval($_GET['confirm']) : false; // Ensur
 $seen = true;
 
 try {
+    if (empty($team_members)) {
+        $team_members = '';
+    }
     $current_team = explode(',', $team_members);
     if (in_array($db_empid, $current_team)) {
 
@@ -173,6 +178,12 @@ $conn->close();
                     <div class="col-4"><strong>Assignment:</strong></div>
                     <div class="col-8"><?php echo ($is_cancelled == 1) ? 'CANCELLED - ' : ''; ?><?php echo htmlspecialchars_decode($title ?? 'No Title'); ?></div>
                 </div>
+                <?php if ($radio_staff){?>
+                <div class="row mb-3">
+                    <div class="col-4"><strong>Show:</strong></div>
+                    <div class="col-8"><?php echo htmlspecialchars($station_show ?? 'N/A'); ?></div>
+                </div>
+                <?php } ?>
                 <div class="row mb-3">
                     <div class="col-4"><strong>Start Time:</strong></div>
                     <div class="col-8"><?php echo htmlspecialchars($start_time ?? 'N/A'); ?></div>
@@ -215,20 +226,24 @@ $conn->close();
                     <div class="col-4"><strong>Assigned To:</strong></div>
                     <div class="col-8"><?php 
                     // echo htmlspecialchars($team_member_names ?? 'N/A'); 
-                    $teamMembers = explode(', ', $team_member_names);
-                    $charactersToRemove = ["/", "|"];
+                    if(empty($team_member_names)){
+                        echo 'N/A';
+                    
+                    }else{
+                        $teamMembers = explode(', ', $team_member_names);
+                        $charactersToRemove = ["/", "|"];
 
-                    foreach ($teamMembers as $member) {
-                        // Check if status is "Confirmed" or "Pending"
-                        if (strpos($member, '/') !== false) {
-                            $member = str_replace($charactersToRemove, "", $member);
-                            echo "<span class='text-success fw-bold'>$member</span><br>";
-                        } else {
-                            $member = str_replace($charactersToRemove, "", $member);
-                            echo "<span class='text-danger'>$member</span><br>";
+                        foreach ($teamMembers as $member) {
+                            // Check if status is "Confirmed" or "Pending"
+                            if (strpos($member, '/') !== false) {
+                                $member = str_replace($charactersToRemove, "", $member);
+                                echo "<span class='text-success fw-bold'>$member</span><br>";
+                            } else {
+                                $member = str_replace($charactersToRemove, "", $member);
+                                echo "<span class='text-danger'>$member</span><br>";
+                            }
                         }
                     }
-                    
                     ?></div>
                 </div>
                 <div class="row mb-3">

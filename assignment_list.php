@@ -214,7 +214,8 @@ if (!$assignment_list) {
                             <span class="<?php echo ($row['is_cancelled'] == 1) ? 'strike-through' : ''; ?>">
                             <?php //echo ($row['team_members_names_with_roles']); 
                             
-                            $teamMembers = explode(', ', $row['team_members_names_with_roles']);
+                                if(!empty($row['team_members_names_with_roles'])){
+                                    $teamMembers = explode(', ', $row['team_members_names_with_roles']);
                                     $charactersToRemove = ["/", "|"];
 
                                     foreach ($teamMembers as $member) {
@@ -227,6 +228,8 @@ if (!$assignment_list) {
                                             echo "<span class='text-danger'>$member</span><br>";
                                         }
                                     }
+                                }else{ echo 'N/A';}
+                                    
                             ?>
                             </span>
                         </td>

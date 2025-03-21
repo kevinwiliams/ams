@@ -279,19 +279,22 @@ $options = [
                                 <span class="<?php echo ($row['is_cancelled'] == 1) ? 'strike-through' : ''; ?>">
                                 <?php 
                                     //echo htmlspecialchars(($row['team_members_names'])); 
-                                    $teamMembers = explode(', ', $row['team_members_names']);
-                                    $charactersToRemove = ["/", "|"];
+                                    if(!empty($row['team_members_names'])){
+                                        $teamMembers = explode(', ', $row['team_members_names']);
+                                        $charactersToRemove = ["/", "|"];
 
-                                    foreach ($teamMembers as $member) {
-                                        // Check if status is "Confirmed" or "Pending"
-                                        if (strpos($member, '/') !== false) {
-                                            $member = str_replace($charactersToRemove, "", $member);
-                                            echo "<span class='text-success fw-bold'>$member</span><br>";
-                                        } else {
-                                            $member = str_replace($charactersToRemove, "", $member);
-                                            echo "<span class='text-seoncdary'>$member</span><br>";
+                                        foreach ($teamMembers as $member) {
+                                            // Check if status is "Confirmed" or "Pending"
+                                            if (strpos($member, '/') !== false) {
+                                                $member = str_replace($charactersToRemove, "", $member);
+                                                echo "<span class='text-success fw-bold'>$member</span><br>";
+                                            } else {
+                                                $member = str_replace($charactersToRemove, "", $member);
+                                                echo "<span class='text-seoncdary'>$member</span><br>";
+                                            }
                                         }
-                                    }
+                                    }else{ echo 'N/A';}
+                                    
                                 ?>
                                 </span>
                         

@@ -51,11 +51,9 @@
     }
     ?>
 <div class="container">
-<div class="card card-outline card-primary">
+    <div class="card card-outline card-primary">
         <div class="card-header d-flex">
             <h4 class="my-0 font-weight-normal flex-grow-1">Manage Roles</h4>
-            
-
             <div class="card-tools">
                 <?php if ($login_role_id < 5): ?>
                     <button class="btn btn-sm btn-danger ml-2" data-toggle="modal" data-target="#addRoleModal"><i class="fa fa-plus"></i> Add Role</button>
@@ -64,32 +62,32 @@
             </div>
         </div>
         <div class="card-body">
-        <table id="rolesTable" class="table table-bordered">
-            <thead>
-                <tr>
-                <th>Actions</th>
-                    <th>ID</th>
-                    <th>Role Name</th>
-                </tr>
-            </thead>
-            <tbody>
-            <?php foreach ($roles as $role): ?>
+            <table id="rolesTable" class="table table-bordered">
+                <thead>
                     <tr>
-                        <td>
-                            <button class="btn btn-sm btn-warning editRole" data-id="<?= $role['role_id'] ?>" data-name="<?= $role['role_name'] ?>"><i class="fas fa-edit"></i></button>
-                            <!-- <button class="btn btn-sm btn-danger deleteRole" data-id="<?= $role['role_id'] ?>"><i class="fas fa-trash"></i></button> -->
-                        </td>
-                        <td><?= $role['role_id'] ?></td>
-                        <td><?= $role['role_name'] ?></td>
-                        
+                    <th>Actions</th>
+                        <th>ID</th>
+                        <th>Role Name</th>
                     </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                <?php foreach ($roles as $role): ?>
+                        <tr>
+                            <td>
+                                <button class="btn btn-sm btn-warning editRole" data-id="<?= $role['role_id'] ?>" data-name="<?= $role['role_name'] ?>"><i class="fas fa-edit"></i></button>
+                                <!-- <button class="btn btn-sm btn-danger deleteRole" data-id="<?= $role['role_id'] ?>"><i class="fas fa-trash"></i></button> -->
+                            </td>
+                            <td><?= $role['role_id'] ?></td>
+                            <td><?= $role['role_name'] ?></td>
+                            
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
         </div>
     </div>
-       
-    </div>
+</div>    
+    
 
     <!-- Add Role Modal -->
     <div class="modal fade" id="addRoleModal" tabindex="-1" aria-labelledby="addRoleModalLabel" aria-hidden="true">
@@ -140,7 +138,7 @@
         </div>
     </div>
 
-</div>
+
 
 <!-- Custom Script -->
 <script>

@@ -263,6 +263,7 @@ Class Action {
 		extract($_POST);
 		$data = "";
 		$newEmpid = "";
+		$sb_staff = isset($_POST['sb_staff']) ? 1 : 0;
 
 		if(empty($id)){
 			// Fetch the last empid from the database
@@ -286,7 +287,7 @@ Class Action {
 		
 
 		foreach($_POST as $k => $v){
-			if(!in_array($k, array('id','cpass','password', 'channels', 'contact_number')) && !is_numeric($k)){
+			if(!in_array($k, array('id','cpass','password', 'channels', 'contact_number','sb_staff')) && !is_numeric($k)){
 				if(empty($data)){
 					// Set new employee ID
 					if ($k == 'empid')
@@ -300,6 +301,7 @@ Class Action {
 				}
 			}
 		}
+		$data .= ", sb_staff=$sb_staff ";
 		if (isset($_POST['contact_number'])) {
 			$phone = $this->sanitize_number($_POST['contact_number']); 
 			$data .= ", contact_number='$phone' ";
@@ -508,17 +510,21 @@ Class Action {
 		extract($_POST);
 	
 		// Initialize variables
+		$env = $this->getEnv();
+		$ob_approval_email = $env->get('APPROVE_ASSIGNMENT_CC');
 		$data = [];
 		$log = [];
 		$status = '';
 		$timestamp = (new DateTime())->format('Y-m-d H:i:s');
 		$assignmentDate = $_POST['assignment_date'] ?? '';
+		$alert_op = isset($alert_manager) ? 1 : 0;
 		$notify = isset($send_notification) ? 1 : 0;
 		$cancelled = isset($is_cancelled) ? 1 : 0;
 		$confirmed_transport = isset($transport_confirmed) ? 1 : 0;
 		$uuid = !empty($uid) ? $uid : uniqid('event_', true);
 		$user_role = $_SESSION['role_name'];
 		$admin_roles = ['Manager', 'ITAdmin', 'Editor', 'Dept Admin'];
+		$team_members_str = "";
 
 		// Set default values
 		$data['transport_confirmed'] = $confirmed_transport;
@@ -527,7 +533,7 @@ Class Action {
 		
 		// Process POST data
 		foreach ($_POST as $key => $value) {
-			if (!empty($value) && !in_array($key, ['id', 'assignee', 'team', 'request', 'request_amount', 'assigned_by']) && !is_numeric($key)) {
+			if (!empty($value) && !in_array($key, ['id', 'assignee', 'team', 'request', 'request_amount', 'assigned_by', 'alert_manager']) && !is_numeric($key)) {
 				// Escape specific fields for HTML entities and SQL
 				if (in_array($key, ['description', 'title', 'equipment'])) {
 					$value = $this->db->real_escape_string(htmlspecialchars($value, ENT_QUOTES, 'UTF-8'));
@@ -597,6 +603,7 @@ Class Action {
 		$data['photo_requested'] = isset($_POST['request']['photographer']) ? 1 : 0;
 		$data['video_requested'] = isset($_POST['request']['videographer']) ? 1 : 0;
 		$data['social_requested'] = isset($_POST['request']['social']) ? 1 : 0;
+		$data['dj_requested'] = isset($_POST['request']['dj']) ? 1 : 0;
 	
 		// Handle transport log
 		if (!empty($_POST['transport_id'])) {
@@ -633,7 +640,11 @@ Class Action {
 			if (isset($_POST['request'])) {
 				$this->send_resource_request($_POST, $data_json);
 			}
-	
+			// Send a single email to all recipients
+			if ($alert_op) {
+				$subjectTxt = $this->build_email_subject($assignmentDate, $notifyAlreadySent, $cancelled, $postponed);
+				$this->send_ams_mail($ob_approval_email, $data_json, $subjectTxt);
+			}
 			// Send notifications
 			if ($notify) {
 				$subjectTxt = $this->build_email_subject($assignmentDate, $notifyAlreadySent, $cancelled, $postponed);
@@ -706,6 +717,7 @@ Class Action {
 			'end_time' => $_POST['end_time'] ?? 'N/A',
 			'depart_time' => $_POST['depart_time'] ?? 'N/A',
 			'assignment' => $_POST['title'] ?? '',
+			'show' => $_POST['station_show'] ?? '',
 			'details' => $_POST['description'] ?? '',
 			'venue' => $_POST['location'] ?? '',
 			'transport_confirmed' => ($transport_confirmed == 1) ? 'Yes' :  'No',
@@ -716,11 +728,12 @@ Class Action {
 			'url' => $site_url . '/index.php?page=view_assignment&id=' . $id . '&confirm=true',
 			'uid' => $uuid,
 			'is_cancelled' => $cancelled,
+			'sb_staff'=> $_SESSION['login_sb_staff'] ?? ''
 		];
 	}
 	
 	function build_email_subject($assignmentDate, $notifyAlreadySent, $cancelled, $postponed) {
-		$subjectTxt = "Assignment - " . date("D, M d, Y", strtotime($assignmentDate));
+		$subjectTxt = date("D, M d, Y", strtotime($assignmentDate));
 		if ($notifyAlreadySent) {
 			if ($cancelled) {
 				$subjectTxt .= " (Cancelled)";
@@ -880,6 +893,9 @@ Class Action {
 			$emailFrom = $env->get('EMAIL_FROM');
 			$copyAssignEmail = $env->get('EMAIL_ASSIGNMENT_CC');
 			$emailTable = $env->get('MSSQL_TABLE_NAME');
+			$radio_staff = $_SESSION['login_sb_staff'] == 1 ? true : false;
+			$mailtype = ($radio_staff) ? "Outside Broadcast" : "Assignment";
+			$subject = $mailtype . " - " . $subject;
 			
 			$email = trim($email); 
 			$bccEmails = $bcc;      
@@ -896,10 +912,10 @@ Class Action {
 				$ccEmails .= "";
 			}
 			// Create HTML structure
-			$htmlContent = '<h3>Assignment Details</h3>';
+			$htmlContent = '<h3>'.$mailtype.' Details</h3>';
 			$htmlContent .= '<table style="width: 100%; border-collapse: collapse;">';
 			foreach ($assignDetails as $key => $value) {
-				if($value && !in_array($key, ['uid', 'is_cancelled'] )){
+				if($value && !in_array($key, ['uid', 'is_cancelled', 'sb_staff'] )){
 				
 					switch ($key) {
 						case 'assignment_date':
@@ -911,6 +927,9 @@ Class Action {
 							break;
 						case 'updated_by':
 							$value = (str_contains($subject, "Updated")) ? $value : '';
+							break;
+						case 'show':
+							$value = ($radio_staff) ? $value : '';
 							break;
 						default:
 							//$value = htmlspecialchars($value);
@@ -972,7 +991,9 @@ Class Action {
     }
 	// Send resource request to assigned personnel
 	function send_resource_request($postData, $data_json) {
-		$roles = ['photographer', 'videographer', 'social', 'driver'];
+		$radio_staff = $_SESSION['login_sb_staff'] == 1 ? true : false;
+
+		$roles = ['photographer', 'videographer', 'social', 'driver', 'dj'];
 	
 		// Initialize request data
 		$requestData = [];
@@ -1007,12 +1028,19 @@ Class Action {
         $recip_video = $env->get('EMAIL_VIDEO_REQUEST');
         $recip_social = $env->get('EMAIL_SOCIAL_REQUEST');
         $recip_driver = $env->get('EMAIL_DRIVER_REQUEST');
+        $recip_dj = '';
+		if (stripos($assignmentInfo['show'], 'FYAH') !== false) {
+			$recip_dj = $env->get('EMAIL_DJ_REQUEST_FYAH');
+		} else {
+			$recip_dj = $env->get('EMAIL_DJ_REQUEST_EDGE');
+		}
 		//Split in case there are multiple recipients for each
 		$roleRecipients = [
 			'photographer' => str_replace(',', ';', $recip_photo), 
 			'videographer' => str_replace(',', ';', $recip_video),
 			'social' => str_replace(',', ';', $recip_social),
-			'driver' => str_replace(',', ';', $recip_driver)
+			'driver' => str_replace(',', ';', $recip_driver),
+			'dj' => str_replace(',', ';', $recip_dj)
 		];
 	
 		// Prepare email subject and body
@@ -1030,8 +1058,11 @@ Class Action {
 			if($value){
 				if($key == 'assignment_date')
 					$value = date("l, M d, Y", strtotime($value));
+
+				if($key == 'show')
+					$value = ($radio_staff) ? $value : '';
 				
-				if(!in_array($key, ['assigned_by_email', 'url', 'updated_by', 'uid', 'is_cancelled']) && !empty($value))
+				if(!in_array($key, ['assigned_by_email', 'url', 'updated_by', 'uid', 'is_cancelled', 'sb_staff']) && !empty($value))
 					$body .= '<tr>
 							<td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>' . ucfirst(str_replace('_', ' ', $key)) . '</strong></td>
 							<td style="padding: 8px; border-bottom: 1px solid #ddd;">' . htmlspecialchars($value) . '</td>
@@ -1421,6 +1452,7 @@ Class Action {
 		$endTime = $assignDetails['end_time'];
 		$departTime = $assignDetails['depart_time'];
 		$assignment = $assignDetails['assignment'];
+		$station_show = $assignDetails['station_show'];
 		$details = $assignDetails['details'];
 		$venue = $assignDetails['venue'];
 		$assignedBy = $assignDetails['assigned_by'];
@@ -1442,7 +1474,7 @@ Class Action {
 			if (strlen($message) > 160) {
 				$venue = strlen($venue) > 20 ? substr($venue, 0, 17) . "..." : $venue;
 				// $assignment = strlen($assignment) > 20 ? substr($assignment, 0, 17) . "..." : $assignment;
-				$message = "AMS - $assignmentDate, $startTime - $assignment, $venue: $departure Info: $shortUrl";
+				$message = "AMS - $assignmentDate, $startTime - $assignment, $venue. Info: $shortUrl";
 			}
 		}
 	
@@ -1474,6 +1506,8 @@ Class Action {
 		// If depart time is not provided, set it to 'N/A'
 		$departTime = empty($info['depart_time']) ? 'N/A' : $info['depart_time'];
 		$departDateTime = date('Ymd\THis', strtotime($info['assignment_date'] . ' ' . $departTime));
+		$radio_staff = $_SESSION['login_sb_staff'] == 1 ? true : false;
+		$ob_station = ($radio_staff) ? "\\nShow: ". $info['show'] : '';
 	
 		// Generate the .ics content
 		$icsContent = "BEGIN:VCALENDAR\r\n";
@@ -1486,7 +1520,7 @@ Class Action {
 		$icsContent .= "DTEND:" . $endDateTime . "\r\n";
 		$icsContent .= "STATUS:" . $status . "\r\n";
 		$icsContent .= "SUMMARY: Assignment | " . $info['assignment'] . "\r\n";
-		$icsContent .= "DESCRIPTION:" . $info['details'] . "\\n\\nTeam: " . $info['team'] . "\\nAssigned by: " . $info['assigned_by'] . "\\nDeparture Time: " . $departTime . "\r\n";
+		$icsContent .= "DESCRIPTION:" . $info['details'] . $ob_station ."\\n\\nTeam: " . $info['team'] . "\\nAssigned by: " . $info['assigned_by'] . "\\nDeparture Time: " . $departTime . "\r\n";
 		$icsContent .= "LOCATION:" . $info['venue'] . "\r\n";
 		$icsContent .= "URL:" . $info['url'] . "\r\n";
 		$icsContent .= "ORGANIZER;CN=" . $info['assigned_by'] . ":mailto:" . $info['assigned_by_email'] . "\r\n";
