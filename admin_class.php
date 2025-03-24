@@ -644,6 +644,10 @@ Class Action {
 			if (isset($_POST['request'])) {
 				$this->send_resource_request($_POST, $data_json);
 			}
+			// Send permit request emails
+			if (isset($_POST['request_permit'])) {
+				$this->send_resource_request($_POST, $data_json, $permit_requested);
+			}
 			// Send a single email to all recipients
 			if ($alert_op) {
 				$subjectTxt = $this->build_email_subject($assignmentDate, $notifyAlreadySent, $cancelled, $postponed);
