@@ -520,6 +520,7 @@ Class Action {
 		$alert_op = isset($alert_manager) ? 1 : 0;
 		$notify = isset($send_notification) ? 1 : 0;
 		$cancelled = isset($is_cancelled) ? 1 : 0;
+		$permit_requested = isset($request_permit) ? 1 : 0;
 		$confirmed_transport = isset($transport_confirmed) ? 1 : 0;
 		$uuid = !empty($uid) ? $uid : uniqid('event_', true);
 		$user_role = $_SESSION['role_name'];
@@ -552,6 +553,9 @@ Class Action {
 						break;
 					case 'transport_confirmed':
 						$value = $confirmed_transport;
+						break;
+					case 'request_permit':
+						$value = $permit_requested;
 						break;
 					case 'uid':
 						$value = $uuid;
@@ -990,7 +994,7 @@ Class Action {
 		}
     }
 	// Send resource request to assigned personnel
-	function send_resource_request($postData, $data_json) {
+	function send_resource_request($postData, $data_json, $permit = null) {
 		$radio_staff = $_SESSION['login_sb_staff'] == 1 ? true : false;
 
 		$roles = ['photographer', 'videographer', 'social', 'driver', 'dj'];
@@ -1042,17 +1046,23 @@ Class Action {
 			'driver' => str_replace(',', ';', $recip_driver),
 			'dj' => str_replace(',', ';', $recip_dj)
 		];
-	
+		
+        $permit_email = $env->get('PERMIT_REQUEST');
+		$mailType = ($permit) ? "Permit" : "Resource";
+
 		// Prepare email subject and body
-		$subject = 'Resource Request - '.date("D, M d, Y", strtotime($assignmentInfo['assignment_date']));
-		$body = '<h3>Resource Request Details</h3>';
+		$subject = $mailType.' Request - '.date("D, M d, Y", strtotime($assignmentInfo['assignment_date']));
+		$body = '<h3>'.$mailType.' Request Details</h3>';
 		$body .= '<table style="width: 100%; border-collapse: collapse;">';
 	
 		// Add requested roles and amounts
-		foreach ($requestData as $role => $data) {
-			$body .= '<tr><td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>' . ucfirst($role) . '</strong></td>
-					  <td style="padding: 8px; border-bottom: 1px solid #ddd;">' . $data['amount'] . ' requested</td></tr>';
+		if(empty($permit)){
+			foreach ($requestData as $role => $data) {
+				$body .= '<tr><td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>' . ucfirst($role) . '</strong></td>
+						  <td style="padding: 8px; border-bottom: 1px solid #ddd;">' . $data['amount'] . ' requested</td></tr>';
+			}
 		}
+		
 		// Add assignment details
 		foreach ($assignmentInfo as $key => $value) {
 			if($value){

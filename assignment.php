@@ -293,12 +293,26 @@ if ($id) {
                             <?php if (isset($_GET['id']) && (in_array($user_role, $editor_roles))){ ?>
                             <div class="form-group">
                                 <div class="custom-control custom-switch my-2">
-                                    <input type="checkbox" class="custom-control-input" id="transport_confirmed" name="transport_confirmed" <?php echo isset($transport_confirmed) && $transport_confirmed == 1 ? 'checked' : '' ?>>
+                                    <input type="checkbox" class="custom-control-input" id="transport_confirmed" name="transport_confirmed" <?php echo isset($transport_confirmed) && $transport_confirmed == 1 ? 'checked' : '' ?><?= $readonlyPersonality ?>>
                                     <label class="custom-control-label font-weight-light" for="transport_confirmed">
                                     <?php echo (isset($transport_confirmed) && $transport_confirmed == 1) ? 'Transportation confirmed' : 'Confirm transportation'; ?>
                                     </label>
                                 </div>
                             </div>
+                            <?php } ?>
+                            <?php if ($radio_staff){ ?>
+                            <div class="form-group">
+                                <div class="custom-control custom-switch my-2">
+                                    <input type="checkbox" class="custom-control-input" id="request_permit" name="request_permit" <?php echo isset($request_permit) && $request_permit == 1 ? 'checked' : '' ?><?= $readonlyPersonality ?>>
+                                    <label class="custom-control-label font-weight-light" for="request_permit">
+                                    <?php echo (isset($request_permit) && $request_permit == 1) ? 'Permit Requested' : 'Request Permit'; ?>
+                                    </label>
+                                </div>
+                            </div>
+                            <?php } ?>
+                            <?php if ($radio_staff && !empty($readonlyPersonality)){ ?>
+                                <input type="hidden" name="request_permit" value="<?= $request_permit?>">
+                                <input type="hidden" name="transport_confirmed" value="<?= $transport_confirmed?>">
                             <?php } ?>
                            
                         </div>
