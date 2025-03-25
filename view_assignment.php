@@ -155,7 +155,7 @@ $conn->close();
         }
     </style>
 
-<div class="container mt-4"><?= $user_role ?>
+<div class="container mt-4">
     <div class=" card card-widget widget-assignment shadow">
         <!-- Header -->
         <div class="widget-assignment-header <?php echo ($is_cancelled == 1) ? 'bg-danger' : 'bg-light'; ?> text-dark text-center p-4">
