@@ -149,3 +149,51 @@ CREATE TABLE IF NOT EXISTS `station_shows` (
 
 ALTER TABLE assignment_list
 CHANGE COLUMN is_ob request_permit TINYINT(1) DEFAULT 0;
+
+CREATE TABLE `ob_items` (
+  `item_id` INT AUTO_INCREMENT PRIMARY KEY,
+  `item_name` VARCHAR(50) NOT NULL,
+  `description` TEXT
+);
+
+CREATE TABLE `ob_inventory` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `assignment_id` INT NOT NULL,
+  `item_id` INT NOT NULL,
+  `status` TINYINT(1) DEFAULT 0,
+  `quantity` INT DEFAULT 0,
+  `notes` TEXT,
+  FOREIGN KEY (`assignment_id`) REFERENCES `assignment_list`(`id`),
+  FOREIGN KEY (`item_id`) REFERENCES `ob_items`(`item_id`)
+);
+
+-- Main inspection table
+CREATE TABLE `venue_inspections` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `assignment_id` INT NOT NULL,
+  `parking_available` TINYINT(1) DEFAULT 0,
+  `bathrooms_available` TINYINT(1) DEFAULT 0,
+  `layout_notes` TEXT,
+  `tent_location` TEXT,
+  `banner_location` TEXT,
+  `general_notes` TEXT,
+  `site_visit_date` DATE,
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (`assignment_id`) REFERENCES `assignment_list`(`id`) ON DELETE CASCADE
+);
+
+-- Permits table (supports multiple permits per inspection)
+CREATE TABLE `venue_permits` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `inspection_id` INT NOT NULL,
+  `permit_type` ENUM('temporary', 'full', 'other') NOT NULL,
+  `notes` TEXT,
+  FOREIGN KEY (`inspection_id`) REFERENCES `venue_inspections`(`id`) ON DELETE CASCADE
+);
+
+ALTER TABLE venue_inspections
+ADD COLUMN updated_at DATETIME;
+
+ALTER TABLE ob_inventory
+ADD COLUMN created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN updated_at DATETIME;
