@@ -1084,8 +1084,13 @@ Class Action {
 			}
 		}
 		
+		if(empty($permit)){ // Add URL for resource requests only
 		$body .= '<tr>
-				  <td colspan="2" style="padding: 8px; border-bottom: 1px solid #ddd;"><a href="' . urlencode($assignmentInfo["url"]) . '">Add Resource to Assignment</a></td></tr>';
+				  <td colspan="2" style="padding: 8px; border-bottom: 1px solid #ddd;">
+				  	<a href="' . urlencode($assignmentInfo["url"]) . '">Add Resource to Assignment</a>
+				  </td>
+				  </tr>';
+		}
 		$body .= '</table>'; 
 	
 		// Determine recipients based on requested roles
