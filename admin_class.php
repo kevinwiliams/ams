@@ -1366,7 +1366,9 @@ Class Action {
 			$request = intval($_POST['equipment_requested']) ?? 0;
 			$details = $_POST['equipment_details'] ?? '';
 			$env = $this->getEnv();
-			$requestEmailTo = $env->get('EMAIL_EQUIPMENT_REQUEST');
+			$radio_staff = $_SESSION['login_sb_staff'] == 1 ? true : false;
+			$requestEmailTo = ($radio_staff) ? $env->get('EMAIL_EQUIPMENT_REQUEST_SB'): $env->get('EMAIL_EQUIPMENT_REQUEST');
+
 			
 			$emailDetails = [
 				'assignment_date' => date("D, M d, Y", strtotime($_POST['assignment_date'])) ?? '',
@@ -1410,6 +1412,7 @@ Class Action {
 			$env = $this->getEnv();
 			$emailFrom = $env->get('EMAIL_FROM');
 			$emailTable = $env->get('MSSQL_TABLE_NAME');
+
 
 			$email = trim($email);
 			$bccEmails = "";      
