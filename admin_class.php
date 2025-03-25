@@ -1079,7 +1079,7 @@ Class Action {
 				if(!in_array($key, ['assigned_by_email', 'url', 'updated_by', 'uid', 'is_cancelled', 'sb_staff']) && !empty($value))
 					$body .= '<tr>
 							<td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>' . ucfirst(str_replace('_', ' ', $key)) . '</strong></td>
-							<td style="padding: 8px; border-bottom: 1px solid #ddd;">' . htmlspecialchars($value) . '</td>
+							<td style="padding: 8px; border-bottom: 1px solid #ddd;">' . ($value) . '</td>
 						</tr>';
 			}
 		}
