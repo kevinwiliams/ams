@@ -219,8 +219,8 @@ $options = [
                         <?php if(in_array($user_role,  ['Dispatcher', 'Security'])) :?>
                             <th>License</th>
                         <?php endif ?>
-                        <th>Start Time</th>
-                        <th>End Time</th>
+                        <th>Time</th>
+                        <!-- <th>End Time</th> -->
                         <th>Assignment</th>
                         <!-- <th>Description</th> -->
                         <th>Venue</th>
@@ -261,10 +261,10 @@ $options = [
                             ?>
                             </td>
                             <?php if(in_array($user_role,  ['Dispatcher', 'Security'])) :?>
-                            <td><span class="<?php echo ($row['is_cancelled'] == 1) ? 'strike-through' : ''; ?>"><?php echo htmlspecialchars($row['plate_number']); ?></span></td>
+                            <td><span class="<?php echo ($row['is_cancelled'] == 1) ? 'strike-through' : ''; ?>"><?php echo htmlspecialchars($row['plate_number']).' '.htmlspecialchars($row['make_model']); ?></span></td>
                             <?php endif ?>
-                            <td><span class="<?php echo ($row['is_cancelled'] == 1) ? 'strike-through' : ''; ?>"><?php echo htmlspecialchars($row['start_time']); ?></span></td>
-                            <td><span class="<?php echo ($row['is_cancelled'] == 1) ? 'strike-through' : ''; ?>"><?php echo htmlspecialchars($row['end_time']); ?></span></td>
+                            <td><span class="<?php echo ($row['is_cancelled'] == 1) ? 'strike-through' : ''; ?>"><?= htmlspecialchars($row['start_time']).' - '.htmlspecialchars($row['end_time']) ?? 'N/A'; ?></span></td>
+                            <!-- <td><span class="<?php echo ($row['is_cancelled'] == 1) ? 'strike-through' : ''; ?>"><?php echo htmlspecialchars($row['end_time']); ?></span></td> -->
                             
                             <td>
                                 <!-- <a href="index.php?page=view_assignment&id=<?php echo $row['id']; ?>" class="text-decoration-none"> -->

@@ -24,8 +24,8 @@ $assignment_list = null;
 // Fetch assignment data based on conditions
 $where = "WHERE (a.is_deleted = 0 OR a.is_deleted IS NULL)"; 
 $create_roles = ['Manager', 'ITAdmin', 'Editor', 'Dept Admin', 'Security','Op Manager', 'Broadcast Coordinator' ];
-$edit_roles = ['Manager', 'ITAdmin', 'Editor', 'Multimedia', 'Dispatcher', 'Photo Editor', 'Dept Admin', 'Op Manager'];
-$delete_roles = ['Manager', 'ITAdmin', 'Editor', 'Dept Admin'];
+$edit_roles = ['Manager', 'ITAdmin', 'Editor', 'Multimedia', 'Dispatcher', 'Photo Editor', 'Dept Admin', 'Op Manager', 'Programme Director'];
+$delete_roles = ['Manager', 'ITAdmin', 'Editor', 'Dept Admin', 'Op Manager'];
 $digital_roles = ['Photo Editor'];
 $multimedia_roles = ['Multimedia'];
 $freelance_roles = ['Freelancer'];
@@ -153,8 +153,8 @@ if (!$assignment_list) {
                     <?php } ?>
 
                         <th>Assignment Date</th>
-                        <th>Start Time</th>
-                        <th>End Time</th>
+                        <th>Time</th>
+                        <!-- <th>End Time</th> -->
                         <th>Assignment</th>
                         <!-- <th>Description</th> -->
                         <th>Venue</th>
@@ -200,8 +200,8 @@ if (!$assignment_list) {
                         }
                     ?>
                     </td>
-                    <td> <span class="<?php echo ($row['is_cancelled'] == 1) ? 'strike-through' : ''; ?>"><?php echo $row['start_time'] ?? 'N/A'; ?></span>  </td>
-                    <td> <span class="<?php echo ($row['is_cancelled'] == 1) ? 'strike-through' : ''; ?>"><?php echo $row['end_time'] ?? 'N/A'; ?></span>  </td>
+                    <td> <span class="<?php echo ($row['is_cancelled'] == 1) ? 'strike-through' : ''; ?>"><?php echo $row['start_time'] .' - '.$row['end_time'] ?? 'N/A'; ?></span>  </td>
+                    <!-- <td> <span class="<?php echo ($row['is_cancelled'] == 1) ? 'strike-through' : ''; ?>"><?php echo $row['end_time'] ?? 'N/A'; ?></span>  </td> -->
 
                     <td>
                         <?php echo ($row['is_cancelled'] == 1) ? '<b>CANCELLED:</b> ' : ''; ?>

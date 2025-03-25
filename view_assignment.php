@@ -11,7 +11,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-$edit_roles = ['Manager', 'ITAdmin', 'Editor', 'Multimedia', 'Dispatcher', 'Photo Editor', 'Dept Admin'];
+$edit_roles = ['Manager', 'ITAdmin', 'Editor', 'Multimedia', 'Dispatcher', 'Photo Editor', 'Dept Admin', 'Op Manager', 'Broadcast Coordinator', 'Security', 'Programme Director'];
 $user_role = $_SESSION['role_name'] ?? '';
 $radio_staff = $_SESSION['login_sb_staff'] == 1 ? true : false;
 
@@ -155,7 +155,7 @@ $conn->close();
         }
     </style>
 
-<div class="container mt-4">
+<div class="container mt-4"><?= $user_role ?>
     <div class=" card card-widget widget-assignment shadow">
         <!-- Header -->
         <div class="widget-assignment-header <?php echo ($is_cancelled == 1) ? 'bg-danger' : 'bg-light'; ?> text-dark text-center p-4">
@@ -185,15 +185,15 @@ $conn->close();
                 </div>
                 <?php } ?>
                 <div class="row mb-3">
-                    <div class="col-4"><strong>Start Time:</strong></div>
-                    <div class="col-8"><?php echo htmlspecialchars($start_time ?? 'N/A'); ?></div>
+                    <div class="col-4"><strong>Time:</strong></div>
+                    <div class="col-8"><?php echo htmlspecialchars($start_time ?? 'N/A').' - '.htmlspecialchars($end_time ?? 'N/A'); ?></div>
                 </div>
-                <?php if ($end_time){?>
+                <!-- <?php if ($end_time){?>
                 <div class="row mb-3">
                     <div class="col-4"><strong>End Time:</strong></div>
                     <div class="col-8"><?php echo htmlspecialchars($end_time ?? 'N/A'); ?></div>
                 </div>
-                <?php } ?>
+                <?php } ?> -->
                 
                 <?php if ($depart_time){?>
                 <div class="row mb-3">

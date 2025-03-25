@@ -24,7 +24,7 @@ $editor_roles = ['Editor', 'Manager', 'Dept Admin', 'Op Manager'];
 $media_roles = ['Multimedia'];
 $digital_roles = ['Photo Editor'];
 $dispatch_roles = ['Dispatcher'];
-$dj_roles = ['Personality'];
+$dj_roles = ['Programme Director'];
 $broadcast_roles = ['Broadcast Coordinator'];
 
 $readonly = '';
@@ -272,7 +272,7 @@ if ($id) {
                                         $station = htmlspecialchars($show['station']);
                                         $display_text = "$station : $show_name"; // Concatenate show name and station
                                         $selected = (isset($station_show) && $station_show == $display_text) ? 'selected' : ''; // Check if selected
-                                        echo '<option value="' . $display_text . '">' . $display_text . '</option>';
+                                        echo '<option value="' . $display_text . '"'. $selected .'>' . $display_text . '</option>';
                                     }
                                     ?>
                                 </select>
@@ -417,7 +417,7 @@ if ($id) {
                                                 $user_qry = $conn->query("SELECT u.empid, u.firstname, u.lastname, r.role_name 
                                                 FROM users u 
                                                 JOIN roles r ON r.role_id = u.role_id
-                                                WHERE r.role_name in ('Personality')
+                                                WHERE r.role_name in ('Personality', 'Programme Director')
                                                 ORDER BY 
                                                     r.role_name, u.firstname;
                                                                                              ");
