@@ -531,6 +531,7 @@ Class Action {
 		$data['transport_confirmed'] = $confirmed_transport;
 		$data['send_notification'] = $notify;
 		$data['is_cancelled'] = $cancelled;
+		$data['request_permit'] = $permit_requested;
 		
 		// Process POST data
 		foreach ($_POST as $key => $value) {
@@ -1026,7 +1027,6 @@ Class Action {
 		if (empty($requestedRoles)) {
 			return json_encode(['status' => 'error', 'message' => 'No roles requested.']);
 		}
-	
 		// Decode the JSON data
 		$assignmentInfo = json_decode($data_json, true);
 	
@@ -1037,7 +1037,7 @@ Class Action {
         $recip_social = $env->get('EMAIL_SOCIAL_REQUEST');
         $recip_driver = $env->get('EMAIL_DRIVER_REQUEST');
         $recip_dj = '';
-		if (str_contains($assignmentInfo['show'], 'FYAH') !== false) {
+		if (str_contains($assignmentInfo['show'], 'FYAH')) {
 			$recip_dj = $env->get('EMAIL_DJ_REQUEST_FYAH');
 		} else {
 			$recip_dj = $env->get('EMAIL_DJ_REQUEST_EDGE');
