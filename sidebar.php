@@ -49,7 +49,7 @@ $login_name = isset($_SESSION['login_name']) ? $_SESSION['login_name'] : 'User';
                 <?php if (in_array($user_role, $show_roles)): ?>
 
                     <li class="nav-item dropdown">
-                        <a href="./index.php?page=station_shows" class="nav-link nav-user_list">
+                        <a href="./index.php?page=station_shows" class="nav-link nav-shows">
                             <i class="nav-icon fa fa-bullhorn"></i>
                             <p>Shows</p>
                         </a>
@@ -68,7 +68,7 @@ $login_name = isset($_SESSION['login_name']) ? $_SESSION['login_name'] : 'User';
                 <?php if (in_array($user_role, $it_roles)): ?>
 
                 <li class="nav-item dropdown">
-                    <a href="./index.php?page=roles" class="nav-link nav-user_list">
+                    <a href="./index.php?page=roles" class="nav-link nav-roles">
                         <i class="nav-icon fa fa-user-secret"></i>
                         <p>Roles</p>
                     </a>
