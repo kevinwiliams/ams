@@ -445,7 +445,7 @@ if ($id) {
                                 <div class="role-group">
                                     <label>DJ</label>
                                     <div class="assignee-wrapper">
-                                        <select name="assignee[dj][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabledBroadcast ?>>
+                                        <select name="assignee[dj][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabledBroadcast.$requiredPersonality ?>>
                                             <!-- <option value="">Select a reporter</option> -->
                                             <?php
                                                 $djs = [];
