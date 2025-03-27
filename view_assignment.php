@@ -30,6 +30,24 @@ $db_empid = $_SESSION['empid'] ?? '';
 $id = isset($_GET['id']) ? intval($_GET['id']) : 0; // Ensure ID is an integer
 
 if ($id > 0) {
+    // Get permits
+    $permits = [];
+    if ($radio_staff) {
+        $stmt = $conn->prepare("SELECT * FROM venue_inspections WHERE assignment_id = ?");
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+        $inspection = $stmt->get_result()->fetch_assoc();
+
+        if ($inspection) {
+            $result = $conn->query("SELECT permit_type FROM venue_permits WHERE inspection_id = " . $inspection['id']);
+            while ($row = $result->fetch_assoc()) {
+                $permits[] = $row['permit_type'];
+            }
+        }
+       
+        $stmt->close();
+    }
+    
     // Prepare and execute the query to fetch assignment details
     $stmt = $conn->prepare("SELECT 
                             a.*,
@@ -104,6 +122,7 @@ if ($id > 0) {
 $confirm = isset($_GET['confirm']) ? boolval($_GET['confirm']) : false; // Ensure confirm is bool
 
 $seen = true;
+$is_exclusive = false;
 
 try {
     if (empty($team_members)) {
@@ -125,11 +144,31 @@ try {
         // Check if an assignment exists
         $seen = $result->num_rows > 0;
         $stmt->close();
+
+    }
+
+    if ($radio_staff) {
+        $show_name = $station_show;
+        $station_name = '';
+        if (strpos($show_name, ':') !== false) {
+            $show_parts = explode(':', $show_name, 2);
+            $show_name = trim($show_parts[1]);
+            $station_name = trim($show_parts[0]);
+        }
+
+        $show = $conn->prepare("SELECT * FROM station_shows WHERE station = ? and show_name = ?");
+        $show->bind_param("ss", $station_name, $show_name);
+        $show->execute();
+        $exclusive = $show->get_result()->fetch_assoc();
+        if($exclusive)
+            $is_exclusive = $exclusive['is_exclusive'] == 1 ? true : false;
+        $show->close();
     }
 } catch (Exception $e) {
  echo "Error: " . $e->getMessage();
 
 }
+
 
 $conn->close();
 ?>
@@ -178,10 +217,20 @@ $conn->close();
                     <div class="col-4"><strong>Assignment:</strong></div>
                     <div class="col-8"><?php echo ($is_cancelled == 1) ? 'CANCELLED - ' : ''; ?><?php echo htmlspecialchars_decode($title ?? 'No Title'); ?></div>
                 </div>
-                <?php if ($radio_staff){?>
+                <?php if ($radio_staff){
+
+                     
+                ?>
                 <div class="row mb-3">
                     <div class="col-4"><strong>Show:</strong></div>
-                    <div class="col-8"><?php echo htmlspecialchars($station_show ?? 'N/A'); ?></div>
+                    <div class="col-8">
+                        <?php 
+                            echo htmlspecialchars($station_show ?? 'N/A'); 
+                            if ($is_exclusive) {
+                                echo ' <span class="text-danger text-bold">(EXCLUSIVE)</span>';
+                            }
+                        ?>
+                    </div>
                 </div>
                 <?php } ?>
                 <div class="row mb-3">
@@ -246,6 +295,22 @@ $conn->close();
                     }
                     ?></div>
                 </div>
+                <?php if($radio_staff){?>
+                <div class="row mb-2">
+                    <div class="col-4"><strong>Permits Obtained:</strong></div>
+                    <div class="col-8">
+                    <?php if (!empty($permits)): ?>
+                                    <ul class="list-unstyled">
+                                        <?php foreach ($permits as $permit): ?>
+                                            <li><?= strtoupper($permit) ?></li>
+                                        <?php endforeach; ?>
+                                    </ul>
+                                <?php else: ?>
+                                    <p class="text-muted">No permits recorded</p>
+                                <?php endif; ?>
+                    </div>
+                </div>
+                <?php } ?>
                 <div class="row mb-3">
                     <div class="col-4"><strong>Assigned By:</strong></div>
                     <div class="col-8"><?php echo htmlspecialchars($assigned_by_name ?? 'N/A'); ?></div>

@@ -282,7 +282,7 @@ $setup_time = $inspection['setup_time'] ?: 'Not specified';
                                     <h6>Permits Obtained:</h6>
                                     <ul>
                                         <?php foreach ($permits as $permit): ?>
-                                            <li><?= ucfirst($permit) ?></li>
+                                            <li><?= strtoupper($permit) ?></li>
                                         <?php endforeach; ?>
                                     </ul>
                                 <?php else: ?>

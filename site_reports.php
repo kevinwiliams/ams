@@ -61,7 +61,7 @@ $result = $conn->query($query);
 
                 <!-- Inspection List Table -->
                 <div class="table-responsive">
-                    <table class="table table-bordered table-hover">
+                    <table class="table table-hover small">
                         <thead class="bg-light">
                             <tr>
                                 <th>Assignment</th>
