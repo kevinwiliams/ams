@@ -524,7 +524,7 @@ Class Action {
 		$confirmed_transport = isset($transport_confirmed) ? 1 : 0;
 		$uuid = !empty($uid) ? $uid : uniqid('event_', true);
 		$user_role = $_SESSION['role_name'];
-		$admin_roles = ['Manager', 'ITAdmin', 'Editor', 'Dept Admin'];
+		$admin_roles = ['Manager', 'ITAdmin', 'Editor', 'Dept Admin', 'Op Manager', 'Broadcast Coordinator'];
 		$team_members_str = "";
 
 		// Set default values
