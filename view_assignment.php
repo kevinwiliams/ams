@@ -373,7 +373,7 @@ $conn->close();
         <?php } ?>
         <?php if (in_array($user_role, ['Broadcast Coordinator', 'ITAdmin', 'Op Manager'])){?>
             <!-- <a href="#" class="mx-5 open-inspection-modal" data-assignment-id="<?= $a_id ?>"> <i class="fas fa-clipboard-check"></i> Record Inspection</a> -->
-            <a href="index.php?page=site_report&id=<?= $a_id; ?>" class="mx-5"> <i class="fas fa-clipboard-check"></i> Record Inspection</a>
+            <a href="index.php?page=view_site_report&id=<?= $a_id; ?>" class="mx-5"> <i class="fas fa-clipboard-check"></i> Report</a>
 
         <?php } ?>
         </div>

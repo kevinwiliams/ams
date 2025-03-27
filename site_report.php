@@ -33,8 +33,8 @@ $inspection = $stmt->get_result()->fetch_assoc();
 if (!$inspection) {
     $conn->begin_transaction();
     try {
-        $stmt = $conn->prepare("INSERT INTO venue_inspections (assignment_id, site_visit_date) VALUES (?, CURDATE())");
-        $stmt->bind_param("i", $assignment_id);
+        $stmt = $conn->prepare("INSERT INTO venue_inspections (assignment_id, site_visit_date, updated_by) VALUES (?, CURDATE(), ?)");
+        $stmt->bind_param("ii", $assignment_id, $_SESSION['login_id']);
         $stmt->execute();
         $inspection_id = $conn->insert_id;
         
@@ -125,7 +125,7 @@ foreach ($all_items as $item) {
                             <div>
                                 <p class="h5">
                                     <i class="fas fa-clipboard-check"></i>
-                                    <span class="text-muted">Inspection Report:</span> <?= htmlspecialchars($assignment['title']) ?>
+                                    <span class="text-muted">Report:</span> <?= htmlspecialchars($assignment['title']) ?>
                                 </p>
                                 <p class="text-muted mb-1">
                                 

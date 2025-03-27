@@ -34,6 +34,8 @@ $stmt->execute();
 $inspection = $stmt->get_result()->fetch_assoc();
 
 if (!$inspection) {
+    echo '<a href="index.php?page=site_report&id='. $assignment_id.'" class="mx-5"> <i class="fas fa-clipboard-check"></i> Create new inspection report.</a>';
+
     die("No inspection found for this assignment");
 }
 
@@ -72,7 +74,7 @@ $setup_time = $inspection['setup_time'] ?: 'Not specified';
                             <div>
                                 <p class="h5">
                                     <i class="fas fa-clipboard-check"></i>
-                                    <span class="text-muted">Inspection Report:</span> <?= htmlspecialchars($assignment['title']) ?>
+                                    <span class="text-muted">Report:</span> <?= htmlspecialchars($assignment['title']) ?>
                                 </p>
                                 <p class="text-muted">
                                     <i class="fas fa-map-marker-alt"></i> <?= htmlspecialchars($assignment['location']) ?>
