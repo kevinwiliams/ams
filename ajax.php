@@ -45,8 +45,8 @@ if ($action == 'login') {
 } elseif ($action == 'equipment_request') {
     $save = $crud->equipment_request();
     if ($save) echo $save;
-}elseif ($action == 'save_progress') {
-    $save = $crud->save_progress();
+}elseif ($action == 'save_inspection') {
+    $save = $crud->save_inspection();
     if ($save) echo $save;
 } elseif ($action == 'delete_progress') {
     $save = $crud->delete_progress();

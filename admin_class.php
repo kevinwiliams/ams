@@ -1565,6 +1565,101 @@ Class Action {
 	
 		return $icsFileUrl;
 	}
+
+	public function save_inspection() {
+		extract($_POST);
+		$data = [];
+		$inspection_id = isset($id) ? $this->db->real_escape_string($id) : '';
+		$assignment_id = isset($assignment_id) ? $this->db->real_escape_string($assignment_id) : '';
+	
+		// Build the data array with proper escaping
+		foreach($_POST as $k => $v) {
+			if(!in_array($k, array('id', 'permits', 'permit_notes', 'inventory', 'assignment_id'))) {
+				if($k == 'general_notes' || $k == 'layout_notes' || $k == 'tent_location' || $k == 'banner_location') {
+					$data[$k] = "'" . $this->db->real_escape_string(htmlspecialchars($v, ENT_QUOTES, 'UTF-8')) . "'";
+				} else {
+					$data[$k] = is_numeric($v) ? $v : "'" . $this->db->real_escape_string($v) . "'";
+				}
+			}
+		}
+	
+		// Handle permits separately
+		$permit_notes = isset($_POST['permit_notes']) ? $this->db->real_escape_string($_POST['permit_notes']) : '';
+		$permits = isset($_POST['permits']) ? $_POST['permits'] : array();
+		$inventory = isset($_POST['inventory']) ? $_POST['inventory'] : array();
+	
+		// Start transaction
+		$this->db->begin_transaction();
+	
+		try {
+			// Prepare SET clause for SQL
+			$set_clause = implode(', ', array_map(
+				function ($v, $k) { return "$k = $v"; },
+				$data,
+				array_keys($data)
+			));
+	
+			if(empty($inspection_id)) {
+				// Insert new inspection
+				$sql = "INSERT INTO venue_inspections SET $set_clause";
+				$save = $this->db->query($sql);
+				$inspection_id = $this->db->insert_id;
+			} else {
+				// Update existing inspection
+				$sql = "UPDATE venue_inspections SET $set_clause WHERE id = $inspection_id";
+				$save = $this->db->query($sql);
+			}
+	
+			if($save) {
+				// Handle permits
+				$this->db->query("DELETE FROM venue_permits WHERE inspection_id = $inspection_id");
+				if(!empty($permits)) {
+					foreach($permits as $permit_type) {
+						$permit_type = $this->db->real_escape_string($permit_type);
+						$this->db->query("INSERT INTO venue_permits (inspection_id, permit_type, notes) VALUES ($inspection_id, '$permit_type', '$permit_notes')");
+					}
+				}
+	
+				// Handle inventory
+				if(!empty($inventory)) {
+					foreach($inventory as $item) {
+						$item_id = $this->db->real_escape_string($item['item_id']);
+						$status = isset($item['status']) ? 1 : 0;
+						$quantity = isset($item['quantity']) ? intval($item['quantity']) : 0;
+						$notes = isset($item['notes']) ? $this->db->real_escape_string($item['notes']) : '';
+						
+						// Check if inventory record already exists
+						$check = $this->db->query("SELECT * FROM ob_inventory 
+												   WHERE assignment_id = $assignment_id 
+												   AND item_id = '$item_id'");
+						
+						if($check->num_rows > 0) {
+							// Update existing record
+							$this->db->query("UPDATE ob_inventory SET 
+											  status = $status,
+											  quantity = $quantity,
+											  notes = '$notes'
+											  WHERE assignment_id = $assignment_id 
+											  AND item_id = '$item_id'");
+						} else {
+							// Insert new record
+							$this->db->query("INSERT INTO ob_inventory 
+											  (assignment_id, item_id, status, quantity, notes) 
+											  VALUES ($assignment_id, '$item_id', $status, $quantity, '$notes')");
+						}
+					}
+				}
+	
+				$this->db->commit();
+				return json_encode(['status' => 'success', 'inspection_id' => $inspection_id]);
+			}
+		} catch(Exception $e) {
+			$this->db->rollback();
+			return json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+		}
+	
+		return json_encode(['status' => 'error', 'message' => 'Unknown error occurred']);
+	}
 	
 }
 

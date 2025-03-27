@@ -47,6 +47,12 @@ $login_name = isset($_SESSION['login_name']) ? $_SESSION['login_name'] : 'User';
                     </a>
                 </li>
                 <?php if (in_array($user_role, $show_roles)): ?>
+                    <li class="nav-item dropdown">
+                        <a href="./index.php?page=site_reports" class="nav-link nav-site_reports">
+                            <i class="nav-icon fas fa-search-location"></i>
+                            <p>Inspections</p>
+                        </a>
+                    </li>
 
                     <li class="nav-item dropdown">
                         <a href="./index.php?page=station_shows" class="nav-link nav-shows">
@@ -54,6 +60,12 @@ $login_name = isset($_SESSION['login_name']) ? $_SESSION['login_name'] : 'User';
                             <p>Shows</p>
                         </a>
                     </li>
+                    <li class="nav-item dropdown">
+                    <a href="./index.php?page=ob_items" class="nav-link nav-ob_items">
+                        <i class="nav-icon fas fa-clipboard-list"></i>
+                        <p>OB Items</p>
+                    </a>
+                </li>
                     <?php endif; ?>
                 <?php if (in_array($user_role, $create_roles)): ?>
 
@@ -73,6 +85,7 @@ $login_name = isset($_SESSION['login_name']) ? $_SESSION['login_name'] : 'User';
                         <p>Roles</p>
                     </a>
                 </li>
+               
                 <?php endif; ?>
                 <li class="nav-item d-none">
                     <a href="#" class="nav-link nav-assignment nav-view_assignment">

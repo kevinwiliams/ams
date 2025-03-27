@@ -381,7 +381,7 @@ if ($id) {
                                             if ($user_qry) {
                                                 while ($user_row = $user_qry->fetch_assoc()):
                                                     if(in_array($user_row['empid'], $salesreps))
-                                                        if(!empty($disabledEditors))
+                                                        if(!empty($disabledPersonality))
                                                             $all_members = array_diff($all_members, [$user_row['empid']]);
                                                    
                                             ?>
@@ -424,7 +424,7 @@ if ($id) {
                                             if ($user_qry) {
                                                 while ($user_row = $user_qry->fetch_assoc()):
                                                     if(in_array($user_row['empid'], $personalities))
-                                                        if(!empty($disabledEditors))
+                                                        if(!empty($disabledPersonality))
                                                             $all_members = array_diff($all_members, [$user_row['empid']]);
                                                    
                                             ?>
@@ -467,7 +467,7 @@ if ($id) {
                                             if ($user_qry) {
                                                 while ($user_row = $user_qry->fetch_assoc()):
                                                     if(in_array($user_row['empid'], $djs))
-                                                        if(!empty($disabledEditors))
+                                                        if(!empty($disabledBroadcast))
                                                             $all_members = array_diff($all_members, [$user_row['empid']]);
                                                    
                                             ?>
@@ -483,7 +483,7 @@ if ($id) {
                                         </select>
                                     </div>
                                      <!-- Checkbox and Dropdown for Request -->
-                                     <?php //if (isset($disabledEditors)): ?>
+                                     <?php //if (isset($disabledPersonality)): ?>
                                     <div class="request-wrapper">
                                         <label>
                                             <input type="checkbox" name="request[dj]" class="request-checkbox" <?= $disabledPersonality.''.$requiredPersonality ?> <?php echo isset($dj_requested) && $dj_requested == 1 ? 'checked' : '' ?>><span class="font-weight-light small"> 
@@ -528,7 +528,7 @@ if ($id) {
                                             if ($user_qry) {
                                                 while ($user_row = $user_qry->fetch_assoc()):
                                                     if(in_array($user_row['empid'], $engineers))
-                                                        if(!empty($disabledEditors))
+                                                        if(!empty($disabledPersonality))
                                                             $all_members = array_diff($all_members, [$user_row['empid']]);
                                                    
                                             ?>
@@ -539,6 +539,49 @@ if ($id) {
                                                 endwhile;
                                             } else {
                                                 echo "<option>No engineers available</option>";
+                                            }
+                                            ?>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Producer -->
+                                <div class="role-group">
+                                    <label>Producer</label>
+                                    <div class="assignee-wrapper">
+                                        <select name="assignee[producer][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabledPersonality ?>>
+                                            <!-- <option value="">Select a reporter</option> -->
+                                            <?php
+                                                $producers = [];
+
+                                                if(isset($team_members))
+                                                    $all_members = explode(',', $team_members);
+
+                                                // Fetch users with role_id = 5 (for producers)
+                                                if(isset($team_members))
+                                                    $producers = explode(',', $team_members);
+                                            
+                                                $user_qry = $conn->query("SELECT u.empid, u.firstname, u.lastname, r.role_name 
+                                                FROM users u 
+                                                JOIN roles r ON r.role_id = u.role_id
+                                                WHERE r.role_name in ('Producer', 'Broadcast Coordinator')
+                                                ORDER BY 
+                                                    r.role_name, u.firstname;
+                                                                                             ");
+                                            if ($user_qry) {
+                                                while ($user_row = $user_qry->fetch_assoc()):
+                                                    if(in_array($user_row['empid'], $producers))
+                                                        if(!empty($disabledPersonality))
+                                                            $all_members = array_diff($all_members, [$user_row['empid']]);
+                                                   
+                                            ?>
+                                            <option value="<?php echo htmlspecialchars($user_row['empid']); ?>" <?php  echo isset($producers) && in_array($user_row['empid'], $producers) ? 'selected' : '' ?>>
+                                                <?php echo trim($user_row['firstname']) . ' ' . trim($user_row['lastname']).' ('.$user_row['role_name'].')'; ?>
+                                            </option>
+                                            <?php 
+                                                endwhile;
+                                            } else {
+                                                echo "<option>No producers available</option>";
                                             }
                                             ?>
                                         </select>
@@ -573,7 +616,7 @@ if ($id) {
                                             if ($user_qry) {
                                                 while ($user_row = $user_qry->fetch_assoc()):
                                                     if(in_array($user_row['empid'], $reporters))
-                                                        if(!empty($disabledEditors))
+                                                        if(!empty($disabledPersonality))
                                                             $all_members = array_diff($all_members, [$user_row['empid']]);
                                                    
                                             ?>
@@ -594,7 +637,7 @@ if ($id) {
                                 <div class="role-group">
                                     <label>Photographers</label>
                                     <div class="assignee-wrapper">
-                                        <select name="assignee[photographer][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabledDispatch.$disabledEditors.$disabledMedia ?><?= $required?>>
+                                        <select name="assignee[photographer][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabledDispatch.$disabledPersonality.$disabledMedia ?><?= $required?>>
                                         <!-- <option value="">Select a photographer</option> -->
                                             <?php
                                             // Fetch users with role_id = 6 (for photographers)
@@ -629,7 +672,7 @@ if ($id) {
                                         </select>
                                     </div>
                                     <!-- Checkbox and Dropdown for Request -->
-                                    <?php if (isset($disabledEditors)): ?>
+                                    <?php if (isset($disabledPersonality)): ?>
                                     <div class="request-wrapper">
                                         <label>
                                             <input type="checkbox" name="request[photographer]" class="request-checkbox" <?= $disabled ?> <?php echo isset($photo_requested) && $photo_requested == 1 ? 'checked' : '' ?>><span class="font-weight-light small"> 
@@ -652,7 +695,7 @@ if ($id) {
                                 <div class="role-group">
                                     <label>Videographers</label>
                                     <div class="assignee-wrapper">
-                                        <select name="assignee[videographer][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabledDispatch.$disabledEditors.$disabledDigital ?>>
+                                        <select name="assignee[videographer][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabledDispatch.$disabledPersonality.$disabledDigital ?>>
                                         <!-- <option value="">Select a videographer</option> -->
                                             <?php
                                             $videographers = [];
@@ -684,7 +727,7 @@ if ($id) {
                                         </select>
                                     </div>
                                      <!-- Checkbox and Dropdown for Request -->
-                                     <?php if (isset($disabledEditors)): ?>
+                                     <?php if (isset($disabledPersonality)): ?>
                                     <div class="request-wrapper">
                                         <label>
                                             <input type="checkbox" name="request[videographer]" class="request-checkbox" <?= $disabled ?> <?php echo isset($video_requested) && $video_requested == 1 ? 'checked' : '' ?>><span class="font-weight-light small"> 
@@ -707,7 +750,7 @@ if ($id) {
                                 <div class="role-group">
                                     <label>Social Media</label>
                                     <div class="assignee-wrapper">
-                                        <select name="assignee[social][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabledDispatch.$disabledEditors.$disabledDigital ?>>
+                                        <select name="assignee[social][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabledDispatch.$disabledPersonality.$disabledDigital ?>>
                                             <?php
                                             $socials = [];
                                             // Fetch users with role_id = 7 (for videographers)
@@ -738,7 +781,7 @@ if ($id) {
                                         </select>
                                     </div>
                                      <!-- Checkbox and Dropdown for Request -->
-                                     <?php if (isset($disabledEditors)): ?>
+                                     <?php if (isset($disabledPersonality)): ?>
                                     <div class="request-wrapper">
                                         <label>
                                             <input type="checkbox" name="request[social]" class="request-checkbox" <?= $disabled ?> <?php echo isset($social_requested) && $social_requested == 1 ? 'checked' : '' ?>><span class="font-weight-light small"> 
@@ -762,7 +805,7 @@ if ($id) {
                                  <div class="role-group <?= ($user_role == 'Dispatcher') ? '' : 'd-none' ?>" >
                                     <label>Drivers</label>
                                     <div class="assignee-wrapper">
-                                        <select name="assignee[driver][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabledEditors.$disabledDigital ?><?= $requiredDispatch?>>
+                                        <select name="assignee[driver][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabledPersonality.$disabledDigital ?><?= $requiredDispatch?>>
                                             <?php
                                             $drivers = [];
                                             // Fetch users with role_id = 9 (for drivers)
@@ -788,7 +831,7 @@ if ($id) {
                                         </select>
                                     </div>
                                       <!-- Checkbox and Dropdown for Request -->
-                                      <?php if (isset($disabledEditors)): ?>
+                                      <?php if (isset($disabledPersonality)): ?>
                                     <div class="request-wrapper d-none">
                                         <label>
                                             <input type="checkbox" name="request[driver]" class="request-checkbox" disabled <?php echo isset($driver_requested) && $driver_requested == 1 ? 'checked' : '' ?>><span class="font-weight-light small"> 
@@ -835,7 +878,7 @@ if ($id) {
                             </div>
                             
                             <!-- Get team members if boxes disabled -->
-                            <?php if(!empty($disabled.$disabledDispatch.$disabledEditors)){
+                            <?php if(!empty($disabled.$disabledDispatch.$disabledEditors.$disabledBroadcast.$disabledPersonality)){
                                 $teamRem = implode(',', $all_members);   
                                 // print_r($teamRem);                             ?>
                             <input type="hidden" name="team" value="<?= $teamRem ?>" />

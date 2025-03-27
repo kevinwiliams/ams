@@ -155,6 +155,25 @@ CREATE TABLE `ob_items` (
   `item_name` VARCHAR(50) NOT NULL,
   `description` TEXT
 );
+  
+INSERT INTO `ob_items` (`item_name`, `description`) VALUES
+('Speakers (LG)', 'Large speakers for broadcasting'),
+('Microphone', 'Audio input device for broadcasting'),
+('In-ear Monitor', 'Personal monitoring system for broadcasters'),
+('Speakers (SM)', 'Small speakers for broadcasting'),
+('Digital Mixer', 'Audio mixing console for broadcast equipment'),
+('Headphones (Amp)', 'Amplified headphones for monitoring'),
+('Headphones', 'Standard headphones for monitoring'),
+('XLR Cables', 'Professional audio cables for connecting equipment'),
+('Modem', 'Network device for broadcasting connectivity');
+INSERT INTO `ob_items` (`item_name`, `description`) VALUES
+('Tent', 'Event tent for outdoor activities'),
+('Trestle Tables', 'Foldable tables for event setups'),
+('Chairs', 'Portable chairs for seating arrangements'),
+('Feather Banners', 'Tall, feather-shaped promotional banners'),
+('Pull Up Banners', 'Retractable stand-up banners for displays'),
+('Giveaways', 'Promotional items for event attendees'),
+('Staff Bands', 'Identification bands for event staff');
 
 CREATE TABLE `ob_inventory` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
@@ -178,6 +197,7 @@ CREATE TABLE `venue_inspections` (
   `banner_location` TEXT,
   `general_notes` TEXT,
   `site_visit_date` DATE,
+  `setup_time` VARCHAR(10),
   `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (`assignment_id`) REFERENCES `assignment_list`(`id`) ON DELETE CASCADE
 );
@@ -197,3 +217,9 @@ ADD COLUMN updated_at DATETIME;
 ALTER TABLE ob_inventory
 ADD COLUMN created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 ADD COLUMN updated_at DATETIME;
+
+ALTER TABLE `venue_inspections`
+ADD COLUMN `updated_by` INT(10) NOT NULL;
+
+ALTER TABLE `venue_permits`
+MODIFY COLUMN `permit_type` VARCHAR(20) NOT NULL;
