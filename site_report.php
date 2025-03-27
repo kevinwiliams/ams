@@ -316,7 +316,7 @@ foreach ($all_items as $item) {
                             <button type="submit" class="btn btn-primary mr-2" id="saveBtn">
                                 <i class="fas fa-save"></i> Save Inspection
                             </button>
-                            <a href="index.php?page=view_assignment&id=<?= $assignment_id ?>" class="btn btn-secondary">
+                            <a href="index.php?page=view_site_report&id=<?= $assignment_id ?>" class="btn btn-secondary">
                                 <i class="fas fa-times"></i> Cancel
                             </a>
                         </div>
