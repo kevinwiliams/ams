@@ -375,6 +375,11 @@ foreach ($all_items as $item) {
                             if (response.inspection_id) {
                                 $('input[name="id"]').val(response.inspection_id);
                             }
+                            let id = $('input[name="assignment_id"]').val();
+                            setTimeout(() => {
+                                    location.href = 'index.php?page=view_site_report&id=' + id; // Redirect after success
+                                }, 2500);
+
                         } else {
                             alert_toast('Error: ' + response.message, 'danger');
                         }
