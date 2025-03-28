@@ -34,11 +34,6 @@ $result = $conn->query($query);
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h4 class="card-title">Venue Inspections</h4>
-                <div>
-                    <a href="index.php?page=add_inspection" class="btn btn-primary btn-sm">
-                        <i class="fas fa-plus"></i> New Inspection
-                    </a>
-                </div>
             </div>
             <div class="card-body">
                 <!-- Search Box -->
@@ -105,10 +100,10 @@ $result = $conn->query($query);
                                            class="btn btn-sm btn-outline-warning" title="Edit">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <button class="btn btn-sm btn-outline-danger delete-inspection" 
+                                        <!-- <button class="btn btn-sm btn-outline-danger delete-inspection" 
                                                 data-id="<?= $row['id'] ?>" title="Delete">
                                             <i class="fas fa-trash"></i>
-                                        </button>
+                                        </button> -->
                                     </td>
                                 </tr>
                             <?php endwhile; ?>
