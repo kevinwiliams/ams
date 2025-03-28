@@ -74,7 +74,7 @@ $setup_time = $inspection['setup_time'] ?: 'Not specified';
                             <div>
                                 <p class="h5">
                                     <i class="fas fa-clipboard-check"></i>
-                                    <span class="text-muted">Report:</span> <?= htmlspecialchars($assignment['title']) ?>
+                                    <span class="text-muted">Report:</span> <?= htmlspecialchars_decode($assignment['title']) ?>
                                 </p>
                                 <p class="text-muted">
                                     <i class="fas fa-map-marker-alt"></i> <?= htmlspecialchars($assignment['location']) ?>
@@ -284,6 +284,7 @@ $setup_time = $inspection['setup_time'] ?: 'Not specified';
                                     <h6>Permits Obtained:</h6>
                                     <ul>
                                         <?php foreach ($permits as $permit): ?>
+                                            <?php if (empty($permit)) continue; ?>
                                             <li><?= strtoupper($permit) ?></li>
                                         <?php endforeach; ?>
                                     </ul>

@@ -195,198 +195,235 @@ $conn->close();
     </style>
 
 <div class="container mt-4">
-    <div class=" card card-widget widget-assignment shadow">
-        <!-- Header -->
-        <div class="widget-assignment-header <?php echo ($is_cancelled == 1) ? 'bg-danger' : 'bg-light'; ?> text-dark text-center p-4">
-        <h5 class="widget-assignment-title">
-                <?php
-                        echo date("l, M j, Y", strtotime($assignment_date));
-                        if (date("Y-m-d", strtotime($date_created)) > $assignment_date){
-                            echo ' <i class="fas fa-history" title="back-dated entry"></i>';
-                        }
-                        echo ($is_cancelled == 1) ? '<br>CANCELLED' : ''; 
-                    ?></h5>
+    <div class="card widget-assignment shadow">
+        <!-- Header with Assignment Date and Status -->
+        <div class="card-header d-flex justify-content-between align-items-center <?= $is_cancelled ? 'bg-danger' : 'bg-primary' ?> text-white">
+            <div>
+                <h4 class="mb-0">
+                    <?= date("l, M j, Y", strtotime($assignment_date)) ?>
+                    <?php if (date("Y-m-d", strtotime($date_created)) > $assignment_date): ?>
+                        <i class="fas fa-history ms-2" title="back-dated entry"></i>
+                    <?php endif; ?>
+                </h4>
+                <?php if ($is_cancelled): ?>
+                    <span class="badge bg-white text-danger mt-1">CANCELLED</span>
+                <?php endif; ?>
+            </div>
+            <!-- <img src="assets/uploads/<?= str_contains($assignment['station_show'], 'FYAH') ? 'fyah':'edge' ?>_logo.png" 
+                 alt="Station Logo" class="img-fluid float-right" style="max-height: 50px;"> -->
         </div>
 
         <!-- Card Body -->
         <div class="card-body">
-            <!-- Assignment Details Section -->
-            <div class="mb-4">
-                <h5>Assignment Details</h5>
-                <div class="row mb-3">
-                    <div class="col-4"><strong>Assignment:</strong></div>
-                    <div class="col-8"><?php echo ($is_cancelled == 1) ? 'CANCELLED - ' : ''; ?><?php echo htmlspecialchars_decode($title ?? 'No Title'); ?></div>
-                </div>
-                <?php if ($radio_staff){
-
-                     
-                ?>
-                <div class="row mb-3">
-                    <div class="col-4"><strong>Show:</strong></div>
-                    <div class="col-8">
-                        <?php 
-                            echo htmlspecialchars($station_show ?? 'N/A'); 
-                            if ($is_exclusive) {
-                                echo ' <span class="text-danger text-bold">(EXCLUSIVE)</span>';
-                            }
-                        ?>
-                    </div>
-                </div>
-                <?php } ?>
-                <div class="row mb-3">
-                    <div class="col-4"><strong>Time:</strong></div>
-                    <div class="col-8"><?php echo htmlspecialchars($start_time ?? 'N/A').' - '.htmlspecialchars($end_time ?? 'N/A'); ?></div>
-                </div>
-                <!-- <?php if ($end_time){?>
-                <div class="row mb-3">
-                    <div class="col-4"><strong>End Time:</strong></div>
-                    <div class="col-8"><?php echo htmlspecialchars($end_time ?? 'N/A'); ?></div>
-                </div>
-                <?php } ?> -->
-                
-                <?php if ($depart_time){?>
-                <div class="row mb-3">
-                    <div class="col-4"><strong>Depart Time:</strong></div>
-                    <div class="col-8"><?php echo htmlspecialchars($depart_time ?? 'N/A'); ?></div>
-                </div>
-                <?php } ?>
-
-                <div class="row mb-3">
-                    <div class="col-4"><strong>Venue:</strong></div>
-                    <div class="col-8"><?php echo htmlspecialchars($location ?? 'N/A'); ?></div>
-                </div>
-                <div class="row mb-3">
-                    <div class="col-4"><strong>Transport Confirmed:</strong></div>
-                    <div class="col-8"><?php echo ($transport_confirmed == 1) ? 'Yes' :  'No'; ?></div>
-                </div>
-            </div>
-
-            <!-- Additional Information Section -->
-            <div class="mb-4">
-                <h5>Additional Information</h5>
-                <?php if(!in_array($user_role, ['Dispatcher', 'Security'])){?>
-                
-                <div class="row mb-3">
-                    <div class="col-4"><strong>Details:</strong></div>
-                    <div class="col-8"><?php echo nl2br(htmlspecialchars_decode($description ?? 'N/A')); ?></div>
-                </div>
-                <?php } ?>
-                <div class="row mb-3">
-                    <div class="col-4"><strong>Assigned To:</strong></div>
-                    <div class="col-8"><?php 
-                    // echo htmlspecialchars($team_member_names ?? 'N/A'); 
-                    if(empty($team_member_names)){
-                        echo 'N/A';
+            <!-- Main Assignment Info -->
+            <div class="row mb-4">
+                <div class="col-md-8">
+                    <h5 class="mb-3">
+                        <?= $is_cancelled ? '<span class="text-danger">CANCELLED - </span>' : '' ?>
+                        <?= htmlspecialchars_decode($title ?? 'No Title') ?>
+                        <?php if ($is_exclusive): ?>
+                            <span class="badge bg-danger ms-2">EXCLUSIVE</span>
+                        <?php endif; ?>
+                    </h5>
                     
-                    }else{
-                        $teamMembers = explode(', ', $team_member_names);
-                        $charactersToRemove = ["/", "|"];
-
-                        foreach ($teamMembers as $member) {
-                            // Check if status is "Confirmed" or "Pending"
-                            if (strpos($member, '/') !== false) {
-                                $member = str_replace($charactersToRemove, "", $member);
-                                echo "<span class='text-success fw-bold'>$member</span><br>";
-                            } else {
-                                $member = str_replace($charactersToRemove, "", $member);
-                                echo "<span class='text-danger'>$member</span><br>";
-                            }
-                        }
-                    }
-                    ?></div>
+                    <div class="d-flex flex-wrap gap-3 mb-3">
+                        <div class="d-flex align-items-center mx-1">
+                            <i class="fas fa-clock me-2"></i>&nbsp;
+                            <?= htmlspecialchars($start_time ?? 'N/A') ?> - <?= htmlspecialchars($end_time ?? 'N/A') ?>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-map-marker-alt mx-2"></i>
+                            <?= htmlspecialchars($location ?? 'N/A') ?>
+                        </div>
+                        <?php if ($depart_time): ?>
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-car mx-2"></i> 
+                            Depart: <?= htmlspecialchars($depart_time) ?>
+                        </div>
+                        <?php endif; ?>
+                    </div>
+                    
+                    <?php if ($radio_staff): ?>
+                    <div class="mb-3">
+                        <span class="badge bg-info text-dark" style="font-size: 0.9rem;">
+                            <?= htmlspecialchars($station_show ?? 'N/A') ?>
+                        </span>
+                    </div>
+                    <?php endif; ?>
                 </div>
-                <?php if($radio_staff){?>
-                <div class="row mb-2">
-                    <div class="col-4"><strong>Permits Obtained:</strong></div>
-                    <div class="col-8">
-                    <?php if (!empty($permits)): ?>
-                                    <ul class="list-unstyled">
-                                        <?php foreach ($permits as $permit): ?>
-                                            <li><?= strtoupper($permit) ?></li>
-                                        <?php endforeach; ?>
-                                    </ul>
-                                <?php else: ?>
-                                    <p class="text-muted">No permits recorded</p>
+                
+                <div class="col-md-4">
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h5 class="card-title small">Quick Info</h5>
+                            <div class="card-text">
+                                <ul class="list-unstyled mb-0">
+                                <li class="mb-2">
+                                    <strong>Transport:</strong> 
+                                    <?= $transport_confirmed ? '<span class="text-success">Confirmed</span>' : '<span class="text-warning">Pending</span>' ?>
+                                </li>
+                                <?php if (in_array($user_role, ['Dispatcher', 'Security'])): ?>
+                                <li class="mb-2">
+                                    <strong>Vehicle:</strong> 
+                                    <?= htmlspecialchars($plate_number ?? 'N/A') ?>
+                                    <small class="d-block"><?= htmlspecialchars($make_model ?? '') ?></small>
+                                    <small class="d-block">Mileage: <?= htmlspecialchars($mileage ?? 'N/A') ?></small>
+                                    <small class="d-block">Gas: <?= htmlspecialchars($gas_level ?? 'N/A') ?></small>
+                                </li>
                                 <?php endif; ?>
+                                <li>
+                                    <strong>Assigned By:</strong> 
+                                    <?= htmlspecialchars($assigned_by_name ?? 'N/A') ?>
+                                </li>
+                            </ul>
+                            </div>
+                            
+
+                        </div>
                     </div>
                 </div>
-                <?php } ?>
-                <div class="row mb-3">
-                    <div class="col-4"><strong>Assigned By:</strong></div>
-                    <div class="col-8"><?php echo htmlspecialchars($assigned_by_name ?? 'N/A'); ?></div>
+            </div>
+
+            <!-- Details Sections -->
+            <div class="row">
+                <div class="col-lg-8">
+                    <!-- Description -->
+                    <?php if (!in_array($user_role, ['Dispatcher', 'Security'])): ?>
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">Assignment Details</h5>
+                        </div>
+                        <div class="card-body">
+                            <?= nl2br(htmlspecialchars_decode($description ?? 'No details provided')) ?>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+                    
+                    <!-- Team Members -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">Team Members</h5>
+                        </div>
+                        <div class="card-body">
+                            <?php if (empty($team_member_names)): ?>
+                                <p class="text-muted">No team members assigned</p>
+                            <?php else: ?>
+                                <div class="d-flex flex-wrap gap-2">
+                                    <?php 
+                                    $charactersToRemove = ["/", "|"];
+                                    foreach (explode(', ', $team_member_names) as $member): 
+                                        $statusClass = strpos($member, '/') !== false ? 'badge-success' : 'badge-danger';
+                                        $member = str_replace($charactersToRemove, "", $member);
+                                    ?>
+                                        <span class="font-weight-normal badge <?= $statusClass ?> p-2 m-1" style="font-size: 0.9rem;">
+                                            <?= htmlspecialchars($member) ?>
+                                        </span>
+                                    <?php endforeach; ?>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
                 </div>
-                <div class="row mb-3 d-none">
-                    <div class="col-4"><strong>Transport Option:</strong></div>
-                    <div class="col-8"><?php echo isset($options[$drop_option]) ? htmlspecialchars($options[$drop_option]) : 'No transport assigned'; ?></div>
+                
+                <div class="col-lg-4">
+                    <!-- Permits -->
+                    <?php if ($radio_staff): ?>
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">Permits</h5>
+                        </div>
+                        <div class="card-body">
+                            <?php 
+                            $nonEmptyPermits = array_filter($permits, function($permit) {
+                                return !empty($permit);
+                            });
+                            ?>
+                            <?php if (!empty($nonEmptyPermits)): ?>
+                                <ul class="list-unstyled mb-0">
+                                    <?php foreach ($nonEmptyPermits as $permit): ?>
+                                        <li class="mb-1">
+                                            <i class="fas fa-check-circle text-success me-2"></i>
+                                            <?= strtoupper($permit) ?>
+                                        </li>
+                                    <?php endforeach; ?>
+                                </ul>
+                            <?php else: ?>
+                                <p class="text-muted mb-0">No permits recorded</p>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+                    
+                    <!-- Equipment Request -->
+                    <div class="card">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">Equipment</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="equipment_requested" 
+                                    <?= !empty($equipment_requested) ? 'checked' : '' ?>
+                                    <?= $user_role == 'Security' ? 'disabled' : '' ?>>
+                                <label class="form-check-label" for="equipment_requested">
+                                    <?= !empty($equipment_requested) ? 'Equipment Requested' : 'Request Equipment' ?>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <?php if(in_array($user_role, ['Dispatcher', 'Security'])){?>
-                <div class="row mb-3">
-                    <div class="col-4"><strong>Vehicle:</strong></div>
-                    <div class="col-8"><?php echo htmlspecialchars($plate_number ?? 'N/A'); ?> <?php echo htmlspecialchars($make_model ?? 'N/A'); ?>
-                    <br><small>Mileage: <?php echo htmlspecialchars($mileage ?? 'N/A'); ?><br>Gas Level: <?php echo htmlspecialchars($gas_level ?? 'N/A'); ?></small></div>
-                </div>
-                <?php } ?>
-                <!-- <div class="row mb-3">
-                    <div class="col-4"><strong>Date Created:</strong></div>
-                    <div class="col-8"><?php echo htmlspecialchars($date_created ?? 'N/A'); ?></div>
-                </div> -->
-                <!-- <div class="row mb-3">
-                    <div class="col-4"><strong>Status:</strong></div>
-                    <div class="col-8"><?php echo htmlspecialchars($status ?? 'N/A'); ?></div>
-                </div> -->
-            <!-- </div> -->
-            <div class="text-start small ">
-                <!-- <a href="index.php?page=vehicle_request&id=<?= $a_id; ?>" class="text-dark"><i class="fas fa-print"></i> Print Transport Form</a> -->
-                <!-- Equipment Request Checkbox -->
-                <div class="form-check mt-3">
-                    <input class="form-check-input" type="checkbox" id="equipment_requested" <?php echo (!empty($equipment_requested)) ? 'checked=checked' : ''; ?><?php echo ($user_role == 'Security') ? 'disabled' : ''; ?>>
-                    <label class="form-check-label" for="equipment_requested"> <?php echo !empty($equipment_requested) ? 'Equipment Requested' : 'Request Equipment'; ?> </label>
-                </div>    
             </div>
         </div>
-        <input type="hidden" id="assignmentDate" name="assignmentDate" value="<?php echo htmlspecialchars($assignment_date); ?>">
-        <input type="hidden" id="startTime" name="startTime" value="<?php echo htmlspecialchars($start_time); ?>">
-        <input type="hidden" id="endTime" name="endTime" value="<?php echo htmlspecialchars($end_time); ?>">
-        <input type="hidden" id="departTime" name="departTime" value="<?php echo htmlspecialchars($depart_time); ?>">
-        <input type="hidden" id="assignment" name="assignment" value="<?php echo htmlspecialchars($title); ?>">
 
-        <?php 
-
-       ?>
-        <div class="card-footer text-center">
-
-        <?php if (!empty($_SERVER['HTTP_REFERER'])) { ?>
-            <a href="#" onclick="goBack()" class="mx-5 cursor-pointer">Back</a>  
-        <?php } ?> 
-        <?php if (in_array($user_role, $edit_roles)){?>
-            <a href="index.php?page=assignment&id=<?= $a_id; ?>" class="mx-5"> Edit / Update Assignment</a>
-        <?php } ?>
-        <?php if(!$seen && in_array($db_empid, $current_team)){ ?>
-           <button class="mx-5 text-success pe-auto cursor-pointer btn btn-link" id="confirm_seen" 
-            
-            data-id="<?= $a_id; ?>" 
-            data-empid="<?= $db_empid; ?>" 
-            data-userid="<?= $user_id; ?>">Confirm Seen Receipt</button>
-        <?php } ?>
-        <?php if (in_array($user_role, ['Security'])){?>
-            <a href="#" class="mx-5 edit-transport-log" data-assignment-id="<?= $a_id ?>"> Update Transport Log</a>
-        <?php } ?>
-        <?php if (in_array($user_role, ['Broadcast Coordinator', 'ITAdmin', 'Op Manager'])){?>
-            <!-- <a href="#" class="mx-5 open-inspection-modal" data-assignment-id="<?= $a_id ?>"> <i class="fas fa-clipboard-check"></i> Record Inspection</a> -->
-            <a href="index.php?page=view_site_report&id=<?= $a_id; ?>" class="mx-5"> <i class="fas fa-clipboard-check"></i> Report</a>
-
-        <?php } ?>
+        <!-- Footer with Action Buttons -->
+        <div class="card-footer bg-light">
+            <div class="d-flex flex-wrap justify-content-center gap-3">
+                <?php if (!empty($_SERVER['HTTP_REFERER'])): ?>
+                    <a href="#" onclick="goBack()" class="btn btn-outline-secondary mx-1">
+                        <i class="fas fa-arrow-left me-1"></i> Back
+                    </a>
+                <?php endif; ?>
+                
+                <?php if (in_array($user_role, $edit_roles)): ?>
+                    <a href="index.php?page=assignment&id=<?= $a_id ?>" class="btn btn-outline-primary mx-1">
+                        <i class="fas fa-edit me-1"></i> Edit Assignment
+                    </a>
+                <?php endif; ?>
+                
+                <?php if (!$seen && in_array($db_empid, $current_team)): ?>
+                    <button class="btn btn-success mx-1" id="confirm_seen" 
+                        data-id="<?= $a_id ?>" 
+                        data-empid="<?= $db_empid ?>" 
+                        data-userid="<?= $user_id ?>">
+                        <i class="fas fa-check-circle me-1"></i> Confirm Receipt
+                    </button>
+                <?php endif; ?>
+                
+                <?php if (in_array($user_role, ['Security'])): ?>
+                    <button class="btn btn-outline-warning edit-transport-log" data-assignment-id="<?= $a_id ?>">
+                        <i class="fas fa-car me-1"></i> Update Transport
+                    </button>
+                <?php endif; ?>
+                
+                <?php if (in_array($user_role, ['Broadcast Coordinator', 'ITAdmin', 'Op Manager'])): ?>
+                    <a href="index.php?page=view_site_report&id=<?= $a_id ?>" class="btn btn-outline-info mx-1">
+                        <i class="fas fa-clipboard-check mx-1"></i> View Report
+                    </a>
+                <?php endif; ?>
+            </div>
         </div>
-
-        <?php include('modal_equipment_request.php'); ?>
-        <?php include('modal_transport_log.php'); ?>
-        
-       
-        <!-- Back Button -->
-        
-      
     </div>
 </div>
+
+<!-- Hidden Fields -->
+<input type="hidden" id="assignmentDate" value="<?= htmlspecialchars($assignment_date) ?>">
+<input type="hidden" id="startTime" value="<?= htmlspecialchars($start_time) ?>">
+<input type="hidden" id="endTime" value="<?= htmlspecialchars($end_time) ?>">
+<input type="hidden" id="departTime" value="<?= htmlspecialchars($depart_time) ?>">
+<input type="hidden" id="assignment" value="<?= htmlspecialchars($title) ?>">
+
+<!-- Include Modals -->
+<?php include('modal_equipment_request.php'); ?>
+<?php include('modal_transport_log.php'); ?>
 
 <script>
 
