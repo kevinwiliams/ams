@@ -238,15 +238,15 @@ if (!$assignment_list) {
                         <td>
                         <?php if (in_array($user_role,  $edit_roles)) { ?>
 
-                            <a data-id="<?php echo $row['id']; ?>" href="#" class="text-info edit-assignment">    
+                            <a data-id="<?php echo $row['id']; ?>" href="#" class="btn text-info edit-assignment">    
                                 <i class="fas fa-edit"></i>
                             </a>
                             <?php } ?>
                         <?php if (in_array($user_role,  $delete_roles)) { ?>
 
-                            <a data-id="<?php echo $row['id']; ?>" href="#" class="text-danger del-assignment">    
+                            <!-- <a data-id="<?php echo $row['id']; ?>" href="#" class="text-danger del-assignment">    
                                 <i class="fas fa-trash-alt"></i>
-                            </a>
+                            </a> -->
                             <?php } ?>
 
                             
