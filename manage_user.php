@@ -68,116 +68,147 @@ $conn->close();
 ?>
 
 <!-- Centering the form horizontally -->
-<div class="container">
+<div class="container py-4">
     <div class="row justify-content-center">
         <div class="col-lg-8">
-            <div class="card">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-user-circle me-2"></i> My Profile - <?= htmlspecialchars($_SESSION['login_role_name']) ?></h4>
+                </div>
+                
                 <div class="card-body">
-                    <form action="" id="manage_user" name="manage_user" method="POST">
-                        <input type="hidden" name="id" value="<?php echo htmlspecialchars($id); ?>">
-                    <h4>Profile - <?= htmlspecialchars($_SESSION['login_role_name'])?></h4>
-                        <div class="row">
-                            <div class="col-md-6 border-right">
-                                <div class="form-group">
-                                    <label for="empid" class="control-label">Employee ID</label>
-                                    <input type="text" id="empid" name="empid" class="form-control form-control-sm" value="<?php echo htmlspecialchars($empid); ?>" readonly>
-                                </div>
-                                <div class="form-group">
-                                    <label for="firstname" class="control-label">First Name</label>
-                                    <input type="text" id="firstname" name="firstname" class="form-control form-control-sm" value="<?php echo htmlspecialchars($firstname); ?>" >
-                                </div>
-                                <div class="form-group">
-                                    <label for="lastname" class="control-label">Last Name</label>
-                                    <input type="text" id="lastname" name="lastname" class="form-control form-control-sm" value="<?php echo htmlspecialchars($lastname); ?>" >
-                                </div>
-                                <div class="form-group">
-                                    <label for="contact_number" class="control-label">Contact Number</label>
-                                    <input type="text" id="contact_number" name="contact_number" class="form-control form-control-sm" value="<?php echo htmlspecialchars($contact_number); ?>" >
-                                </div>
-                                <div class="form-group">
-                                    <label for="address" class="control-label">Address</label>
-                                    <textarea id="address" name="address" class="form-control form-control-sm" ><?php echo htmlspecialchars($address); ?></textarea>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="email" class="control-label">Email</label>
-                                    <input type="email" id="email" class="form-control form-control-sm" name="email" value="<?php echo htmlspecialchars($email); ?>" readonly>
-                                </div>
-                                <!-- preferred_channel -->
-                            <?php
-                            if (isset($preferred_channel)) {
-                                $channels = explode(',', $preferred_channel);
-                            }
-                            ?>
-                            <div class="form-group">
-                                <label class="form-label">Preferred Channel</label>
-                                <div class="form-check">
-                                    <input 
-                                        class="form-check-input" 
-                                        type="checkbox" 
-                                        disabled
-                                        name="channels[]" 
-                                        value="email" 
-                                        <?php echo isset($preferred_channel) && in_array('email', $channels) ? 'checked' : '' ?>
-                                    >
-                                    <label class="form-check-label" for="email">Email</label>
-                                </div>
-                                <input type="hidden" name="channels[]" value="email" id="hEmail">
-
-                                <div class="form-check">
-                                    <input 
-                                        class="form-check-input" 
-                                        type="checkbox" 
-                                        name="channels[]" 
-                                        id="sms" 
-                                        value="sms" 
-                                        <?php echo isset($preferred_channel) && in_array('sms', $channels) ? 'checked' : '' ?>
-                                    >
-                                    <label class="form-check-label" for="sms">SMS Message</label>
-                                </div>
-
-                                <div class="form-check">
-                                    <input 
-                                        class="form-check-input" 
-                                        type="checkbox" 
-                                        name="channels[]" 
-                                        id="whatsapp" 
-                                        value="whatsapp" 
-                                        disabled
-                                        <?php echo isset($preferred_channel) && in_array('whatsapp', $channels) ? 'checked' : '' ?>
-                                    >
-                                    <label class="form-check-label" for="whatsapp">WhatsApp</label>
+                    <!-- Profile Update Form -->
+                    <form id="manage_user" method="POST" class="mb-4">
+                        <input type="hidden" name="id" value="<?= htmlspecialchars($id) ?>">
+                        
+                        <div class="row g-3">
+                            <!-- Left Column -->
+                            <div class="col-md-6 border-end">
+                                <div class="mb-3">
+                                    <label for="empid" class="form-label">Employee ID</label>
+                                    <input type="text" class="form-control" id="empid" name="empid" 
+                                           value="<?= htmlspecialchars($empid) ?>" readonly>
                                 </div>
                                 
-                               
+                                <div class="mb-3">
+                                    <label for="firstname" class="form-label">First Name</label>
+                                    <input type="text" class="form-control" id="firstname" name="firstname" 
+                                           value="<?= htmlspecialchars($firstname) ?>" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="lastname" class="form-label">Last Name</label>
+                                    <input type="text" class="form-control" id="lastname" name="lastname" 
+                                           value="<?= htmlspecialchars($lastname) ?>" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="contact_number" class="form-label">Contact Number</label>
+                                    <input type="tel" class="form-control" id="contact_number" name="contact_number" 
+                                           value="<?= htmlspecialchars($contact_number) ?>">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="address" class="form-label">Address</label>
+                                    <textarea class="form-control" id="address" name="address" 
+                                              rows="3"><?= htmlspecialchars($address) ?></textarea>
+                                </div>
                             </div>
-                             
+                            
+                            <!-- Right Column -->
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="email" class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="email" name="email" 
+                                           value="<?= htmlspecialchars($email) ?>" readonly>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Notification Preferences</label>
+                                    <div class="card border-0 shadow-sm">
+                                        <div class="card-body">
+                                            <div class="form-check mb-2">
+                                                <input class="form-check-input" type="checkbox" disabled checked>
+                                                <label class="form-check-label">Email (required)</label>
+                                                <input type="hidden" name="channels[]" value="email">
+                                            </div>
+                                            
+                                            <div class="form-check mb-2">
+                                                <input class="form-check-input" type="checkbox" name="channels[]" 
+                                                       id="sms" value="sms" 
+                                                       <?= isset($preferred_channel) && in_array('sms', explode(',', $preferred_channel)) ? 'checked' : '' ?>>
+                                                <label class="form-check-label" for="sms">SMS Text Message</label>
+                                            </div>
+                                            
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" disabled
+                                                       <?= isset($preferred_channel) && in_array('whatsapp', explode(',', $preferred_channel)) ? 'checked' : '' ?>>
+                                                <label class="form-check-label">WhatsApp (coming soon)</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <hr>
-                        <div class="">
-                            <button class="btn btn-primary mr-2 btn-block" type="submit"><i class="fa fa-save"></i> Update Profile</button>
+                        
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i> Update Profile
+                            </button>
                         </div>
                     </form>
-                    <hr class="m-4">
-                    <h4>Change Password</h4>
-                    <!-- Update Password Form -->
-                <form id="updatePasswordForm">
-                    <div class="form-group">
-                        <label for="currentPassword">Current Password</label>
-                        <input type="password" class="form-control" id="currentPassword" name="currentPassword" required autocomplete="false">
+                    
+                    <hr class="my-4">
+                    
+                    <!-- Password Change Form -->
+                    <div class="card border-warning">
+                        <div class="card-header bg-warning text-dark">
+                            <h5 class="mb-0"><i class="fas fa-key me-2"></i> Change Password</h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="updatePasswordForm">
+                                <div class="mb-3">
+                                    <label for="currentPassword" class="form-label">Current Password</label>
+                                    <div class="input-group">
+                                        <input type="password" class="form-control" id="currentPassword" 
+                                               name="currentPassword" required autocomplete="off">
+                                        <button class="btn btn-outline-secondary toggle-password" type="button">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="newPassword" class="form-label">New Password</label>
+                                    <div class="input-group">
+                                        <input type="password" class="form-control" id="newPassword" 
+                                               name="newPassword" required autocomplete="off">
+                                        <button class="btn btn-outline-secondary toggle-password" type="button">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                    <div class="form-text">Minimum 8 characters with at least one number</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="confirmPassword" class="form-label">Confirm New Password</label>
+                                    <div class="input-group">
+                                        <input type="password" class="form-control" id="confirmPassword" 
+                                               name="confirmPassword" required autocomplete="off">
+                                        <button class="btn btn-outline-secondary toggle-password" type="button">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-warning">
+                                        <i class="fas fa-lock me-2"></i> Change Password
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="newPassword">New Password</label>
-                        <input type="password" class="form-control" id="newPassword" name="newPassword" required autocomplete="false">
-                    </div>
-                    <div class="form-group">
-                        <label for="confirmPassword">Confirm New Password</label>
-                        <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required autocomplete="false">
-                    </div>
-                    <button type="submit" class="btn btn-warning btn-block">Change Password</button>
-                </form>
                 </div>
             </div>
         </div>
@@ -261,6 +292,15 @@ $(document).ready(function(){
                 }
             }
         });
+    });
+
+    // Toggle password visibility
+    $('.toggle-password').click(function() {
+        const input = $(this).siblings('input');
+        const icon = $(this).find('i');
+        const type = input.attr('type') === 'password' ? 'text' : 'password';
+        input.attr('type', type);
+        icon.toggleClass('fa-eye fa-eye-slash');
     });
 });                                        
 </script>
