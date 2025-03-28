@@ -290,7 +290,7 @@ if ($id) {
                                 <label class="control-label">Notes</label>
                                 <textarea name="description" class="form-control form-control-sm summernote textarea" <?= $readonly.$readonlyDispatch.$readonlyPersonality ?>><?php echo htmlspecialchars_decode($description ?? ''); ?></textarea>
                             </div>
-                            <?php if (isset($_GET['id']) && (in_array($user_role, $editor_roles))){ ?>
+                            <?php if (isset($_GET['id']) && (in_array($user_role, $editor_roles) || in_array($user_role, $broadcast_roles))){ ?>
                             <div class="form-group">
                                 <div class="custom-control custom-switch my-2">
                                     <input type="checkbox" class="custom-control-input" id="transport_confirmed" name="transport_confirmed" <?php echo isset($transport_confirmed) && $transport_confirmed == 1 ? 'checked' : '' ?><?= $readonlyPersonality ?>>

@@ -21,7 +21,7 @@ if(in_array($user_role,  $freelance_roles)){
 
 $query = "SELECT a.*,  
 (SELECT GROUP_CONCAT(
-        CONCAT(u.firstname, ' ', u.lastname, ' (', r.role_name, ')'
+        CONCAT('<b>',u.firstname, ' ', u.lastname, '</b> (', r.role_name, ')'
             
         ) SEPARATOR ', ')  
      FROM users u 
