@@ -635,8 +635,10 @@ Class Action {
 		$save = $this->db->query($query);
 		if ($save) {
 			$lastInsertId = $this->db->insert_id;
+			$assigned_id = $id;
+			// If no ID is provided, use the last inserted ID
 			$id = !empty($id) ? $id : $lastInsertId;
-	
+			
 			// Prepare assignment info for notifications
 			$assignmentInfo = $this->prepare_assignment_info($id, $uuid, $assignmentDate, $team_members_str, $cancelled, $postponed, $confirmed_transport);
 			$data_json = json_encode($assignmentInfo);
@@ -659,6 +661,12 @@ Class Action {
 				$subjectTxt = $this->build_email_subject($assignmentDate, $notifyAlreadySent, $cancelled, $postponed);
 				$this->send_notifications($team_members, $data_json, $subjectTxt);
 			}
+
+			// Log the assignment confirmation for the current user if they are part of the team
+			if (strpos($team_members_str, $_SESSION['login_empid']) !== false && empty($assigned_id)) {
+				$this->log_confirmed($id, $_SESSION['login_empid'], intval($_SESSION['login_id']));
+			}
+			
 			$success = 1;
 			return $success;
 		} else {
@@ -1345,24 +1353,39 @@ Class Action {
         }
     }
 	// Log confirm seen recipts
-	function log_confirmed(){
-		extract($_POST);
-		$data = '';
-		foreach($_POST as $k => $v){
-			if(!is_numeric($k)){
-				if(empty($data)){
-					$data .= " $k='$v' ";
-				}else{
-					$data .= ", $k='$v' ";
+	function log_confirmed($assignment_id = null, $empid = null, $user_id = null) {
+		$data = [];
+		if (!empty($_POST) && isset($_POST['assignment_id'])) {
+			foreach ($_POST as $k => $v) {
+				if (!is_numeric($k)) {
+					$data[$k] = $this->db->real_escape_string($v);
 				}
 			}
 		}
-		$save = $this->db->query("INSERT INTO confirmed_logs set $data");
 		
-		if($save){
-			return 1;
+		// Add optional parameters to the data array if provided
+		if ($assignment_id !== null) {
+			$data['assignment_id'] = intval($assignment_id);
 		}
-		else{ return "Error saving record: " . $this->db->error; }
+		if ($empid !== null) {
+			$data['empid'] = $this->db->real_escape_string($empid);
+		}
+		if ($user_id !== null) {
+			$data['user_id'] = intval($user_id);
+		}
+
+		// Build the query dynamically
+		$columns = implode(", ", array_keys($data));
+		$values = implode(", ", array_map(fn($v) => is_int($v) ? $v : "'$v'", $data));
+		$query = "INSERT INTO confirmed_logs ($columns) VALUES ($values)";
+
+		$save = $this->db->query($query);
+
+		if ($save) {
+			return 1;
+		} else {
+			return "Error saving record: " . $this->db->error;
+		}
 	}
 	// Send mail request for eqipmentment
 	function equipment_request() {
