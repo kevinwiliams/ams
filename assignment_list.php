@@ -148,10 +148,6 @@ if (!$assignment_list) {
             <table class="table table-hover small" id="list">
                 <thead class="thead-dark">
                     <tr>
-                    <?php if (in_array($user_role,  $edit_roles)){ ?>
-                        <th>&nbsp;</th>
-                    <?php } ?>
-
                         <th>Assignment Date</th>
                         <th>Time</th>
                         <!-- <th>End Time</th> -->
@@ -166,7 +162,7 @@ if (!$assignment_list) {
                         <!-- <th>Action</th> -->
                         <!-- <th>Progress</th> -->
                         <?php if (in_array($user_role,  $delete_roles)) { ?>
-                        <th>&nbsp;</th>
+                        <th>Actions</th>
                     <?php } ?>
                     </tr>
                 </thead>
@@ -182,13 +178,7 @@ if (!$assignment_list) {
                         }
                     ?>
                     <tr class="<?= ($hightlight) ?'table-warning': '' ?>">
-                    <?php if (in_array($user_role,  $edit_roles)) { ?>
-                    <td>
-                        <a data-id="<?php echo $row['id']; ?>" href="#" class="text-info edit-assignment">    
-                            <i class="fas fa-edit"></i>
-                        </a>
-                    </td>
-                    <?php } ?>
+                 
                     <td>
                     <a href="index.php?page=view_assignment&id=<?php echo $row['id']; ?>" class="text-decoration-none">    
                     <?= date("D, M j, Y", strtotime($row['assignment_date'])); ?>
@@ -245,13 +235,23 @@ if (!$assignment_list) {
                             <?php echo ($row['approved_by_name']); ?>
                         </td> -->
                         <td> <?php echo $row['date_created'] ?? 'N/A'; ?> </td>
-                        <?php if (in_array($user_role,  $delete_roles)) { ?>
                         <td>
+                        <?php if (in_array($user_role,  $edit_roles)) { ?>
+
+                            <a data-id="<?php echo $row['id']; ?>" href="#" class="text-info edit-assignment">    
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <?php } ?>
+                        <?php if (in_array($user_role,  $delete_roles)) { ?>
+
                             <a data-id="<?php echo $row['id']; ?>" href="#" class="text-danger del-assignment">    
                                 <i class="fas fa-trash-alt"></i>
                             </a>
+                            <?php } ?>
+
+                            
+
                         </td>
-                        <?php } ?>
 
 					</tr>	
                     </tr>

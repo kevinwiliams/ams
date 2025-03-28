@@ -65,18 +65,18 @@
             <table id="rolesTable" class="table table-bordered small">
                 <thead>
                     <tr>
+                    <th>Role Name</th>
                     <th>Actions</th>
-                        <th>Role Name</th>
                     </tr>
                 </thead>
                 <tbody>
                 <?php foreach ($roles as $role): ?>
                         <tr>
+                            <td><?= $role['role_name'] ?></td>
                             <td>
                                 <button class="btn btn-sm btn-warning editRole" data-id="<?= $role['role_id'] ?>" data-name="<?= $role['role_name'] ?>"><i class="fas fa-edit"></i></button>
                                 <!-- <button class="btn btn-sm btn-danger deleteRole" data-id="<?= $role['role_id'] ?>"><i class="fas fa-trash"></i></button> -->
                             </td>
-                            <td><?= $role['role_name'] ?></td>
                             
                         </tr>
                     <?php endforeach; ?>

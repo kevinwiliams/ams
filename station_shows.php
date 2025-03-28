@@ -81,7 +81,7 @@ while ($row = $result->fetch_assoc()) {
                                 <td><?= $show['station'] ?></td>
                                 <td><?= $show['is_exclusive'] ? 'Yes' : 'No' ?></td>
                                 <td>
-                                    <button class="btn btn-sm btn-warning editShow" data-id="<?= $show['id'] ?>" data-name="<?= $show['show_name'] ?>" data-station="<?= $show['station'] ?>" data-exclusive="<?= $show['is_exclusive'] ?>">Edit</button>
+                                    <a href="javascript:void(0);" class="btn btn-sm btn-warning editShow" data-id="<?= $show['id'] ?>" data-name="<?= $show['show_name'] ?>" data-station="<?= $show['station'] ?>" data-exclusive="<?= $show['is_exclusive'] ?>"><i class="fas fa-edit"></i></a>
                                     <!-- <button class="btn btn-sm btn-danger deleteShow" data-id="<?= $show['id'] ?>">Delete</button> -->
                                 </td>
                             </tr>
