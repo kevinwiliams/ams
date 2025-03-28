@@ -1605,6 +1605,8 @@ Class Action {
 				}
 			}
 		}
+
+		$data['updated_at'] = 'NOW()';
 	
 		// Handle permits separately
 		$permit_notes = isset($_POST['permit_notes']) ? $this->db->real_escape_string($_POST['permit_notes']) : '';

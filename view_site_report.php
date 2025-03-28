@@ -28,7 +28,7 @@ if (!$assignment) {
 }
 
 // Get inspection details
-$stmt = $conn->prepare("SELECT * FROM venue_inspections WHERE assignment_id = ?");
+$stmt = $conn->prepare("SELECT vi.*, u.firstname, u.lastname FROM venue_inspections vi LEFT JOIN users u ON vi.updated_by = u.id WHERE vi.assignment_id = ?");
 $stmt->bind_param("i", $assignment_id);
 $stmt->execute();
 $inspection = $stmt->get_result()->fetch_assoc();
@@ -271,6 +271,15 @@ $setup_time = $inspection['setup_time'] ?: 'Not specified';
                                 <?php endif; ?>
                             </div>
                         </div>
+                        <div class="text-muted ">
+                            Created At: <?= date('M. j, Y g:iA', strtotime($inspection['created_at'])) ?>
+                            <?php if ($inspection['updated_at']): ?>
+                                <br>Updated: <?= date('M. j, Y g:iA', strtotime($inspection['updated_at'])) ?>
+                            <?php endif; ?>
+                            <?php if ($inspection['updated_by']): ?>
+                                <br>Last updated by: <?= htmlspecialchars($inspection['firstname']) . ' ' . htmlspecialchars($inspection['lastname']) ?>
+                            <?php endif; ?>
+                        </div>
                     </div>
 
                     <!-- Permits and General Notes -->
@@ -304,7 +313,7 @@ $setup_time = $inspection['setup_time'] ?: 'Not specified';
                     </div>
                 </div>
 
-                <div class="row">
+                <div class="row no-print">
                     <div class="col">
                         <a href="index.php?page=view_assignment&id=<?= $assignment_id ?>" class="btn btn-secondary">
                             <i class="fas fa-arrow-left"></i> Back to Assignment
@@ -314,6 +323,9 @@ $setup_time = $inspection['setup_time'] ?: 'Not specified';
                                 <i class="fas fa-edit"></i> Edit Inspection
                             </a>
                         <?php endif; ?>
+                        <!-- <button onclick="printCard()" class="btn btn-primary no-print">
+                            <i class="fas fa-print"></i> Print Report
+                        </button> -->
                     </div>
                 </div>
             </div>
@@ -330,4 +342,41 @@ $setup_time = $inspection['setup_time'] ?: 'Not specified';
         font-weight: 600;
         margin-top: 0.5rem;
     }
+
+    @media print {
+    .no-print {
+        display: none !important;
+    }
+
+    @media print {
+        .col-md-6 {
+            width: 50%; /* Ensure two-column layout */
+        }
+
+        .col-md-4 {
+            width: 33.33%; /* Ensure three-column layout */
+        }
+
+        .col-lg-12 {
+            width: 100%;
+        }
+    }
+}
+
 </style>
+
+<script>
+    function printCard() {
+        var card = document.querySelector('.card'); // Select the card
+        var printWindow = window.open('', '', 'width=800,height=600');
+        printWindow.document.write('<html><head><title>Print Report</title>');
+        printWindow.document.write('<link rel="stylesheet" href="assets/dist/css/adminlte.min.css">'); // Link your CSS file
+        printWindow.document.write('<link rel="stylesheet" href="assets/plugins/fontawesome-free/css/all.min.css">'); // Link your CSS file
+        printWindow.document.write('</head><body>');
+        printWindow.document.write(card.outerHTML); // Only print the card
+        printWindow.document.write('</body></html>');
+        printWindow.document.close();
+
+        // printWindow.print();
+}//
+</script>
