@@ -368,6 +368,9 @@ $conn->close();
                                     <?= !empty($equipment_requested) ? 'Equipment Requested' : 'Request Equipment' ?>
                                 </label>
                             </div>
+                            <?php if (!empty($equipment)): ?>
+                            <p><?= $equipment ?></p>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
