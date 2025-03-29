@@ -29,7 +29,7 @@ $digital_roles = ['Photo Editor'];
 $multimedia_roles = ['Multimedia'];
 $create_roles = ['Manager', 'ITAdmin', 'Editor', 'Dept Admin', 'Security','Op Manager', 'Broadcast Coordinator' ];
 
-$sbQry .= ($radio_staff) ? " AND a.station_show <> '' " : "";
+$sbQry .= ($radio_staff) ? " AND a.station_show <> '' " : " AND a.station_show IS NULL ";
 
 if(!in_array($user_role,  $view_roles))
     $editorQry = " AND FIND_IN_SET('".$db_empid."', REPLACE(a.team_members, ' ', '')) > 0 ";

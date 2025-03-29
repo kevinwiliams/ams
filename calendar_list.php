@@ -13,7 +13,7 @@ $radio_staff = $_SESSION['login_sb_staff'] == 1 ? true : false;
 
 $where = " WHERE (a.is_deleted = 0 OR a.is_deleted IS NULL)"; 
 
-$sbQry = ($radio_staff) ? " AND a.station_show <> '' " : "";
+$sbQry = ($radio_staff) ? " AND a.station_show <> '' " : " AND a.station_show IS NULL ";
 
 if(in_array($user_role,  $freelance_roles)){
     $where .= "  AND FIND_IN_SET('".$db_empid."', REPLACE(a.team_members, ' ', '')) > 0 ";

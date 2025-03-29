@@ -34,7 +34,7 @@ if(in_array($user_role,  $freelance_roles)){
     $where .= " AND FIND_IN_SET('" . $sessionempid . "', a.team_members)";
 }
 
-$sbQry = ($radio_staff) ? " AND a.station_show <> '' " : "";
+$sbQry = ($radio_staff) ? " AND a.station_show <> '' " : " AND a.station_show IS NULL ";
 
 
 // if(!in_array($user_role,  $edit_roles)){
