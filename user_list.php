@@ -61,12 +61,9 @@ if (!$user_list) {
 
         <!-- User List -->
         <div class="card-body">
-            <table class="table table-hover table-bordered small" id="user-list">
-                <thead>
+            <table class="table table-hover small" id="user-list">
+                <thead class="bg-light">
                     <tr>
-                    <?php if ($login_role_id < 5) { ?>
-                        <th>&nbsp;</th>
-                    <?php } ?>
                         <th>Name</th>
                         <th>Email</th>
                         <!-- <th>Address</th> -->
@@ -79,13 +76,7 @@ if (!$user_list) {
                 <tbody>
                     <?php while ($row = $user_list->fetch_assoc()): ?>
                     <tr>
-                    <?php if ($login_role_id < 5) { ?>
-                    <td>
-                        <a data-id="<?php echo htmlspecialchars($row['id']); ?>" href="#" class="text-info edit-user">    
-                            <i class="fas fa-edit"></i>
-                        </a>
-                    </td>
-                    <?php } ?>
+                 
                     <td>
                         <a href="index.php?page=view_user&id=<?php echo htmlspecialchars($row['id']); ?>" class="text-decoration-none">  
                             <?php echo ucwords(htmlspecialchars($row['name'])); ?>
@@ -98,7 +89,10 @@ if (!$user_list) {
                     <td><?php echo htmlspecialchars($row['preferred_channel'] ?? 'N/A'); ?> </td>
                     <?php if ($login_role_id < 5) { ?>
                     <td>
-                        <a data-id="<?php echo htmlspecialchars($row['id']); ?>" href="#" class="text-danger del-user">    
+                        <a data-id="<?php echo htmlspecialchars($row['id']); ?>" href="#" class="btn text-info edit-user">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <a data-id="<?php echo htmlspecialchars($row['id']); ?>" href="#" class="btn text-danger del-user">
                             <i class="fas fa-trash-alt"></i>
                         </a>
                     </td>

@@ -79,8 +79,8 @@ $items = $obItem->getAllItems();
             </div>
         </div>
         <div class="card-body">
-            <table id="itemsTable" class="table table-bordered small">
-                <thead>
+            <table id="itemsTable" class="table table-hover small">
+                <thead class="bg-light">
                     <tr>
                         <th>Item Name</th>
                         <th>Description</th>

@@ -63,8 +63,8 @@ while ($row = $result->fetch_assoc()) {
                 </div>
             </div>
             <div class="card-body">
-                <table id="showsTable" class="table table-bordered small">
-                    <thead>
+                <table id="showsTable" class="table table-hover small">
+                    <thead class="bg-light">
                         <tr>
                             <!-- <th>ID</th> -->
                             <th>Show Name</th>

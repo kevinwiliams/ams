@@ -74,7 +74,7 @@ $result = $conn->query($query);
                                 <?php 
                                 // Extract show name if in "STATION: SHOW" format
                                 $show_name = $row['station_show'];
-                                if (strpos($show_name, ':') !== false) {
+                                if (!empty($show_name) && strpos($show_name, ':') !== false) {
                                     $parts = explode(':', $show_name, 2);
                                     $show_name = trim($parts[1]);
                                 }
@@ -83,7 +83,7 @@ $result = $conn->query($query);
                                     <td><?= htmlspecialchars($row['title']) ?></td>
                                     <td><?= htmlspecialchars($row['location']) ?></td>
                                     <td><?= date('M j, Y', strtotime($row['assignment_date'])) ?></td>
-                                    <td><?= htmlspecialchars($show_name) ?></td>
+                                    <td><?= htmlspecialchars($show_name ?? '') ?></td>
                                     <td><?= date('M j, Y', strtotime($row['site_visit_date'])) ?></td>
                                     <td class="text-center">
                                         <?= $row['parking_available'] ? '<span class="badge badge-success">Yes</span>' : '<span class="badge badge-danger">No</span>' ?>
