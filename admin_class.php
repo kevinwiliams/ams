@@ -1663,7 +1663,8 @@ Class Action {
 							$this->db->query("UPDATE ob_inventory SET 
 											  status = $status,
 											  quantity = $quantity,
-											  notes = '$notes'
+											  notes = '$notes',
+											  updated_at = NOW()
 											  WHERE assignment_id = $assignment_id 
 											  AND item_id = '$item_id'");
 						} else {
