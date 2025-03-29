@@ -62,7 +62,7 @@
             </div>
         </div>
         <div class="card-body">
-            <table id="rolesTable" class="table table-bordered small">
+            <table id="rolesTable" class="table table-hover small">
                 <thead class="bg-light">
                     <tr>
                     <th>Role Name</th>
