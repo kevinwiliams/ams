@@ -153,7 +153,7 @@ $options = [
                     <span class="info-box-number"><?= date('D M d, Y', strtotime($next_assignment['assignment_date'])) ?> - <?= htmlspecialchars($next_assignment['start_time']) ?></span>
                     <span class="info-box-number"><a href="index.php?page=view_assignment&id=<?= $next_assignment['id']; ?>" class="text-white"><?= trimString(htmlspecialchars_decode($next_assignment['title'])) ?></a></span>
                     <span class="progress-description">
-                        Venue: <?= htmlspecialchars($next_assignment['location']) ?>
+                        Venue: <?= htmlspecialchars_decode($next_assignment['location']) ?>
                     </span>
                 </div>
             </div>
@@ -170,7 +170,7 @@ $options = [
                     <span class="info-box-number"><?= date('D M d, Y', strtotime($last_assignment['assignment_date'])) ?> - <?= htmlspecialchars($last_assignment['start_time']) ?></span>
                     <span class="info-box-number"><a href="index.php?page=view_assignment&id=<?= $last_assignment['id']; ?>" class="text-white"><?= trimString(htmlspecialchars_decode($last_assignment['title'])) ?></a></span>
                     <span class="progress-description">
-                        Venue: <?= htmlspecialchars($last_assignment['location']) ?>
+                        Venue: <?= htmlspecialchars_decode($last_assignment['location']) ?>
                     </span>
                 </div>
             </div>
@@ -187,7 +187,7 @@ $options = [
                     <span class="info-box-number"><?= date('D M d, Y', strtotime($future_assignments[0]['assignment_date'])) ?> - <?= htmlspecialchars($future_assignments[0]['start_time']) ?></span>
                     <span class="info-box-number"><a href="index.php?page=view_assignment&id=<?= $future_assignments[0]['id']; ?>" class="text-dark"><?= trimString(htmlspecialchars_decode($future_assignments[0]['title'])) ?></a></span>
                     <span class="progress-description">
-                        Venue: <?= htmlspecialchars($future_assignments[0]['location']) ?>
+                        Venue: <?= htmlspecialchars_decode($future_assignments[0]['location']) ?>
                     </span>
                 </div>
             </div>
@@ -273,7 +273,7 @@ $options = [
                                 <!-- </a> -->
                             </td>
                             <!-- <td><?php echo htmlspecialchars(substr($row['description'], 0, 15)) . " ... " . htmlspecialchars(substr($row['description'], -5)); ?></td> -->
-                            <td><span class="<?php echo ($row['is_cancelled'] == 1) ? 'strike-through' : ''; ?>"><?php echo htmlspecialchars($row['location']); ?></span></td>
+                            <td><span class="<?php echo ($row['is_cancelled'] == 1) ? 'strike-through' : ''; ?>"><?php echo htmlspecialchars_decode($row['location']); ?></span></td>
                             <!-- <td><?php echo htmlspecialchars(($row['team_members_names'])); ?></td> -->
                             <td>
                                 <span class="<?php echo ($row['is_cancelled'] == 1) ? 'strike-through' : ''; ?>">

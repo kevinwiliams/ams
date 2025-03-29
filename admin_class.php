@@ -537,7 +537,7 @@ Class Action {
 		foreach ($_POST as $key => $value) {
 			if (!empty($value) && !in_array($key, ['id', 'assignee', 'team', 'request', 'request_amount', 'assigned_by', 'alert_manager']) && !is_numeric($key)) {
 				// Escape specific fields for HTML entities and SQL
-				if (in_array($key, ['description', 'title', 'equipment'])) {
+				if (in_array($key, ['description', 'title', 'equipment', 'location'])) {
 					$value = $this->db->real_escape_string(htmlspecialchars($value, ENT_QUOTES, 'UTF-8'));
 				}
 	
@@ -1497,7 +1497,7 @@ Class Action {
 		$endTime = $assignDetails['end_time'];
 		$departTime = $assignDetails['depart_time'];
 		$assignment = $assignDetails['assignment'];
-		$station_show = $assignDetails['station_show'];
+		$station_show = $assignDetails['show'];
 		$details = $assignDetails['details'];
 		$venue = $assignDetails['venue'];
 		$assignedBy = $assignDetails['assigned_by'];

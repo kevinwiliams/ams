@@ -202,7 +202,7 @@ if (!$assignment_list) {
                         <!-- <td><?php echo isset($row['description']) ? htmlspecialchars(substr($row['description'], 0, 15)) . " ..." : 'No Description'; ?></td> -->
                         <td>
                             <span class="<?php echo ($row['is_cancelled'] == 1) ? 'strike-through' : ''; ?>">
-                                <?php echo $row['location'] ?? 'N/A'; ?>
+                                <?php echo htmlspecialchars_decode($row['location'] ?? 'N/A'); ?>
                             </span>
                         </td>
                         <td>

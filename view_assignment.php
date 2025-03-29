@@ -233,7 +233,7 @@ $conn->close();
                         </div>
                         <div class="d-flex align-items-center">
                             <i class="fas fa-map-marker-alt mx-2"></i>
-                            <?= htmlspecialchars($location ?? 'N/A') ?>
+                            <?= htmlspecialchars_decode($location ?? 'N/A') ?>
                         </div>
                         <?php if ($depart_time): ?>
                         <div class="d-flex align-items-center">
@@ -312,7 +312,7 @@ $conn->close();
                                     <?php 
                                     $charactersToRemove = ["/", "|"];
                                     foreach (explode(', ', $team_member_names) as $member): 
-                                        $statusClass = strpos($member, '/') !== false ? 'badge-success' : 'badge-danger';
+                                        $statusClass = strpos($member, '/') !== false ? 'badge-success' : 'badge-secondary';
                                         $member = str_replace($charactersToRemove, "", $member);
                                     ?>
                                         <span class="font-weight-normal badge <?= $statusClass ?> p-2 m-1" style="font-size: 0.9rem;">
