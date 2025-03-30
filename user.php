@@ -32,157 +32,151 @@ if ($id) {
         object-fit: cover;
         border-radius: 100%;
     }
+    .form-label {
+        font-weight: 500;
+    }
+    .card-header h4, .card-header h6 {
+        font-weight: 600;
+    }
 </style>
 
-<div class="container">
-    <div class="col-lg-12">
-        <div class="card">
-         <form action="" id="manage_user" method="POST">
-
-            <div class="card-body">
-                    <input type="hidden" name="id" value="<?php echo htmlspecialchars($id ?? ''); ?>">
-                    <div class="row">
-                        <div class="col-md-6 border-right">
-                            <input type="hidden" name="empid" id="empid" value="<?php echo htmlspecialchars($empid ?? ''); ?>">
-                          
-
-                                     <!-- preferred_channel -->
-                                     <div class="col-md-6">
-                                                
-                                    
-                            <div class="form-group">
-                                <label for="firstname" class="control-label">First Name</label>
-                                <input type="text" name="firstname" id="firstname" class="form-control form-control-sm" required value="<?php echo htmlspecialchars($firstname ?? ''); ?>">
-                            </div>
-                            <div class="form-group">
-                                <label for="lastname" class="control-label">Last Name</label>
-                                <input type="text" name="lastname" id="lastname" class="form-control form-control-sm" required value="<?php echo htmlspecialchars($lastname ?? ''); ?>">
-                            </div>
-                            <div class="form-check">
-                                    <input 
-                                        class="form-check-input" 
-                                        type="checkbox" 
-                                        name="sb_staff" 
-                                        id="sb_staff" 
-                                        <?php echo isset($sb_staff) && $sb_staff == 1 ? 'checked' : '' ?>
-                                    >
-                                    <label class="form-check-label" for="whatsapp">S&B Staff</label>
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-user-edit me-2"></i>
+                        <?= isset($id) ? 'Edit User' : 'Create New User' ?>
+                    </h4>
+                </div>
+                
+                <form id="manage_user" method="POST">
+                    <input type="hidden" name="id" value="<?= htmlspecialchars($id ?? '') ?>">
+                    <input type="hidden" name="empid" value="<?= htmlspecialchars($empid ?? '') ?>">
+                    
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <!-- Left Column -->
+                            <div class="col-md-6 border-end">
+                                <div class="mb-3">
+                                    <label for="empid" class="form-label">Employee ID</label>
+                                    <input type="text" class="form-control" value="<?= htmlspecialchars($empid ?? '') ?>" readonly>
                                 </div>
-                                    </div>
-                                 <br>
-                            <div class="form-group">
-                                <label for="email" class="control-label">Email</label>
-                                <input type="email" name="email" id="email" class="form-control form-control-sm" required value="<?php echo htmlspecialchars($email ?? ''); ?>">
+                                
+                                <div class="mb-3">
+                                    <label for="firstname" class="form-label">First Name <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="firstname" name="firstname" 
+                                           value="<?= htmlspecialchars($firstname ?? '') ?>" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="lastname" class="form-label">Last Name <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="lastname" name="lastname" 
+                                           value="<?= htmlspecialchars($lastname ?? '') ?>" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
+                                    <input type="email" class="form-control" id="email" name="email" 
+                                           value="<?= htmlspecialchars($email ?? '') ?>" required>
+                                </div>
+                                
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="sb_staff" name="sb_staff" 
+                                           <?= isset($sb_staff) && $sb_staff == 1 ? 'checked' : '' ?>>
+                                    <label class="form-check-label" for="sb_staff">S&B Staff</label>
+                                </div>
                             </div>
-                            <!-- preferred_channel -->
-                            <?php
                             
-                            if (isset($preferred_channel)) {
-                                // Convert the comma-delimited string into an array
-                                $channels = explode(',', $preferred_channel);
-             
-                            }
-                            ?>
-                            <div class="form-group">
-                                <label class="form-label">Preferred Channel</label>
-                                
-                                <div class="form-check">
-                                    <input 
-                                        class="form-check-input" 
-                                        type="checkbox" 
-                                        name="channels[]" 
-                                        value="email" 
-                                        checked
-                                        <?php echo isset($preferred_channel) && in_array('email', $channels) ? 'checked' : '' ?>
-                                    >
-                                    <label class="form-check-label" for="email">Email</label>
-                                </div>
-                                <div class="form-check">
-                                    <input 
-                                        class="form-check-input" 
-                                        type="checkbox" 
-                                        name="channels[]" 
-                                        id="sms" 
-                                        value="sms" 
-                                        <?php echo isset($preferred_channel) && in_array('sms', $channels) ? 'checked' : '' ?>
-                                    >
-                                    <label class="form-check-label" for="sms">SMS Message</label>
+                            <!-- Right Column -->
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="address" class="form-label">Address <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="address" name="address" 
+                                           value="<?= htmlspecialchars($address ?? '') ?>" required>
                                 </div>
                                 
-                                <div class="form-check">
-                                    <input 
-                                        class="form-check-input" 
-                                        type="checkbox" 
-                                        name="channels[]" 
-                                        id="whatsapp" 
-                                        value="whatsapp" 
-                                        disabled
-                                        <?php echo isset($preferred_channel) && in_array('whatsapp', $channels) ? 'checked' : '' ?>
-                                    >
-                                    <label class="form-check-label" for="whatsapp">WhatsApp</label>
+                                <div class="mb-3">
+                                    <label for="contact_number" class="form-label">Contact Number <span class="text-danger">*</span></label>
+                                    <input type="tel" class="form-control" id="contact_number" name="contact_number" 
+                                           value="<?= htmlspecialchars($contact_number ?? '') ?>" required>
                                 </div>
                                 
-                               
+                                <div class="mb-3">
+                                    <label for="role_id" class="form-label">Role <span class="text-danger">*</span></label>
+                                    <select class="form-select custom-select-sm" id="role_id" name="role_id" required>
+                                        <option value="">Select a role</option>
+                                        <?php
+                                        $role_qry = $conn->query("SELECT * FROM roles ORDER BY role_name");
+                                        while ($role_row = $role_qry->fetch_assoc()):
+                                        ?>
+                                            <option value="<?= htmlspecialchars($role_row['role_id']) ?>" 
+                                                <?= isset($role_id) && $role_id == $role_row['role_id'] ? 'selected' : '' ?>>
+                                                <?= htmlspecialchars($role_row['role_name']) ?>
+                                            </option>
+                                        <?php endwhile; ?>
+                                    </select>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="password" class="form-label">
+                                        Password <?= !isset($id) ? '<span class="text-danger">*</span>' : '' ?>
+                                    </label>
+                                    <input type="password" class="form-control" id="password" name="password" 
+                                           <?= !isset($id) ? 'required' : '' ?> autocomplete="new-password">
+                                    <?php if (isset($id)): ?>
+                                    <small class="text-muted">Leave blank to keep current password</small>
+                                    <?php endif; ?>
+                                </div>
+                                
+                                <div class="card border-0 shadow-sm">
+                                    <div class="card-header bg-light">
+                                        <h6 class="mb-0">Notification Preferences</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" name="channels[]" 
+                                                   value="email" checked disabled>
+                                            <label class="form-check-label">Email (required)</label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" name="channels[]" 
+                                                   id="sms" value="sms" 
+                                                   <?= isset($preferred_channel) && in_array('sms', explode(',', $preferred_channel)) ? 'checked' : '' ?>>
+                                            <label class="form-check-label" for="sms">SMS Text Message</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" disabled
+                                                   <?= isset($preferred_channel) && in_array('whatsapp', explode(',', $preferred_channel)) ? 'checked' : '' ?>>
+                                            <label class="form-check-label">WhatsApp (coming soon)</label>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="address" class="control-label">Address</label>
-                                <input type="text" name="address" id="address" class="form-control form-control-sm" required value="<?php echo htmlspecialchars($address ?? ''); ?>">
-                            </div>
-
-                            <div class="form-group">
-                                <label for="contact_number" class="control-label">Contact Number</label>
-                                <input type="text" name="contact_number" id="contact_number" class="form-control form-control-sm" required value="<?php echo htmlspecialchars($contact_number ?? ''); ?>">
-                            </div>
-                            <div class="form-group">
-                                <label for="role_id" class="control-label">Role</label>
-                                <select name="role_id" id="role_id" class="custom-select custom-select-sm" required>
-                                    <option value="">Select a role</option>
-                                    <?php
-                                    $role_qry = $conn->query("SELECT * FROM roles");
-                                    if ($role_qry) {
-                                        while ($role_row = $role_qry->fetch_assoc()):
-                                    ?>
-                                        <option value="<?php echo htmlspecialchars($role_row['role_id']); ?>" <?php echo isset($role_id) && $role_id == $role_row['role_id'] ? 'selected' : ''; ?>>
-                                            <?php echo htmlspecialchars($role_row['role_name']); ?>
-                                        </option>
-                                    <?php 
-                                        endwhile;
-                                    } else {
-                                        echo "<option>No roles available</option>";
-                                    }
-                                    ?>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="password" class="control-label">Password</label>
-                                <input type="password" name="password" id="password" class="form-control form-control-sm" <?php echo $id ? '' : 'required'; ?> autocomplete="false">
-                                <small class="text-muted"><?php echo $id ? 'Leave blank to keep the current password.' : ''; ?></small>
-                            </div>
-                            
-                            </div>
-                           </div>                
-
-                        </div>      
                     </div>
                     
+                    <!-- Footer -->
+                    <?php if (isset($login_role_id) && $login_role_id < 5): ?>
+                    <div class="card-footer bg-light">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <button type="submit" class="btn btn-primary mx-3">
+                                <i class="fas fa-save me-2"></i>
+                                <?= isset($status) && $status == 'Approved' ? 'Update' : 'Save' ?> User
+                            </button>
+                            
+                            <?php if (!empty($_SERVER['HTTP_REFERER'])): ?>
+                            <a href="<?= htmlspecialchars($_SERVER['HTTP_REFERER']) ?>" class="btn btn-secondary">
+                                <i class="fas fa-times me-2"></i> Cancel
+                            </a>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+                </form>
             </div>
-            <!-- Footer (only visible to users with role_id < 5) -->
-            <?php if (isset($login_role_id) && $login_role_id < 5) { ?>
-            <div class="card-footer text-center">
-            <button class="btn btn-danger mx-5"><i class="fa fa-save"></i> <?php echo isset($status) && $status == 'Approved' ? 'Update' : 'Save' ?> User</button>
-                <?php if (!empty($_SERVER['HTTP_REFERER'])) { ?>
-                    <a href="<?php echo htmlspecialchars($_SERVER['HTTP_REFERER']); ?>" class="btn btn-secondary mx-5">Cancel</a>
-                <?php } ?>
-
-               
-            </div>
-                    <?php } ?>
-         </form>
         </div>
-
     </div>
 </div>
 <!-- Cleave.js -->

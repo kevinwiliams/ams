@@ -60,78 +60,142 @@ if ($id > 0) {
 $conn->close();
 ?>
 <style>
-    .employee-card {
-        max-width: 600px; /* Adjust card width */
-        margin: 0 auto; /* Center horizontally */
+    .badge {
+        font-size: 0.875rem;
     }
-    .widget-employee-header {
-        padding: 1rem; /* Adjust header padding */
+    .employee-profile {
+        border: none;
+        border-radius: 0.5rem;
+        overflow: hidden;
     }
-    .widget-employee-header h3 {
-        margin-bottom: 0;
+    
+    .employee-detail {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 1.25rem;
     }
-    .card-footer dl dt {
-        font-weight: bold;
+    
+    .detail-label {
+        font-weight: 600;
+        color: #6c757d;
+        font-size: 0.875rem;
+        margin-bottom: 0.25rem;
     }
-    .card-footer dl dd {
-        margin-bottom: 0.5rem;
+    
+    .detail-value {
+        font-size: 1rem;
+        word-break: break-word;
     }
-    .modal-footer {
-        border-top: none; /* Remove border for a cleaner look */
+    
+    @media (max-width: 767.98px) {
+        .employee-detail {
+            margin-bottom: 1rem;
+        }
     }
 </style>
 
-<div class="container mt-4">
-    <div class="employee-card card card-widget widget-employee shadow">
-        <!-- Header -->
-        <div class="widget-employee-header bg-dark text-white text-center p-4">
-            <h3 class="widget-employee-title"><?php echo htmlspecialchars($firstname . ' ' . $lastname ?? 'No Name'); ?></h3>
-        </div>
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card employee-profile shadow">
+                <!-- Header with Employee Name -->
+                <div class="card-header bg-primary text-white py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3 class="mb-0">
+                            <i class="fas fa-user-tie me-2"></i>
+                            <?= htmlspecialchars($firstname . ' ' . $lastname ?? 'Employee Profile') ?>
+                        </h3>
+                        <span class="badge bg-light text-dark">
+                            ID: <?= htmlspecialchars($empid ?? 'N/A') ?>
+                        </span>
+                    </div>
+                </div>
 
-        <!-- Card Body -->
-        <div class="card-body">
+                <!-- Card Body -->
+                <div class="card-body">
+                    <!-- Employee Details Section -->
+                    <div class="row g-3 mb-4">
+                        <!-- Left Column -->
+                        <div class="col-md-6">
+                            <div class="employee-detail">
+                                <span class="detail-label">Full Name</span>
+                                <span class="detail-value"><?= htmlspecialchars($firstname . ' ' . $lastname ?? 'N/A') ?></span>
+                            </div>
+                            
+                            <div class="employee-detail">
+                                <span class="detail-label">Email</span>
+                                <span class="detail-value">
+                                    <a href="mailto:<?= htmlspecialchars($email ?? '') ?>">
+                                        <?= htmlspecialchars($email ?? 'N/A') ?>
+                                    </a>
+                                </span>
+                            </div>
+                            
+                            <div class="employee-detail">
+                                <span class="detail-label">Contact Number</span>
+                                <span class="detail-value">
+                                    <a href="tel:<?= htmlspecialchars($contact_number ?? '') ?>">
+                                        <?= htmlspecialchars($contact_number ?? 'N/A') ?>
+                                    </a>
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <!-- Right Column -->
+                        <div class="col-md-6">
+                            <div class="employee-detail">
+                                <span class="detail-label">Address</span>
+                                <span class="detail-value"><?= htmlspecialchars($address ?? 'N/A') ?></span>
+                            </div>
+                            
+                            <div class="employee-detail">
+                                <span class="detail-label">Role</span>
+                                <span class="detail-value">
+                                    <span class="badge bg-info text-dark">
+                                        <?= htmlspecialchars($role_name ?? 'N/A') ?>
+                                    </span>
+                                </span>
+                            </div>
+                            
+                            <div class="employee-detail">
+                                <span class="detail-label">Notification Preferences</span>
+                                <span class="detail-value">
+                                    <?php 
+                                    if (!empty($preferred_channel)) {
+                                        $channels = explode(',', $preferred_channel);
+                                        foreach ($channels as $channel):
+                                    ?>
+                                        <span class="badge bg-light text-dark me-1">
+                                            <?= htmlspecialchars(strtoupper($channel)) ?>
+                                        </span>
+                                    <?php 
+                                        endforeach;
+                                    } else {
+                                        echo 'N/A';
+                                    }
+                                    ?>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Additional Sections Can Be Added Here -->
+                </div>
 
-            <!-- Employee Details Section -->
-            <div class="mb-4">
-                <h5>Employee Details</h5>
-                <div class="row mb-3">
-                    <div class="col-4"><strong>Employee ID:</strong></div>
-                    <div class="col-8"><?php echo htmlspecialchars($empid ?? 'N/A'); ?></div>
+                <!-- Footer with Action Buttons -->
+                <?php if ($login_role_id < 5): ?>
+                <div class="card-footer bg-light py-3">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center">
+                        <a href="index.php?page=user&id=<?= $id ?>" class="btn btn-primary">
+                            <i class="fas fa-edit me-2"></i> Edit Employee
+                        </a>
+                        <a href="index.php?page=user_list" class="btn btn-outline-secondary">
+                            <i class="fas fa-list me-2"></i> Back to List
+                        </a>
+                    </div>
                 </div>
-                <div class="row mb-3">
-                    <div class="col-4"><strong>Name:</strong></div>
-                    <div class="col-8"><?php echo htmlspecialchars($firstname . ' ' . $lastname ?? 'N/A'); ?></div>
-                </div>
-                <div class="row mb-3">
-                    <div class="col-4"><strong>Email:</strong></div>
-                    <div class="col-8"><?php echo htmlspecialchars($email ?? 'N/A'); ?></div>
-                </div>
-                <div class="row mb-3">
-                    <div class="col-4"><strong>Address:</strong></div>
-                    <div class="col-8"><?php echo htmlspecialchars($address ?? 'N/A'); ?></div>
-                </div>
-                <div class="row mb-3">
-                    <div class="col-4"><strong>Contact Number:</strong></div>
-                    <div class="col-8"><?php echo htmlspecialchars($contact_number ?? 'N/A'); ?></div>
-                </div>
-                <div class="row mb-3">
-                    <div class="col-4"><strong>Role:</strong></div>
-                    <div class="col-8"><?php echo htmlspecialchars($role_name ?? 'N/A'); ?></div>
-                </div>
-                <div class="row mb-3">
-                    <div class="col-4"><strong>Preferred Channel:</strong></div>
-                    <div class="col-8"><?php echo htmlspecialchars($preferred_channel ?? 'N/A'); ?></div>
-                </div>
+                <?php endif; ?>
             </div>
         </div>
-
-        <!-- Footer (only visible to users with role_id < 5) -->
-        <?php if ($login_role_id < 5) { ?>
-        <div class="card-footer text-center">
-            <a href="index.php?page=user&id=<?php echo $id; ?>" class="mx-5">Edit Employee</a>
-            <!-- Cancel Button to Return to User List -->
-            <a href="index.php?page=user_list" class="mx-5">Cancel</a>
-        </div>
-        <?php } ?>
     </div>
 </div>
