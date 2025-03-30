@@ -369,7 +369,7 @@ $conn->close();
                                 </label>
                             </div>
                             <?php if (!empty($equipment)): ?>
-                            <p><?= $equipment ?></p>
+                            <p><?= htmlspecialchars_decode($equipment ?? '') ?></p>
                             <?php endif; ?>
                         </div>
                     </div>
@@ -421,7 +421,7 @@ $conn->close();
 <input type="hidden" id="assignmentDate" value="<?= htmlspecialchars($assignment_date) ?>">
 <input type="hidden" id="startTime" value="<?= htmlspecialchars($start_time) ?>">
 <input type="hidden" id="endTime" value="<?= htmlspecialchars($end_time) ?>">
-<input type="hidden" id="departTime" value="<?= htmlspecialchars($depart_time) ?>">
+<input type="hidden" id="departTime" value="<?= htmlspecialchars($depart_time ?? '') ?>">
 <input type="hidden" id="assignment" value="<?= htmlspecialchars($title) ?>">
 
 <!-- Include Modals -->
@@ -431,6 +431,14 @@ $conn->close();
 <script>
 
     $(document).ready(function(){
+
+        $('.summernote').summernote({
+        height: 150,
+        toolbar: [
+            ['font', ['bold', 'underline', 'clear']],
+            ['para', ['ul', 'ol', 'paragraph']],
+        ]
+    });
 
         // Pass PHP variables to JavaScript
         var confirm = <?php echo json_encode($confirm); ?>;
@@ -487,7 +495,7 @@ $conn->close();
             event.preventDefault();
             $('#submitEquipmentRequest').prop('disabled', true);
 
-            let assignmentId = "<?= $id ?>"; // Get assignment ID
+            let assignmentId = "<?= $a_id ?>"; // Get assignment ID
             let assignmentDate = $('#assignmentDate').val().trim(); //
             let startTime = $('#startTime').val().trim(); //
             let endTime = $('#endTime').val().trim(); //

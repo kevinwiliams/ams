@@ -10,7 +10,7 @@
                         
                     </div>
                     <div class="modal-body">
-                        <textarea id="equipment_details" class="form-control" rows="4" placeholder="Enter equipment request details..."></textarea>
+                        <textarea id="equipment_details" class="form-control summernote textarea" rows="4" placeholder="Enter equipment request details..."></textarea>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cancel</button>
