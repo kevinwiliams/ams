@@ -420,7 +420,7 @@ $conn->close();
 <!-- Hidden Fields -->
 <input type="hidden" id="assignmentDate" value="<?= htmlspecialchars($assignment_date) ?>">
 <input type="hidden" id="startTime" value="<?= htmlspecialchars($start_time) ?>">
-<input type="hidden" id="endTime" value="<?= htmlspecialchars($end_time) ?>">
+<input type="hidden" id="endTime" value="<?= htmlspecialchars($end_time ?? '') ?>">
 <input type="hidden" id="departTime" value="<?= htmlspecialchars($depart_time ?? '') ?>">
 <input type="hidden" id="assignment" value="<?= htmlspecialchars($title) ?>">
 
