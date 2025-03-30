@@ -433,12 +433,12 @@ $conn->close();
     $(document).ready(function(){
 
         $('.summernote').summernote({
-        height: 150,
-        toolbar: [
-            ['font', ['bold', 'underline', 'clear']],
-            ['para', ['ul', 'ol', 'paragraph']],
-        ]
-    });
+            height: 150,
+            toolbar: [
+                ['font', ['bold', 'underline', 'clear']],
+                ['para', ['ul', 'ol', 'paragraph']],
+            ]
+        });
 
         // Pass PHP variables to JavaScript
         var confirm = <?php echo json_encode($confirm); ?>;

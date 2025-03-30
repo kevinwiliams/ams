@@ -1,6 +1,7 @@
 <style>
     .dataTables_filter {
-        display: none;
+        /* display: none; */
+        float: right !important;
     }
     .strike-through {
         text-decoration: line-through;
@@ -272,15 +273,17 @@ if (!$assignment_list) {
         $('.custom-select-sm').select2();
 
         var table = $('#list').DataTable({
-            dom: 'Bfrtip',
+            dom: "<'row'<'col-md-6'B><'col-md-6'f>>" + 
+                "<'row'<'col-sm-12'tr>>" + 
+                "<'row'<'col-sm-5'i><'col-sm-7'p>>",
             buttons: [
                 'copy', 'csv', 'excel', 'pdf', 'print'
             ],
-            pageLength: 10, // Limit number of records per page
+            pageLength: 10,
             columnDefs: [
-                { type: 'date', targets: 0 } 
+                { type: 'date', targets: 0 }
             ],
-            order: [[0, 'desc']], // Order by assignment_date (first column)
+            order: [[0, 'desc']],
             searching: true
         });
 
