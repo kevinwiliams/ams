@@ -99,7 +99,7 @@ $items = $obItem->getAllItems();
                                         data-desc="<?= htmlspecialchars($item['description']) ?>">
                                         <i class="fas fa-edit"></i>
                                 </button>
-                                <button class="btn btn-sm btn-danger deleteItem" data-id="<?= $item['item_id'] ?>"><i class="fas fa-trash"></i></button>
+                                <!-- <button class="btn btn-sm btn-danger deleteItem" data-id="<?= $item['item_id'] ?>"><i class="fas fa-trash"></i></button> -->
                             </td>
                         </tr>
                     <?php endforeach; ?>
