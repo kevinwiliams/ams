@@ -123,8 +123,15 @@ if ($id) {
                                     <label for="password" class="form-label">
                                         Password <?= !isset($id) ? '<span class="text-danger">*</span>' : '' ?>
                                     </label>
-                                    <input type="password" class="form-control" id="password" name="password" 
-                                           <?= !isset($id) ? 'required' : '' ?> autocomplete="new-password">
+                                    <div class="input-group">
+                                        <input type="password" class="form-control" id="password" name="password" 
+                                               <?= !isset($id) ? 'required' : '' ?> autocomplete="new-password">
+                                        <div class="input-group-append">
+                                            <button class="btn btn-outline-secondary toggle-password" type="button">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </div>
+                                    </div>
                                     <?php if (isset($id)): ?>
                                     <small class="text-muted">Leave blank to keep current password</small>
                                     <?php endif; ?>
@@ -225,6 +232,20 @@ $(document).ready(function(){
                 }
             }
         });
+    });
+
+    $('.toggle-password').click(function() {
+        const passwordField = $('#password');
+        const passwordFieldType = passwordField.attr('type');
+        const icon = $(this).find('i');
+
+        if (passwordFieldType === 'password') {
+            passwordField.attr('type', 'text');
+            icon.removeClass('fa-eye').addClass('fa-eye-slash');
+        } else {
+            passwordField.attr('type', 'password');
+            icon.removeClass('fa-eye-slash').addClass('fa-eye');
+        }
     });
 });                                        
 </script>

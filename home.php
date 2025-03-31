@@ -248,22 +248,22 @@ $options = [
                         ?>
                         <tr class="<?= ($hightlight) ?'table-warning': '' ?>">
                             <!-- <td><?php echo htmlspecialchars($row['assignment_id']); ?></td> -->
-                            <td>
-                            <span class="<?php echo ($row['is_cancelled'] == 1) ? 'strike-through' : ''; ?>">
-                            <a href="index.php?page=view_assignment&id=<?php echo $row['assignment_id']; ?>" class="text-decoration-none">
-                                <?php echo date("D, M j, Y", strtotime($row['assignment_date'])); ?>
-                            </a>
-                            </span>
-                            <?php
-                                if (date("Y-m-d", strtotime($row['date_created'])) > $row['assignment_date']){
-                                    echo ' <i class="fas fa-history"></i>';
-                                }
-                            ?>
+                            <td style="width: 100px;">
+                                <span class="<?php echo ($row['is_cancelled'] == 1) ? 'strike-through' : ''; ?>">
+                                <a href="index.php?page=view_assignment&id=<?php echo $row['assignment_id']; ?>" class="text-decoration-none">
+                                    <?php echo date("D, M j, Y", strtotime($row['assignment_date'])); ?>
+                                </a>
+                                </span>
+                                <?php
+                                    if (date("Y-m-d", strtotime($row['date_created'])) > $row['assignment_date']){
+                                        echo ' <i class="fas fa-history"></i>';
+                                    }
+                                ?>
                             </td>
                             <?php if(in_array($user_role,  ['Dispatcher', 'Security'])) :?>
                             <td><span class="<?php echo ($row['is_cancelled'] == 1) ? 'strike-through' : ''; ?>"><?php echo htmlspecialchars($row['plate_number']).' '.htmlspecialchars($row['make_model']); ?></span></td>
                             <?php endif ?>
-                            <td><span class="flex-nowrap <?php echo ($row['is_cancelled'] == 1) ? 'strike-through' : ''; ?>"><?= htmlspecialchars($row['start_time']).' - '.htmlspecialchars($row['end_time']) ?? 'N/A'; ?></span></td>
+                            <td style="width: 110px;"><span class="flex-nowrap <?php echo ($row['is_cancelled'] == 1) ? 'strike-through' : ''; ?>"><?= htmlspecialchars($row['start_time']).' - '.htmlspecialchars($row['end_time']) ?? 'N/A'; ?></span></td>
                             <!-- <td><span class="<?php echo ($row['is_cancelled'] == 1) ? 'strike-through' : ''; ?>"><?php echo htmlspecialchars($row['end_time']); ?></span></td> -->
                             
                             <td>

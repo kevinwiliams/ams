@@ -180,18 +180,18 @@ if (!$assignment_list) {
                     ?>
                     <tr class="<?= ($hightlight) ?'table-warning': '' ?>">
                  
-                    <td>
-                    <a href="index.php?page=view_assignment&id=<?php echo $row['id']; ?>" class="text-decoration-none">    
-                    <?= date("D, M j, Y", strtotime($row['assignment_date'])); ?>
-                    
-                    </a>
-                    <?php
-                        if (date("Y-m-d", strtotime($row['date_created'])) > $row['assignment_date']){
-                            echo ' <i class="fas fa-history"></i>';
-                        }
-                    ?>
+                    <td style="width: 100px;">
+                        <a href="index.php?page=view_assignment&id=<?php echo $row['id']; ?>" class="text-decoration-none">    
+                        <?= date("D, M j, Y", strtotime($row['assignment_date'])); ?>
+                        
+                        </a>
+                        <?php
+                            if (date("Y-m-d", strtotime($row['date_created'])) > $row['assignment_date']){
+                                echo ' <i class="fas fa-history"></i>';
+                            }
+                        ?>
                     </td>
-                    <td> <span class="flex-nowrap <?php echo ($row['is_cancelled'] == 1) ? 'strike-through' : ''; ?>"><?php echo $row['start_time'] .' - '.$row['end_time'] ?? 'N/A'; ?></span>  </td>
+                    <td style="width: 110px;"> <span class="flex-nowrap <?php echo ($row['is_cancelled'] == 1) ? 'strike-through' : ''; ?>"><?php echo $row['start_time'] .' - '.$row['end_time'] ?? 'N/A'; ?></span>  </td>
                     <!-- <td> <span class="<?php echo ($row['is_cancelled'] == 1) ? 'strike-through' : ''; ?>"><?php echo $row['end_time'] ?? 'N/A'; ?></span>  </td> -->
 
                     <td>

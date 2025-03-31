@@ -284,7 +284,7 @@ if ($id) {
                             </div>
                             <div class="form-group">
                                 <label for="location" class="control-label">Venue</label>
-                                <input type="text" name="location" id="location" class="form-control form-control-sm" required value="<?php echo htmlspecialchars($location ?? ''); ?>" <?= $readonly.$readonlyDispatch.$readonlyPersonality ?>>
+                                <input type="text" name="location" id="location" class="form-control form-control-sm" required value="<?php echo htmlspecialchars_decode($location ?? ''); ?>" <?= $readonly.$readonlyDispatch.$readonlyPersonality ?>>
                             </div>
                             <div class="form-group">
                                 <label class="control-label">Notes</label>
