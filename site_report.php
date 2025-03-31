@@ -296,7 +296,17 @@ foreach ($all_items as $item) {
                                         <div class="form-check">
                                             <input class="form-check-input" type="checkbox" name="permits[]" 
                                                    id="permit_jcf" value="jcf" <?= in_array('jcf', $permits) ? 'checked' : '' ?>>
-                                            <label class="form-check-label" for="permit_jcf">JCF</label>
+                                            <label class="form-check-label" for="permit_jcf">JCF (Police)</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="permits[]" 
+                                                   id="permit_jfb" value="jfb" <?= in_array('jfb', $permits) ? 'checked' : '' ?>>
+                                            <label class="form-check-label" for="permit_jfb">JFB (Fire Brigade)</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="permits[]" 
+                                                   id="permit_ems" value="ems" <?= in_array('ems', $permits) ? 'checked' : '' ?>>
+                                            <label class="form-check-label" for="permit_ems">EMS (Emergency Medical Services)</label>
                                         </div>
                                         <div class="form-check">
                                             <input class="form-check-input" type="checkbox" name="permits[]" 
