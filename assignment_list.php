@@ -150,7 +150,7 @@ if (!$assignment_list) {
                 <thead class="thead-dark">
                     <tr>
                         <th>Assignment Date</th>
-                        <th>Time</th>
+                        <th>Duration</th>
                         <!-- <th>End Time</th> -->
                         <th>Assignment</th>
                         <!-- <th>Description</th> -->
@@ -163,7 +163,7 @@ if (!$assignment_list) {
                         <!-- <th>Action</th> -->
                         <!-- <th>Progress</th> -->
                         <?php if (in_array($user_role,  $delete_roles)) { ?>
-                        <th>Actions</th>
+                        <th></th>
                     <?php } ?>
                     </tr>
                 </thead>
@@ -191,18 +191,18 @@ if (!$assignment_list) {
                         }
                     ?>
                     </td>
-                    <td> <span class="<?php echo ($row['is_cancelled'] == 1) ? 'strike-through' : ''; ?>"><?php echo $row['start_time'] .' - '.$row['end_time'] ?? 'N/A'; ?></span>  </td>
+                    <td> <span class="flex-nowrap <?php echo ($row['is_cancelled'] == 1) ? 'strike-through' : ''; ?>"><?php echo $row['start_time'] .' - '.$row['end_time'] ?? 'N/A'; ?></span>  </td>
                     <!-- <td> <span class="<?php echo ($row['is_cancelled'] == 1) ? 'strike-through' : ''; ?>"><?php echo $row['end_time'] ?? 'N/A'; ?></span>  </td> -->
 
                     <td>
                         <?php echo ($row['is_cancelled'] == 1) ? '<b>CANCELLED:</b> ' : ''; ?>
-                        <span class="<?php echo ($row['is_cancelled'] == 1) ? 'strike-through' : ''; ?>">
+                        <span class="text-wrap <?php echo ($row['is_cancelled'] == 1) ? 'strike-through' : ''; ?>">
                             <?php echo ucwords(htmlspecialchars_decode($row['title']) ?? 'No Title'); ?>
                         </span>
                     </td>
                         <!-- <td><?php echo isset($row['description']) ? htmlspecialchars(substr($row['description'], 0, 15)) . " ..." : 'No Description'; ?></td> -->
                         <td>
-                            <span class="<?php echo ($row['is_cancelled'] == 1) ? 'strike-through' : ''; ?>">
+                            <span class="text-wrap <?php echo ($row['is_cancelled'] == 1) ? 'strike-through' : ''; ?>">
                                 <?php echo htmlspecialchars_decode($row['location'] ?? 'N/A'); ?>
                             </span>
                         </td>
