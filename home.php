@@ -27,6 +27,7 @@ $sbQry = "";
 $view_roles = ['Manager', 'ITAdmin', 'Editor', 'Multimedia', 'Dispatcher', 'Photo Editor', 'Dept Admin', 'Security', 'Op Manager', 'Broadcast Coordinator' ];
 $digital_roles = ['Photo Editor'];
 $multimedia_roles = ['Multimedia'];
+$dj_roles = ['Programme Director'];
 $create_roles = ['Manager', 'ITAdmin', 'Editor', 'Dept Admin', 'Security','Op Manager', 'Broadcast Coordinator' ];
 
 $sbQry .= ($radio_staff) ? " AND a.station_show <> '' " : " AND a.station_show IS NULL ";
@@ -242,6 +243,9 @@ $options = [
                                 $hightlight = true;
                             }
                             if(in_array($user_role, $multimedia_roles) && ($row['video_requested'] == 1 ||  $row['social_requested'] == 1)){
+                                $hightlight = true;
+                            }
+                            if(in_array($user_role, $dj_roles) && $row['dj_requested'] == 1){
                                 $hightlight = true;
                             }
                         
