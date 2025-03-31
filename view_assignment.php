@@ -255,7 +255,7 @@ $conn->close();
                 <div class="col-md-4">
                     <div class="card bg-light">
                         <div class="card-body">
-                            <h5 class="card-title small">Quick Info</h5>
+                            <!-- <h6 class="card-title small">Quick Info</h6> -->
                             <div class="card-text">
                                 <ul class="list-unstyled mb-0">
                                 <li class="mb-2">
@@ -291,7 +291,7 @@ $conn->close();
                     <?php if (!in_array($user_role, ['Dispatcher', 'Security'])): ?>
                     <div class="card mb-4">
                         <div class="card-header bg-light">
-                            <h5 class="mb-0">Assignment Details</h5>
+                            <h6 class="text-bold mb-0">Assignment Details</h6>
                         </div>
                         <div class="card-body">
                             <?= nl2br(htmlspecialchars_decode($description ?? 'No details provided')) ?>
@@ -302,7 +302,7 @@ $conn->close();
                     <!-- Team Members -->
                     <div class="card mb-4">
                         <div class="card-header bg-light">
-                            <h5 class="mb-0">Team Members</h5>
+                            <h6 class="text-bold mb-0">Team Members</h6>
                         </div>
                         <div class="card-body">
                             <?php if (empty($team_member_names)): ?>
@@ -330,7 +330,7 @@ $conn->close();
                     <?php if ($radio_staff): ?>
                     <div class="card mb-4">
                         <div class="card-header bg-light">
-                            <h5 class="mb-0">Permits</h5>
+                            <h6 class="text-bold mb-0">Permits</h6>
                         </div>
                         <div class="card-body">
                             <?php 
@@ -357,7 +357,7 @@ $conn->close();
                     <!-- Equipment Request -->
                     <div class="card">
                         <div class="card-header bg-light">
-                            <h5 class="mb-0">Equipment</h5>
+                            <h6 class="text-bold mb-0">Equipment</h6>
                         </div>
                         <div class="card-body">
                             <div class="form-check form-switch">
