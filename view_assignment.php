@@ -294,7 +294,7 @@ $conn->close();
                             <h6 class="text-bold mb-0">Assignment Details</h6>
                         </div>
                         <div class="card-body">
-                            <?= empty(trim($description)) ? 'No details provided' : nl2br(htmlspecialchars_decode($description)) ?>
+                            <?= empty(trim($description ?? '')) ? 'No details provided' : nl2br(htmlspecialchars_decode($description)) ?>
                         </div>
                     </div>
                     <?php endif; ?>
