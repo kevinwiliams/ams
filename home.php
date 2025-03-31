@@ -154,7 +154,7 @@ $options = [
                     <span class="info-box-number"><?= date('D M d, Y', strtotime($next_assignment['assignment_date'])) ?> - <?= htmlspecialchars($next_assignment['start_time']) ?></span>
                     <span class="info-box-number"><a href="index.php?page=view_assignment&id=<?= $next_assignment['id']; ?>" class="text-white"><?= trimString(htmlspecialchars_decode($next_assignment['title'])) ?></a></span>
                     <span class="progress-description">
-                        Venue: <?= htmlspecialchars_decode($next_assignment['location']) ?>
+                    <i class="fas fa-map-marker-alt mr-1"></i> <?= htmlspecialchars_decode($next_assignment['location']) ?>
                     </span>
                 </div>
             </div>
@@ -165,13 +165,13 @@ $options = [
     <?php if ($last_assignment): ?>
         <div class="col-md-4 col-sm-6 col-12">
             <div class="info-box bg-secondary">
-                <span class="info-box-icon" style="width:35px"><i class="far fa-clock"></i></span>
+                <span class="info-box-icon" style="width:35px"><i class="fas fa-history"></i></span>
                 <div class="info-box-content" style="line-height:1.45em">
                     <span class="info-box-text small">LAST ASSIGNMENT</span>
                     <span class="info-box-number"><?= date('D M d, Y', strtotime($last_assignment['assignment_date'])) ?> - <?= htmlspecialchars($last_assignment['start_time']) ?></span>
                     <span class="info-box-number"><a href="index.php?page=view_assignment&id=<?= $last_assignment['id']; ?>" class="text-white"><?= trimString(htmlspecialchars_decode($last_assignment['title'])) ?></a></span>
                     <span class="progress-description">
-                        Venue: <?= htmlspecialchars_decode($last_assignment['location']) ?>
+                    <i class="fas fa-map-marker-alt mr-1"></i> <?= htmlspecialchars_decode($last_assignment['location']) ?>
                     </span>
                 </div>
             </div>
@@ -188,7 +188,7 @@ $options = [
                     <span class="info-box-number"><?= date('D M d, Y', strtotime($future_assignments[0]['assignment_date'])) ?> - <?= htmlspecialchars($future_assignments[0]['start_time']) ?></span>
                     <span class="info-box-number"><a href="index.php?page=view_assignment&id=<?= $future_assignments[0]['id']; ?>" class="text-dark"><?= trimString(htmlspecialchars_decode($future_assignments[0]['title'])) ?></a></span>
                     <span class="progress-description">
-                        Venue: <?= htmlspecialchars_decode($future_assignments[0]['location']) ?>
+                    <i class="fas fa-map-marker-alt mr-1"></i> <?= htmlspecialchars_decode($future_assignments[0]['location']) ?>
                     </span>
                 </div>
             </div>
