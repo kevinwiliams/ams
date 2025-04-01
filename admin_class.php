@@ -1745,7 +1745,7 @@ Class Action {
 				'assignment_date' => date("D, M d, Y", strtotime($postData['assignment_date'])) ?? '',
 				'duration' => $postData['assignment_time'] ?? 'N/A',
 				'assignment' => $postData['assignment_title'] ?? '',
-				'details' => $details ?? '',
+				'details' => urlencode($details ?? ''),
 				'requested_by' => $_SESSION['login_firstname'].' '.$_SESSION['login_lastname'],
 			];
 	
