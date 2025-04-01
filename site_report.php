@@ -9,6 +9,11 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+$user_role = $_SESSION['role_name'] ?? '';
+
+//Declare user roles for filtering
+$editor_roles = ['Op Manager'];
+
 $assignment_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 
 if (!$assignment_id) die('Assignment ID is required');
@@ -195,6 +200,9 @@ foreach ($all_items as $item) {
                                                 <th>Item</th>
                                                 <th>Used</th>
                                                 <th>Quantity</th>
+                                                <?php if (in_array($user_role, $editor_roles)): ?>
+                                                    <th>Notes</th>
+                                                <?php endif; ?>    
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -217,14 +225,21 @@ foreach ($all_items as $item) {
                                                            name="inventory[<?= $item['item_id'] ?>][quantity]" 
                                                            value="<?= $item['quantity'] ?>" min="0">
                                                 </td>
+                                                <?php if (in_array($user_role, $editor_roles)): ?>
+                                                <td>
+                                                    <input type="text" class="form-control form-control-sm" 
+                                                           name="inventory[<?= $item['item_id'] ?>][notes]" 
+                                                           value="<?= $item['notes'] ?>" placeholder="Notes">
+                                                </td>
+                                                <?php endif; ?>
                                             </tr>
                                             <?php endforeach; ?>
                                         </tbody>
                                     </table>
                                     <div class="custom-control custom-switch">
-                                        <input type="checkbox" class="custom-control-input text-primary" id="items_requested" name="items_requested" <?= isset($inspection['items_requested']) && $inspection['items_requested'] == 1 ? 'checked' : '' ?>>
-                                        <label class="custom-control-label text-primary" for="items_requested">
-                                        <?= isset($inspection['items_requested']) && $inspection['items_requested'] == 1 ? 'Manager Notified' : 'Send Request to Manager' ?>
+                                        <input type="checkbox" class="custom-control-input text-primary" id="items_requested" name="items_requested" <?php //= isset($inspection['items_requested']) && $inspection['items_requested'] == 1 ? 'checked' : '' ?>>
+                                        <label class="custom-control-label text-primary font-weight-light" for="items_requested">
+                                        <?= isset($inspection['items_requested']) && $inspection['items_requested'] == 1 ? 'Form Sent' : 'Send Equipment Form' ?>
                                         </label>
                                     </div>
                                 </div>

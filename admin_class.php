@@ -1458,11 +1458,11 @@ Class Action {
 			$ccEmails = trim($_SESSION['login_email']);      
 			$fromEmail = $emailFrom;   
 			$requestDetails = json_decode($message, true); // Convert back to array
-			$requestType = isset($requestDetails['items']) ? 'Items' : 'Equipment';
-			$subjectTxt = urlencode($requestType. " Request - ". date("D, M d, Y", strtotime($requestDetails['assignment_date'])));
+			$requestType = isset($requestDetails['items']) ? 'Outside Broadcast Equipment' : 'Equipment Request';
+			$subjectTxt = urlencode($requestType. " - ". date("D, M d, Y", strtotime($requestDetails['assignment_date'])));
 			
 			// Create HTML structure
-			$htmlContent = '<h3>Equipment Request</h3>';
+			$htmlContent = '<h3>'.$requestType.'</h3>';
 			$htmlContent .= '<table style="width: 100%; border-collapse: collapse;">';
 			foreach ($requestDetails as $key => $value) {
 				if($value){
@@ -1736,8 +1736,9 @@ Class Action {
 				// Start building the HTML table
 				$details = '<table style="width: 100%; border-collapse: collapse;">';
 				$details .= '<tr style="background-color: #f2f2f2;">';
-				$details .= '<th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Item Name</th>';
-				$details .= '<th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Quantity</th>';
+				$details .= '<th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Equipment</th>';
+				$details .= '<th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Quantity Out</th>';
+				$details .= '<th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Quantity In</th>';
 				$details .= '</tr>';
 				
 				foreach ($inventory as $item) {
@@ -1751,6 +1752,7 @@ Class Action {
 						$details .= '<tr>';
 						$details .= '<td style="border: 1px solid #ddd; padding: 8px;">' . $item_name . '</td>';
 						$details .= '<td style="border: 1px solid #ddd; padding: 8px;">' . $quantity . '</td>';
+						$details .= '<td style="border: 1px solid #ddd; padding: 8px;">&nbsp;</td>';
 						$details .= '</tr>';
 					}
 				}
@@ -1765,7 +1767,8 @@ Class Action {
 				'duration' => $postData['assignment_time'] ?? 'N/A',
 				'assignment' => $postData['assignment_title'] ?? '',
 				'items' => urlencode($details ?? ''),
-				'requested_by' => $_SESSION['login_firstname'].' '.$_SESSION['login_lastname'],
+				'broadcast_technician' => ':',
+				'security' => ':',
 			];
 	
 			$stmt = $this->db->prepare("UPDATE venue_inspections SET items_requested = ? WHERE id = ?");
