@@ -1459,16 +1459,16 @@ Class Action {
 					if($key == 'assignment_date')
 						$value = date("D, M d, Y", strtotime($value));
 
-					if($key == 'items'){
-						$htmlContent .= '<tr>
-							<td colspan="2" style="padding: 8px; border-bottom: 1px solid #ddd;">' . htmlspecialchars($value) . '</td>
-						</tr>';
-					}else{
+					// if($key == 'items'){
+					// 	$htmlContent .= '<tr>
+					// 		<td colspan="2" style="padding: 8px; border-bottom: 1px solid #ddd;">' . htmlspecialchars($value) . '</td>
+					// 	</tr>';
+					// }else{
 						$htmlContent .= '<tr>
 							<td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>' . ucfirst(str_replace('_', ' ', $key)) . '</strong></td>
 							<td style="padding: 8px; border-bottom: 1px solid #ddd;">' . htmlspecialchars($value) . '</td>
 						</tr>';
-					}
+					// }
 					
 					
 				}
