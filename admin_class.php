@@ -1404,7 +1404,7 @@ Class Action {
 				'end_time' => $_POST['end_time'] ?? 'N/A',
 				'depart_time' => $_POST['depart_time'] ?? 'N/A',
 				'assignment' => $_POST['title'] ?? '',
-				'details' => $details ?? '',
+				'details' => urlencode($details) ?? '',
 				'requested_by' => $_SESSION['login_firstname'].' '.$_SESSION['login_lastname'],
 			];
 
@@ -1449,7 +1449,7 @@ Class Action {
 			$fromEmail = $emailFrom;   
 			$requestDetails = json_decode($message, true); // Convert back to array
 			$requestType = isset($requestDetails['items']) ? 'Items' : 'Equipment';
-			$subjectTxt = urlencode($requestType." Request - ". date("D, M d, Y", strtotime($requestDetails['assignment_date'])));
+			$subjectTxt = urlencode($requestType. " Request - ". date("D, M d, Y", strtotime($requestDetails['assignment_date'])));
 			
 			// Create HTML structure
 			$htmlContent = '<h3>Equipment Request</h3>';
