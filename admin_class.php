@@ -1448,7 +1448,8 @@ Class Action {
 			$ccEmails = trim($_SESSION['login_email']);      
 			$fromEmail = $emailFrom;   
 			$requestDetails = json_decode($message, true); // Convert back to array
-			$subjectTxt = urlencode("Equipment Request - ". date("D, M d, Y", strtotime($requestDetails['assignment_date'])));
+			$requestType = isset($requestDetails['items']) ? 'Items' : 'Equipment';
+			$subjectTxt = urlencode($requestType." Request - ". date("D, M d, Y", strtotime($requestDetails['assignment_date'])));
 			
 			// Create HTML structure
 			$htmlContent = '<h3>Equipment Request</h3>';
