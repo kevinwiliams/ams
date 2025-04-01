@@ -1457,11 +1457,19 @@ Class Action {
 				if($value){
 					if($key == 'assignment_date')
 						$value = date("D, M d, Y", strtotime($value));
-					
-					$htmlContent .= '<tr>
+
+					if($key == 'items'){
+						$htmlContent .= '<tr>
+							<td colspan="2" style="padding: 8px; border-bottom: 1px solid #ddd;">' . htmlspecialchars($value) . '</td>
+						</tr>';
+					}else{
+						$htmlContent .= '<tr>
 							<td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>' . ucfirst(str_replace('_', ' ', $key)) . '</strong></td>
 							<td style="padding: 8px; border-bottom: 1px solid #ddd;">' . htmlspecialchars($value) . '</td>
 						</tr>';
+					}
+					
+					
 				}
 				
 			}
@@ -1745,7 +1753,7 @@ Class Action {
 				'assignment_date' => date("D, M d, Y", strtotime($postData['assignment_date'])) ?? '',
 				'duration' => $postData['assignment_time'] ?? 'N/A',
 				'assignment' => $postData['assignment_title'] ?? '',
-				'details' => urlencode($details ?? ''),
+				'items' => urlencode($details ?? ''),
 				'requested_by' => $_SESSION['login_firstname'].' '.$_SESSION['login_lastname'],
 			];
 	

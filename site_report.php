@@ -203,7 +203,7 @@ foreach ($all_items as $item) {
                                                 <td><?= htmlspecialchars($item['item_name']) ?></td>
                                                 <td>
                                                     <input type="hidden" name="inventory[<?= $item['item_id'] ?>][item_id]" value="<?= $item['item_id'] ?>">
-                                                    <input type="hidden" name="inventory[<?= $item['item_id'] ?>][item_name]" value="<?= $item['item_name'] ?>">
+                                                    <input type="hidden" name="inventory[<?= $item['item_id'] ?>][name]" value="<?= $item['item_name'] ?>">
                                                     <div class="custom-control custom-switch">
                                                         <input type="checkbox" class="custom-control-input" 
                                                                id="item_status_<?= $item['item_id'] ?>" 
