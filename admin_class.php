@@ -579,7 +579,11 @@ Class Action {
 		if (empty($id)) {
 			$alreadyAssigned = $this->check_double_booking($team_members, $assignmentDate, $_POST['start_time']);
 			if ($alreadyAssigned) {
-				return $alreadyAssigned . ' is already assigned!';
+				// return $alreadyAssigned . ' is already assigned!';
+				return json_encode([
+					"status" => "error",
+					"message" => $alreadyAssigned . ' is already assigned!'
+				]);
 			}
 		}
 	
@@ -667,10 +671,15 @@ Class Action {
 				$this->log_confirmed($id, $_SESSION['login_empid'], intval($_SESSION['login_id']));
 			}
 			
-			$success = 1;
-			return $success;
+			return json_encode([
+				"status" => "success",
+				"message" => $id
+			]);
 		} else {
-			return "Error saving record: " . $this->db->error;
+			return json_encode([
+				"status" => "error",
+				"message" => "Error saving record: " . $this->db->error
+			]);
 		}
 	}
 	
@@ -699,6 +708,7 @@ Class Action {
 			}
 		}
 		return count($assignedMembers) > 0 ? implode(", ", $assignedMembers) : false;
+		
 	}
 	
 	function update_transport_logs($assignmentId, $logData) {

@@ -1123,18 +1123,28 @@ $(document).ready(function(){
             },
             success: function(resp) {
                 console.log(resp);
-            end_load(); 
-
-            if (resp == 1) {
-                alert_toast('The assignment has been updated', 'success');
-                setTimeout(() => {
-                    location.href = 'index.php?page=home'; // Redirect after success
-                }, 3000);
-            
-            }else{
-                alert_toast(resp, 'error');
+            try {
+                let response = JSON.parse(resp);
+                if (response.status === 'success') {
+                    alert_toast('The assignment has been updated', 'success');
+                    setTimeout(() => {
+                        location.href = 'index.php?page=view_assignment&id=' + response.message; // Redirect after success
+                    }, 3000);
+                } else if (response.status === 'error') {
+                    alert_toast(response.message, 'error');
+                    $('#save_assignment_button').prop('disabled', false);
+                } else {
+                    alert_toast('Unexpected response: ' + resp, 'error');
+                    $('#save_assignment_button').prop('disabled', false);
+                }
+            } catch (e) {
+                console.error('Error parsing JSON response:', e);
+                alert_toast('An error occurred while processing the response.', 'error');
                 $('#save_assignment_button').prop('disabled', false);
             }
+            end_load(); 
+
+        
             }
         });
     });
