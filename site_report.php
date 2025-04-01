@@ -149,6 +149,10 @@ foreach ($all_items as $item) {
                 <form id="inspectionForm">
                     <input type="hidden" name="id" value="<?= $inspection['id'] ?>">
                     <input type="hidden" name="assignment_id" value="<?= $assignment_id ?>">
+                    <input type="hidden" name="assignment_title" value="<?= $assignment['title']?>">
+                    <input type="hidden" name="assignment_date" value="<?= $assignment['assignment_date'] ?>">
+                    <input type="hidden" name="assignment_time" value="<?= htmlspecialchars($assignment['start_time']).' - '.htmlspecialchars($assignment['end_time'])?>">
+
                     
                     <!-- Basic Information -->
                     <div class="form-row mb-3">
@@ -199,6 +203,7 @@ foreach ($all_items as $item) {
                                                 <td><?= htmlspecialchars($item['item_name']) ?></td>
                                                 <td>
                                                     <input type="hidden" name="inventory[<?= $item['item_id'] ?>][item_id]" value="<?= $item['item_id'] ?>">
+                                                    <input type="hidden" name="inventory[<?= $item['item_id'] ?>][item_name]" value="<?= $item['item_name'] ?>">
                                                     <div class="custom-control custom-switch">
                                                         <input type="checkbox" class="custom-control-input" 
                                                                id="item_status_<?= $item['item_id'] ?>" 
@@ -216,6 +221,12 @@ foreach ($all_items as $item) {
                                             <?php endforeach; ?>
                                         </tbody>
                                     </table>
+                                    <div class="custom-control custom-switch">
+                                        <input type="checkbox" class="custom-control-input text-primary" id="items_requested" name="items_requested" <?= isset($inspection['items_requested']) && $inspection['items_requested'] == 1 ? 'checked' : '' ?>>
+                                        <label class="custom-control-label text-primary" for="items_requested">
+                                        <?= isset($inspection['items_requested']) && $inspection['items_requested'] == 1 ? 'Manager Notified' : 'Send Request to Manager' ?>
+                                        </label>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -322,6 +333,7 @@ foreach ($all_items as $item) {
                     </div>
                     
                     <div class="row">
+                    
                         <div class="col">
                             <button type="submit" class="btn btn-primary mr-2" id="saveBtn">
                                 <i class="fas fa-save"></i> Save Inspection

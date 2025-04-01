@@ -1594,10 +1594,11 @@ Class Action {
 		$data = [];
 		$inspection_id = isset($id) ? $this->db->real_escape_string($id) : '';
 		$assignment_id = isset($assignment_id) ? $this->db->real_escape_string($assignment_id) : '';
-	
+		$notify = isset($items_requested) ? 1 : 0;
+		
 		// Build the data array with proper escaping
 		foreach($_POST as $k => $v) {
-			if(!in_array($k, array('id', 'permits', 'permit_notes', 'inventory', 'assignment_id'))) {
+			if(!in_array($k, array('id', 'permits', 'permit_notes', 'inventory', 'assignment_id','assignment_title', 'assignment_date', 'assignment_time','items_requested'))) {
 				if($k == 'general_notes' || $k == 'layout_notes' || $k == 'tent_location' || $k == 'banner_location') {
 					$data[$k] = "'" . $this->db->real_escape_string(htmlspecialchars($v, ENT_QUOTES, 'UTF-8')) . "'";
 				} else {
@@ -1612,7 +1613,11 @@ Class Action {
 		$permit_notes = isset($_POST['permit_notes']) ? $this->db->real_escape_string($_POST['permit_notes']) : '';
 		$permits = isset($_POST['permits']) ? $_POST['permits'] : array();
 		$inventory = isset($_POST['inventory']) ? $_POST['inventory'] : array();
-	
+		
+		if ($notify) {
+			$data['items_requested'] = $notify;
+			$this->equipment_ob_request($_POST);
+		}
 		// Start transaction
 		$this->db->begin_transaction();
 	
@@ -1685,6 +1690,82 @@ Class Action {
 		}
 	
 		return json_encode(['status' => 'error', 'message' => 'Unknown error occurred']);
+	}
+	
+	function equipment_ob_request($postData) {
+		try {
+			$env = $this->getEnv();
+			$requestEmailTo = $env->get('EMAIL_ITEMS_REQUEST_SB');
+			$id = intval($postData['assignment_id']) ?? null;
+			$request = intval($postData['items_requested']) ?? 0;
+			$inventory = isset($postData['inventory']) ? $postData['inventory'] : array();
+	
+			// First check if items have already been requested
+			$checkStmt = $this->db->prepare("SELECT items_requested FROM venue_inspections WHERE id = ?");
+			$checkStmt->bind_param("i", $id);
+			$checkStmt->execute();
+			$checkStmt->bind_result($db_requested);
+			$checkStmt->fetch();
+			$checkStmt->close();
+	
+			// If items were already requested, return without doing anything
+			if ($db_requested == 1) {
+				return json_encode(["status" => "info", "message" => "Items were already requested"]);
+			}
+	
+			if (!empty($inventory)) {
+				// Start building the HTML table
+				$details = '<table style="width: 100%; border-collapse: collapse;">';
+				$details .= '<tr style="background-color: #f2f2f2;">';
+				$details .= '<th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Item Name</th>';
+				$details .= '<th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Quantity</th>';
+				$details .= '</tr>';
+				
+				foreach ($inventory as $item) {
+					$status = isset($item['status']) ? (int)$item['status'] : 0;
+					
+					// Only include items with status = 1
+					if ($status === 1) {
+						$quantity = isset($item['quantity']) ? intval($item['quantity']) : 0;
+						$item_name = isset($item['name']) ? htmlspecialchars($item['name']) : '';
+						
+						$details .= '<tr>';
+						$details .= '<td style="border: 1px solid #ddd; padding: 8px;">' . $item_name . '</td>';
+						$details .= '<td style="border: 1px solid #ddd; padding: 8px;">' . $quantity . '</td>';
+						$details .= '</tr>';
+					}
+				}
+				
+				$details .= '</table>';
+			} else {
+				$details = 'No inventory items';
+			}
+	
+			$emailDetails = [
+				'assignment_date' => date("D, M d, Y", strtotime($postData['assignment_date'])) ?? '',
+				'duration' => $postData['assignment_time'] ?? 'N/A',
+				'assignment' => $postData['assignment_title'] ?? '',
+				'details' => $details ?? '',
+				'requested_by' => $_SESSION['login_firstname'].' '.$_SESSION['login_lastname'],
+			];
+	
+			$stmt = $this->db->prepare("UPDATE venue_inspections SET items_requested = ? WHERE id = ?");
+			$stmt->bind_param("ii", $request, $id);
+			$update_success = $stmt->execute();
+			$stmt->close();
+	
+			$message = json_encode($emailDetails);
+			if($update_success){
+				$mail = $this->send_equip_req_mail($requestEmailTo, $message);
+			}
+		
+			return json_encode($update_success 
+				? ["status" => "success", "message" => $mail] 
+				: ["status" => "error", "message" => "Database update failed"]
+			);
+		} catch (Exception $e) {
+			return json_encode(["status" => "error", "message" => $e->getMessage()]);
+		}
 	}
 	
 }
