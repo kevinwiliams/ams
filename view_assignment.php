@@ -319,6 +319,32 @@ $conn->close();
                                             <?= htmlspecialchars($member) ?>
                                         </span>
                                     <?php endforeach; ?>
+                                      <!-- Add badges for requested fields -->
+                                      <?php if (!empty($photo_requested) && $photo_requested == 1): ?>
+                                        <span class="font-weight-normal badge badge-warning p-2 m-1" style="font-size: 0.9rem;">
+                                            Photographer Requested
+                                        </span>
+                                    <?php endif; ?>
+                                    <?php if (!empty($video_requested) && $video_requested == 1): ?>
+                                        <span class="font-weight-normal badge badge-warning p-2 m-1" style="font-size: 0.9rem;">
+                                            Videographer Requested
+                                        </span>
+                                    <?php endif; ?>
+                                    <?php if (!empty($social_requested) && $social_requested == 1): ?>
+                                        <span class="font-weight-normal badge badge-warning p-2 m-1" style="font-size: 0.9rem;">
+                                            Social Media Requested
+                                        </span>
+                                    <?php endif; ?>
+                                    <?php if (!empty($driver_requested) && $driver_requested == 1): ?>
+                                        <span class="font-weight-normal badge badge-warning p-2 m-1" style="font-size: 0.9rem;">
+                                            Driver Requested
+                                        </span>
+                                    <?php endif; ?>
+                                    <?php if (!empty($dj_requested) && $dj_requested == 1): ?>
+                                        <span class="font-weight-normal badge badge-warning p-2 m-1" style="font-size: 0.9rem;">
+                                            DJ Requested
+                                        </span>
+                                    <?php endif; ?>
                                 </div>
                             <?php endif; ?>
                         </div>
@@ -391,6 +417,16 @@ $conn->close();
                         <i class="fas fa-edit me-1"></i> Edit Assignment
                     </a>
                 <?php endif; ?>
+                <?php 
+               
+                
+                if (in_array($user_role, $edit_roles)): ?>
+                    <?php if (!str_contains($_SERVER['HTTP_REFERER'], 'page=assignment_')): ?>
+                        <a href="index.php?page=assignment_list" class="btn btn-outline-secondary">
+                            <i class="fas fa-list me-2"></i> Back to List
+                        </a>
+                    <?php endif; ?>
+                <?php endif; ?>
                 
                 <?php if (!$seen && in_array($db_empid, $current_team)): ?>
                     <button class="btn btn-success mx-1" id="confirm_seen" 
@@ -412,6 +448,7 @@ $conn->close();
                         <i class="fas fa-clipboard-check mx-1"></i> View Report
                     </a>
                 <?php endif; ?>
+                
             </div>
         </div>
     </div>
@@ -528,11 +565,14 @@ $conn->close();
                         alert_toast('Equipment request submitted!', 'success');
                         $('#equipmentModal').modal('hide');
                         $('#submitEquipmentRequest').prop('disabled', false);
-                        // $('#equipment_requested').prop("checked", false); // Uncheck after submission
+                        setTimeout(() => {
+                            location.reload(); // Reload the page to reflect changes
+                        }, 1500); // Set timeout to 2 seconds
                     } else {
                         $('#submitEquipmentRequest').prop('disabled', false);
                         alert_toast('Failed to submit request.', 'error');
                     }
+                    
                 },
                 error: function() {
                     $('#submitEquipmentRequest').prop('disabled', false);
@@ -565,6 +605,9 @@ $conn->close();
                             showConfirmButton: false,
                         }).then(() => {
                             $('#confirm_seen').hide();
+                            setTimeout(() => {
+                            location.reload(); // Reload the page to reflect changes
+                        }, 1500);
                             // location.href = 'index.php?page=request_list'; // Redirect after success
                     });
 
