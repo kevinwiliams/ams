@@ -162,8 +162,8 @@ if (!$assignment_list) {
                         <!-- <th>Status</th> -->
                         <!-- <th>Action</th> -->
                         <!-- <th>Progress</th> -->
-                        <?php if (in_array($user_role,  $delete_roles)) { ?>
-                        <th></th>
+                        <?php if (in_array($user_role,  $edit_roles)) { ?>
+                        <th>Actions</th>
                     <?php } ?>
                     </tr>
                 </thead>

@@ -288,8 +288,13 @@ if ($id) {
                             </div>
                             <div class="form-group">
                                 <label class="control-label">Notes</label>
-                                <textarea name="description" class="form-control form-control-sm summernote textarea" <?= $readonly.$readonlyDispatch.$readonlyPersonality ?>><?php echo htmlspecialchars_decode($description ?? ''); ?></textarea>
+                                <textarea 
+                                    name="description" 
+                                    class="form-control form-control-sm summernote textarea" 
+                                    data-readonly="<?= ($readonly || $readonlyDispatch || $readonlyPersonality) ? 'true' : 'false'; ?>"
+                                ><?php echo htmlspecialchars_decode($description ?? ''); ?></textarea>
                             </div>
+
                             <?php if (isset($_GET['id']) && (in_array($user_role, $editor_roles) || in_array($user_role, $broadcast_roles))){ ?>
                             <div class="form-group">
                                 <div class="custom-control custom-switch my-2">
@@ -983,16 +988,24 @@ function convertTo24Hour(time) {
     return `${hours.toString().padStart(2, "0")}:${minutes}`;
 }
 $(document).ready(function(){
-
-    $('.summernote').summernote({
-        height: 150,
-        toolbar: [
-            ['style', ['style']],
-            ['font', ['bold', 'underline', 'clear']],
-            ['para', ['ul', 'ol', 'paragraph']],
-            ['insert', ['link']],
-            // ['view', ['codeview']]
-        ]
+    
+    var isReadonly = $('.summernote').data('readonly');
+    // Initialize Summernote editor
+    $('.summernote').each(function() {
+        
+        $(this).summernote({
+            height: 200,
+            toolbar: [
+                ['style', ['bold', 'italic', 'underline']],
+                ['para', ['ul', 'ol', 'paragraph']],
+                // ['insert', ['link']]
+            ],
+            disableDragAndDrop: true,
+        });
+        // Set the editor to readonly if isReadonly is true
+        if (isReadonly == true) {
+            $(this).summernote('disable');
+        }
     });
 
     // Show modal when checkbox is checked

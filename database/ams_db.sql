@@ -223,3 +223,6 @@ ADD COLUMN `updated_by` INT(10) NOT NULL;
 
 ALTER TABLE `venue_permits`
 MODIFY COLUMN `permit_type` VARCHAR(20) NOT NULL;
+
+ALTER TABLE venue_inspections
+ADD COLUMN items_requested TINYINT(1) DEFAULT 0;
