@@ -225,6 +225,8 @@ Class Action {
 		// Split the team member IDs into an array and trim whitespace
 		$ids = explode(',', $team_member_ids);
 		$ids = array_map('trim', $ids);
+		$ids = array_unique($ids); // Remove duplicates
+		$ids = array_filter($ids); // Remove empty values
 	
 		// Sanitize the IDs to prevent SQL injection
 		$sanitized_ids = array_map(function($id) {
@@ -256,6 +258,8 @@ Class Action {
 				$team_member_names[] = $names[$id];
 			}
 		}
+	
+		// Join the names into a single string
 		return implode(', ', $team_member_names);
 	}
 	// Save / Update system users
