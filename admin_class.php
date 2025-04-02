@@ -541,7 +541,7 @@ Class Action {
 		foreach ($_POST as $key => $value) {
 			if (!empty($value) && !in_array($key, ['id', 'assignee', 'team', 'request', 'request_amount', 'assigned_by', 'alert_manager']) && !is_numeric($key)) {
 				// Escape specific fields for HTML entities and SQL
-				if (in_array($key, ['description', 'title', 'equipment', 'location'])) {
+				if (in_array($key, ['description', 'title', 'equipment', 'location', 'contact_information'])) {
 					$value = $this->db->real_escape_string(htmlspecialchars($value, ENT_QUOTES, 'UTF-8'));
 				}
 	
@@ -749,6 +749,7 @@ Class Action {
 			'depart_time' => $_POST['depart_time'] ?? 'N/A',
 			'assignment' => $_POST['title'] ?? '',
 			'show' => $_POST['station_show'] ?? '',
+			'contact_information' => $_POST['contact_information'] ?? '',
 			'details' => $_POST['description'] ?? '',
 			'venue' => $_POST['location'] ?? '',
 			'transport_confirmed' => ($transport_confirmed == 1) ? 'Yes' :  'No',

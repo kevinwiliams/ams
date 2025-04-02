@@ -360,6 +360,11 @@ if ($id) {
                             <div class="form-group"> 
                                 
                             <?php if($radio_staff){?>
+                                <!-- Contact Information -->
+                                <label for="contact_information">Contact Information</label>
+                                <textarea class="form-control form-control-sm summernote textarea" 
+                                        name="contact_information" id="contact_information" rows="1"><?= htmlspecialchars_decode($assignment['contact_information'] ?? '') ?>
+                                </textarea>
                                 <!-- Sales Rep -->
                                 <div class="role-group">
                                     <label>Sales Rep</label>
@@ -994,7 +999,7 @@ $(document).ready(function(){
     $('.summernote').each(function() {
         
         $(this).summernote({
-            height: 200,
+            height: 150,
             toolbar: [
                 ['style', ['bold', 'italic', 'underline']],
                 ['para', ['ul', 'ol', 'paragraph']],

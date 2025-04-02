@@ -225,3 +225,6 @@ MODIFY COLUMN `permit_type` VARCHAR(20) NOT NULL;
 
 ALTER TABLE venue_inspections
 ADD COLUMN items_requested TINYINT(1) DEFAULT 0;
+
+ALTER TABLE assignment_list
+ADD COLUMN contact_information TEXT DEFAULT NULL;

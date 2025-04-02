@@ -254,10 +254,11 @@ foreach ($all_items as $item) {
                         </div>
                         
                         <!-- General Notes & Amenities -->
-                        <div class="form-group col-lg-6 col-sm-12 px-lg-4">
+                        <div class="form-group col-lg-6 col-sm-12 px-lg-4">                           
                             <label for="general_notes">Additional Notes</label>
                             <textarea class="form-control form-control-sm summernote textarea" 
-                                      name="general_notes" id="general_notes" rows="2"><?= htmlspecialchars_decode($inspection['general_notes'] ?? '') ?></textarea>
+                                      name="general_notes" id="general_notes" rows="2"><?= htmlspecialchars_decode($inspection['general_notes'] ?? '') ?>
+                            </textarea>
                               
                             <!-- Amenities -->
                             <div class="form-row my-4">

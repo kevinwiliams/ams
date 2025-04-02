@@ -288,6 +288,17 @@ $conn->close();
             <div class="row">
                 <div class="col-lg-8">
                     <!-- Description -->
+                    <?php if ($radio_staff): ?>
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <h6 class="text-bold mb-0">Contact Information</h6>
+                        </div>
+                        <div class="card-body">
+                            <?= empty(trim($contact_information ?? '')) ? 'No contact details provided' : nl2br(htmlspecialchars_decode($contact_information)) ?>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+                    <!-- Description -->
                     <?php if (!in_array($user_role, ['Dispatcher', 'Security'])): ?>
                     <div class="card mb-4">
                         <div class="card-header bg-light">
