@@ -80,7 +80,11 @@ $result = $conn->query($query);
                                 }
                                 ?>
                                 <tr>
-                                    <td><?= htmlspecialchars($row['title']) ?></td>
+                                    <td>
+                                        <a href="index.php?page=view_site_report&id=<?= $row['assignment_id'] ?>">
+                                            <?= htmlspecialchars($row['title']) ?>
+                                        </a>
+                                </td>
                                     <td><?= htmlspecialchars($row['location']) ?></td>
                                     <td><?= date('M j, Y', strtotime($row['assignment_date'])) ?></td>
                                     <td><?= htmlspecialchars($show_name ?? '') ?></td>
@@ -92,10 +96,10 @@ $result = $conn->query($query);
                                         <?= $row['bathrooms_available'] ? '<span class="badge badge-success">Yes</span>' : '<span class="badge badge-danger">No</span>' ?>
                                     </td>
                                     <td class="text-center">
-                                        <a href="index.php?page=view_site_report&id=<?= $row['assignment_id'] ?>" 
+                                        <!-- <a href="index.php?page=view_site_report&id=<?= $row['assignment_id'] ?>" 
                                            class="btn btn-sm btn-outline-primary" title="View">
                                             <i class="fas fa-eye"></i>
-                                        </a>
+                                        </a> -->
                                         <a href="index.php?page=site_report&id=<?= $row['assignment_id'] ?>" 
                                            class="btn btn-sm btn-outline-warning" title="Edit">
                                             <i class="fas fa-edit"></i>
