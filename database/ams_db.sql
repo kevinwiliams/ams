@@ -132,7 +132,7 @@ CREATE TABLE IF NOT EXISTS `users` (
 
 ALTER TABLE assignment_list
 ADD COLUMN is_ob TINYINT(1) DEFAULT 0,
-ADD COLUMN dj_requested BIT(1) DEFAULT 0
+ADD COLUMN dj_requested BIT(1) DEFAULT 0,
 ADD COLUMN show_id INT(10) DEFAULT NULL,
 ADD COLUMN station_show VARCHAR(100) DEFAULT NULL;
 
@@ -165,8 +165,7 @@ INSERT INTO `ob_items` (`item_name`, `description`) VALUES
 ('Headphones (Amp)', 'Amplified headphones for monitoring'),
 ('Headphones', 'Standard headphones for monitoring'),
 ('XLR Cables', 'Professional audio cables for connecting equipment'),
-('Modem', 'Network device for broadcasting connectivity');
-INSERT INTO `ob_items` (`item_name`, `description`) VALUES
+('Modem', 'Network device for broadcasting connectivity'),
 ('Tent', 'Event tent for outdoor activities'),
 ('Trestle Tables', 'Foldable tables for event setups'),
 ('Chairs', 'Portable chairs for seating arrangements'),

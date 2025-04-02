@@ -346,7 +346,7 @@ foreach ($all_items as $item) {
                                                    id="permit_jamms" value="jamms" <?= in_array('jamms', $permits) ? 'checked' : '' ?>>
                                             <label class="form-check-label" for="permit_jamms">JAMMS/JACAP</label>
                                         </div>
-                                        <textarea class="form-control form-control-sm mt-2 textarea" 
+                                        <textarea class="form-control form-control-sm mt-2 textarea d-none" 
                                                   name="permit_notes" placeholder="Permit details"><?= htmlspecialchars($inspection['permit_notes']) ?></textarea>
                                     </div>
                                 </div>
