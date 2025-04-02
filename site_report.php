@@ -191,7 +191,14 @@ foreach ($all_items as $item) {
                     <div class="row">
                         <!-- Inventory Section -->
                         <div class="card mb-3 col-lg-6 col-sm-12">
-                            <div class="card-header text-bold">Execution Requirements</div>
+                        <div class="card-header text-bold d-flex justify-content-between align-items-center">
+                            <span>Execution Requirements</span>
+                            <?php if (in_array($user_role, $editor_roles)): ?>
+                            <button type="button" class="btn btn-sm btn-outline-secondary ml-auto" onclick="printEquipmentForm()">
+                                <i class="fas fa-print"></i> Print Gate Pass
+                            </button>
+                            <?php endif; ?>
+                        </div>
                             <div class="card-body">
                                 <div class="table-responsive">
                                     <table class="table table-sm" id="inventoryTable">
@@ -236,7 +243,7 @@ foreach ($all_items as $item) {
                                             <?php endforeach; ?>
                                         </tbody>
                                     </table>
-                                    <div class="custom-control custom-switch">
+                                    <div class="custom-control custom-switch d-none">
                                         <input type="checkbox" class="custom-control-input text-primary" id="items_requested" name="items_requested" <?php //= isset($inspection['items_requested']) && $inspection['items_requested'] == 1 ? 'checked' : '' ?>>
                                         <label class="custom-control-label text-primary font-weight-light" for="items_requested">
                                         <?= isset($inspection['items_requested']) && $inspection['items_requested'] == 1 ? 'Form Sent' : 'Send Equipment Form' ?>
@@ -363,6 +370,7 @@ foreach ($all_items as $item) {
         </div>
     </div>
 </div>
+<?php include('gate_pass.php'); ?>
 
 <script>
         $(document).ready(function() {
@@ -438,4 +446,93 @@ foreach ($all_items as $item) {
                 quantityField.prop('disabled', !this.checked);
             }).trigger('change');
         });
+
+        function printEquipmentForm() {
+            // Get current date for the form
+            const now = new Date();
+            document.getElementById('print-current-date').textContent = now.toLocaleDateString('en-US', {
+                year: 'numeric', month: 'long', day: 'numeric'
+            }) + ' at ' + now.toLocaleTimeString('en-US', {
+                hour: '2-digit', minute: '2-digit'
+            });
+
+            // Populate the print form with current data
+            document.getElementById('print-assignment-title').textContent = document.querySelector('input[name="assignment_title"]').value;
+            document.getElementById('print-assignment-date').textContent = document.querySelector('input[name="assignment_date"]').value;
+            document.getElementById('print-assignment-time').textContent = document.querySelector('input[name="assignment_time"]').value;
+            document.getElementById('print-site-visit-date').textContent = document.querySelector('input[name="site_visit_date"]').value;
+            document.getElementById('print-setup-time').textContent = document.querySelector('select[name="setup_time"]').value;
+            
+            // Populate equipment table
+            const inventoryRows = document.querySelectorAll('#inventoryTable tbody tr');
+            const printBody = document.getElementById('print-equipment-body');
+            printBody.innerHTML = '';
+            
+            inventoryRows.forEach(row => {
+                const itemName = row.querySelector('td:first-child').textContent;
+                const quantityInput = row.querySelector('input[type="number"]');
+                const quantity = quantityInput ? quantityInput.value : '0';
+                const notesInput = row.querySelector('input[type="text"][name*="notes"]');
+                const notes = notesInput ? notesInput.value : '';
+                
+                const newRow = document.createElement('tr');
+                newRow.style.borderBottom = '1px solid #eee';
+                if(quantity > 0){
+                    newRow.innerHTML = `
+                    <td style="padding: 10px 15px; border-bottom: 1px solid #eee;">${itemName}</td>
+                    <td style="padding: 10px 15px; text-align: center; border-bottom: 1px solid #eee;">${quantity}</td>
+                    <td style="padding: 10px 15px; text-align: center; border-bottom: 1px solid #eee;"></td>
+                    <td style="padding: 10px 15px; border-bottom: 1px solid #eee;">${notes}</td>
+                `;
+                }
+                
+                printBody.appendChild(newRow);
+            });
+            
+            // Create a new window for printing
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                    <head>
+                        <title>Equipment Checkout Form</title>
+                        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+                        <style>
+                            @media print {
+                                body {
+                                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                                    margin: 0;
+                                    padding: 20px;
+                                    color: #333;
+                                }
+                                .no-print {
+                                    display: none !important;
+                                }
+                            }
+                            @page {
+                                size: A4;
+                                margin: 15mm;
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        ${document.getElementById('printEquipmentForm').innerHTML}
+                        <div class="no-print" style="text-align: center; margin-top: 20px;">
+                            <button onclick="window.print()" style="padding: 10px 20px; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                                <i class="fas fa-print"></i> Print Now
+                            </button>
+                            <button onclick="window.close()" style="padding: 10px 20px; background: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer; margin-left: 10px;">
+                                <i class="fas fa-times"></i> Close
+                            </button>
+                        </div>
+                        <script>
+                            // Auto-print when the window loads
+                            setTimeout(function() {
+                                window.print();
+                            }, 500);
+                        <\/script>
+                    </body>
+                </html>
+            `);
+            printWindow.document.close();
+        }
     </script>
