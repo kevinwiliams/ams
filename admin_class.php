@@ -687,7 +687,7 @@ Class Action {
 		}
 	}
 	
-	// Helper Functions
+	// Get team members from POST data
 	function get_team_members_from_post($postData) {
 		$team_members = [];
 		if (isset($postData['assignee'])) {
@@ -700,7 +700,7 @@ Class Action {
 		}
 		return $team_members;
 	}
-	
+	// Check for double booking
 	function check_double_booking($team_members, $assignmentDate, $startTime) {
 		$assignedMembers = [];
 		foreach ($team_members as $member) {
@@ -714,14 +714,14 @@ Class Action {
 		return count($assignedMembers) > 0 ? implode(", ", $assignedMembers) : false;
 		
 	}
-	
+	// Update transport log
 	function update_transport_logs($assignmentId, $logData) {
 		$logged = $this->check_transport_log($assignmentId);
 		$logQuery = $logged ? "UPDATE transport_log SET " . $this->build_query($logData) . " WHERE assignment_id=$assignmentId"
 							: "INSERT INTO transport_log SET " . $this->build_query($logData);
 		$this->db->query($logQuery);
 	}
-	
+	// Check if notification was alreadu sent out
 	function check_notification_sent($assignmentId) {
 		if (!empty($assignmentId)) {
 			$checkQuery = "SELECT send_notification FROM assignment_list WHERE id = $assignmentId";
@@ -730,11 +730,11 @@ Class Action {
 		}
 		return false;
 	}
-	
+	// Build query string for SQL
 	function build_query($data) {
 		return implode(', ', array_map(fn($k, $v) => "$k=$v", array_keys($data), $data));
 	}
-	
+	// Prepare assignment info (ARRAY) for email
 	function prepare_assignment_info($id, $uuid, $assignmentDate, $team_members_str, $cancelled, $postponed, $transport_confirmed) {
 		$env = $this->getEnv();
 		$site_url = $env->get('SITE_URL');
@@ -763,7 +763,7 @@ Class Action {
 			'sb_staff'=> $_SESSION['login_sb_staff'] ?? ''
 		];
 	}
-	
+	// Build email subject line
 	function build_email_subject($assignmentDate, $notifyAlreadySent, $cancelled, $postponed) {
 		$subjectTxt = date("D, M d, Y", strtotime($assignmentDate));
 		if ($notifyAlreadySent) {
@@ -1613,7 +1613,7 @@ Class Action {
 	
 		return $icsFileUrl;
 	}
-
+	// Save inspection details and send email
 	public function save_inspection() {
 		extract($_POST);
 		$data = [];
@@ -1716,7 +1716,7 @@ Class Action {
 	
 		return json_encode(['status' => 'error', 'message' => 'Unknown error occurred']);
 	}
-	
+	// Send email request for equipment
 	function equipment_ob_request($postData) {
 		try {
 			$env = $this->getEnv();
