@@ -1282,9 +1282,10 @@ Class Action {
 			if ($result->num_rows > 0) {
 				// Query to get team member details
 				$userQuery = "
-					SELECT firstname, lastname 
-					FROM users 
-					WHERE empid = ?
+					SELECT u.firstname, u.lastname 
+					FROM users u
+					JOIN roles r ON u.role_id = r.role_id
+					WHERE r.role_name NOT IN ('Sales Rep','Producer', 'Broadcast Coordinator') AND u.empid = ? 
 				";
 				$userStmt = $this->db->prepare($userQuery);
 				$userStmt->bind_param('s', $empID); // Assuming empid is a string
