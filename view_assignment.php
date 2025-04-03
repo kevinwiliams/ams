@@ -11,7 +11,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-$edit_roles = ['Manager', 'ITAdmin', 'Editor', 'Multimedia', 'Dispatcher', 'Photo Editor', 'Dept Admin', 'Op Manager', 'Broadcast Coordinator', 'Security', 'Programme Director'];
+$edit_roles = ['Manager', 'ITAdmin', 'Editor', 'Multimedia', 'Dispatcher', 'Photo Editor', 'Dept Admin', 'Op Manager', 'Broadcast Coordinator', 'Programme Director'];
 $user_role = $_SESSION['role_name'] ?? '';
 $radio_staff = $_SESSION['login_sb_staff'] == 1 ? true : false;
 
@@ -172,27 +172,7 @@ try {
 
 $conn->close();
 ?>
-<style>
-        .assignment-card {
-            max-width: 600px; /* Adjust card width */
-            margin: 0 auto; /* Center horizontally */
-        }
-        .widget-assignment-header {
-            padding: 1rem; /* Adjust header padding */
-        }
-        .widget-assignment-header h3 {
-            margin-bottom: 0;
-        }
-        .card-footer dl dt {
-            font-weight: bold;
-        }
-        .card-footer dl dd {
-            margin-bottom: 0.5rem;
-        }
-        .modal-footer {
-            border-top: none; /* Remove border for a cleaner look */
-        }
-    </style>
+
 
 <div class="container mt-4">
     <div class="card widget-assignment shadow">
@@ -263,12 +243,21 @@ $conn->close();
                                     <?= $transport_confirmed ? '<span class="text-success">Confirmed</span>' : '<span class="text-warning">Pending</span>' ?>
                                 </li>
                                 <?php if (in_array($user_role, ['Dispatcher', 'Security'])): ?>
-                                <li class="mb-2">
-                                    <strong>Vehicle:</strong> 
-                                    <?= htmlspecialchars($plate_number ?? 'N/A') ?>
-                                    <small class="d-block"><?= htmlspecialchars($make_model ?? '') ?></small>
-                                    <small class="d-block">Mileage: <?= htmlspecialchars($mileage ?? 'N/A') ?></small>
-                                    <small class="d-block">Gas: <?= htmlspecialchars($gas_level ?? 'N/A') ?></small>
+                                <li class="mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <strong class="me-2">Vehicle:</strong>&nbsp;
+                                        <span><?= htmlspecialchars($plate_number ?? 'N/A') ?></span>
+                                    </div>
+                                    <div class="text-muted">
+                                        <em><?= htmlspecialchars($make_model ?? 'N/A') ?></em>
+                                    </div>
+                                    <div class="d-flex justify-content-between mt-2">
+                                        <span>
+                                            <span class="badge bg-secondary">Mileage</span> 
+                                            <?= is_numeric($mileage) ? number_format($mileage) . ' km' : htmlspecialchars($mileage ?? 'N/A') ?>
+                                        </span>
+                                        <span><span class="badge bg-secondary">Gas</span> <?= htmlspecialchars($gas_level ?? 'N/A') ?></span>
+                                    </div>
                                 </li>
                                 <?php endif; ?>
                                 <li>
