@@ -130,7 +130,7 @@ if ($id) {
             <div class="card-body">
                 <form action="" id="manage_assignment" method="POST">
                     <div class="row">
-                        <div class="col-md-6  pr-3">
+                        <div class="col-md-6 pr-3">
                             <!-- Schedule Section -->
                             <div class="card mb-4">
                                 <div class="card-header bg-light">
@@ -249,7 +249,9 @@ if ($id) {
                                         <!-- Contact Information -->
                                         <label for="contact_information">Contact Information</label>
                                         <textarea class="form-control form-control-sm summernote textarea" 
-                                                name="contact_information" id="contact_information" rows="1"><?= htmlspecialchars_decode($assignment['contact_information'] ?? '') ?>
+                                                name="contact_information" id="contact_information" rows="1"
+                                                data-readonly="<?= ($readonly || $readonlyDispatch || $readonlyPersonality) ? 'true' : 'false'; ?>">
+                                                <?= htmlspecialchars_decode($assignment['contact_information'] ?? '') ?>
                                         </textarea>
                                     </div>
                                     <?php } ?>
@@ -264,9 +266,6 @@ if ($id) {
                                 </div>
                             </div>
 
-                            
-                            
-                           
                         </div>
 
                         <div class="col-md-6 pl-3">
@@ -330,12 +329,105 @@ if ($id) {
                                 </div>
                             </div>
 
-
                             <input type="hidden" name="id" value="<?php echo htmlspecialchars($id ?? ''); ?>">
                             <input type="hidden" name="assigned_by" value="<?php echo htmlspecialchars($assigned_by ?? ''); ?>">
                             <?php
                                 $all_members = [];
+                                $salesreps = [];
+                                $personalities = [];
+                                $engineers = [];
+                                $producers = [];
+                                $reporters = [];
+                                $photographers = [];
+                                $videographers = [];
+                                $socials = [];
+                                $drivers = [];
+                                $djs = [];
+
                                 $teamRem = "";
+                                
+                                if (isset($team_members)) {
+                                    $all_members = explode(',', $team_members);
+                                    $salesreps = explode(',', $team_members);
+                                    $personalities = explode(',', $team_members);
+                                    $engineers = explode(',', $team_members);
+                                    $producers = explode(',', $team_members);
+                                    $reporters = explode(',', $team_members);
+                                    $photographers = explode(',', $team_members);
+                                    $videographers = explode(',', $team_members);
+                                    $socials = explode(',', $team_members);
+                                    $drivers = explode(',', $team_members);
+                                    $djs = explode(',', $team_members);
+                                }
+
+                                // Sales Reps
+                                $salesrep_qry = $conn->query("SELECT u.empid, u.firstname, u.lastname, r.role_name 
+                                                                FROM users u 
+                                                                JOIN roles r ON r.role_id = u.role_id
+                                                                WHERE r.role_name in ('Sales Rep')
+                                                                ORDER BY r.role_name, u.firstname");
+
+                                // Personalities
+                                $personality_qry = $conn->query("SELECT u.empid, u.firstname, u.lastname, r.role_name 
+                                                                FROM users u 
+                                                                JOIN roles r ON r.role_id = u.role_id
+                                                                WHERE r.role_name in ('Personality', 'Programme Director')
+                                                                ORDER BY r.role_name, u.firstname");
+
+                                // DJs
+                                $dj_qry = $conn->query("SELECT u.empid, u.firstname, u.lastname, r.role_name 
+                                                    FROM users u 
+                                                    JOIN roles r ON r.role_id = u.role_id
+                                                    WHERE r.role_name in ('DJ')
+                                                    ORDER BY r.role_name, u.firstname");
+
+                                // Engineers
+                                $engineer_qry = $conn->query("SELECT u.empid, u.firstname, u.lastname, r.role_name 
+                                                            FROM users u 
+                                                            JOIN roles r ON r.role_id = u.role_id
+                                                            WHERE r.role_name in ('Engineer')
+                                                            ORDER BY r.role_name, u.firstname");
+
+                                // Producers
+                                $producer_qry = $conn->query("SELECT u.empid, u.firstname, u.lastname, r.role_name 
+                                                            FROM users u 
+                                                            JOIN roles r ON r.role_id = u.role_id
+                                                            WHERE r.role_name in ('Producer', 'Broadcast Coordinator')
+                                                            ORDER BY r.role_name, u.firstname");
+
+                                // Reporters
+                                $reporter_qry = $conn->query("SELECT u.empid, u.firstname, u.lastname, r.role_name 
+                                                            FROM users u 
+                                                            JOIN roles r ON r.role_id = u.role_id
+                                                            WHERE r.role_name in ('Reporter', 'Editor', 'Freelancer')
+                                                            ORDER BY r.role_name, u.firstname");
+
+                                // Photographers
+                                $photographer_qry = $conn->query("SELECT u.empid, u.firstname, u.lastname, r.role_name 
+                                                                FROM users u 
+                                                                JOIN roles r ON r.role_id = u.role_id
+                                                                WHERE u.role_id in ('Photographer', 'Photo Editor')
+                                                                ORDER BY r.role_name, u.firstname");
+
+                                // Videographers
+                                $videographer_qry = $conn->query("SELECT u.empid, u.firstname, u.lastname, r.role_name 
+                                                                FROM users u 
+                                                                JOIN roles r ON r.role_id = u.role_id
+                                                                WHERE u.role_id in ('Videographer')
+                                                                ORDER BY r.role_name, u.firstname");
+
+                                // Social Media
+                                $social_qry = $conn->query("SELECT u.empid, u.firstname, u.lastname, r.role_name 
+                                                        FROM users u 
+                                                        JOIN roles r ON r.role_id = u.role_id
+                                                        WHERE u.role_id in ('Multimedia', 'Social Media')
+                                                        ORDER BY r.role_name, u.firstname");
+                                // Drivers
+                                $driver_qry = $conn->query("SELECT u.empid, u.firstname, u.lastname, r.role_name 
+                                                            FROM users u 
+                                                            JOIN roles r ON r.role_id = u.role_id
+                                                            WHERE r.role_name in ('Driver')
+                                                            ORDER BY r.role_name, u.firstname");
                             ?>
                             <!-- Team Assignment Section -->
                             <div class="card mb-4">
@@ -352,26 +444,11 @@ if ($id) {
                                                 <select name="assignee[salesrep][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabledPersonality.$required ?>>
                                                     <!-- <option value="">Select a reporter</option> -->
                                                     <?php
-                                                        $salesreps = [];
 
-                                                        if(isset($team_members))
-                                                            $all_members = explode(',', $team_members);
-
-                                                        // Fetch users with role_id = 5 (for salesreps)
-                                                        if(isset($team_members))
-                                                            $salesreps = explode(',', $team_members);
-                                                    
-                                                        $user_qry = $conn->query("SELECT u.empid, u.firstname, u.lastname, r.role_name 
-                                                        FROM users u 
-                                                        JOIN roles r ON r.role_id = u.role_id
-                                                        WHERE r.role_name in ('Sales Rep')
-                                                        ORDER BY 
-                                                            r.role_name, u.firstname;
-                                                                                                    ");
-                                                    if ($user_qry) {
-                                                        while ($user_row = $user_qry->fetch_assoc()):
+                                                    if ($salesrep_qry) {
+                                                        while ($user_row = $salesrep_qry->fetch_assoc()):
                                                             if(in_array($user_row['empid'], $salesreps))
-                                                                if(!empty($disabledPersonality))
+                                                                if(!empty($disabledBroadcast))
                                                                     $all_members = array_diff($all_members, [$user_row['empid']]);
                                                         
                                                     ?>
@@ -395,26 +472,11 @@ if ($id) {
                                                 <select name="assignee[personality][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabledPersonality ?>>
                                                     <!-- <option value="">Select a reporter</option> -->
                                                     <?php
-                                                        $personalities = [];
 
-                                                        if(isset($team_members))
-                                                            $all_members = explode(',', $team_members);
-
-                                                        // Fetch users with role_id = 5 (for personalities)
-                                                        if(isset($team_members))
-                                                            $personalities = explode(',', $team_members);
-                                                    
-                                                        $user_qry = $conn->query("SELECT u.empid, u.firstname, u.lastname, r.role_name 
-                                                        FROM users u 
-                                                        JOIN roles r ON r.role_id = u.role_id
-                                                        WHERE r.role_name in ('Personality', 'Programme Director')
-                                                        ORDER BY 
-                                                            r.role_name, u.firstname;
-                                                                                                    ");
-                                                    if ($user_qry) {
-                                                        while ($user_row = $user_qry->fetch_assoc()):
+                                                    if ($personality_qry) {
+                                                        while ($user_row = $personality_qry->fetch_assoc()):
                                                             if(in_array($user_row['empid'], $personalities))
-                                                                if(!empty($disabledPersonality))
+                                                                if(!empty($disabledBroadcast))
                                                                     $all_members = array_diff($all_members, [$user_row['empid']]);
                                                         
                                                     ?>
@@ -438,26 +500,11 @@ if ($id) {
                                                 <select name="assignee[dj][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabledBroadcast.$requiredPersonality ?>>
                                                     <!-- <option value="">Select a reporter</option> -->
                                                     <?php
-                                                        $djs = [];
 
-                                                        if(isset($team_members))
-                                                            $all_members = explode(',', $team_members);
-
-                                                        // Fetch users with role_id = 5 (for djs)
-                                                        if(isset($team_members))
-                                                            $djs = explode(',', $team_members);
-                                                    
-                                                        $user_qry = $conn->query("SELECT u.empid, u.firstname, u.lastname, r.role_name 
-                                                        FROM users u 
-                                                        JOIN roles r ON r.role_id = u.role_id
-                                                        WHERE r.role_name in ('DJ')
-                                                        ORDER BY 
-                                                            r.role_name, u.firstname;
-                                                                                                    ");
-                                                    if ($user_qry) {
-                                                        while ($user_row = $user_qry->fetch_assoc()):
+                                                    if ($dj_qry) {
+                                                        while ($user_row = $dj_qry->fetch_assoc()):
                                                             if(in_array($user_row['empid'], $djs))
-                                                                if(!empty($disabledBroadcast))
+                                                                if(!empty($disabledPersonality))
                                                                     $all_members = array_diff($all_members, [$user_row['empid']]);
                                                         
                                                     ?>
@@ -487,7 +534,7 @@ if ($id) {
                                                 </select>
                                             </div>
                                             <?php //endif; ?>
-                                            <?php if(!empty($disabledMedia) && (isset($dj_requested)) && $dj_requested == 1): ?>
+                                            <?php if(!empty($disabledBroadcast) && (isset($dj_requested)) && $dj_requested == 1): ?>
                                                 <input type="hidden" name="request[dj]" value="<?= $dj_requested?>">
                                             <?php endif; ?>
                                         </div>
@@ -499,26 +546,11 @@ if ($id) {
                                                 <select name="assignee[engineer][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabledPersonality ?>>
                                                     <!-- <option value="">Select a reporter</option> -->
                                                     <?php
-                                                        $engineers = [];
 
-                                                        if(isset($team_members))
-                                                            $all_members = explode(',', $team_members);
-
-                                                        // Fetch users with role_id = 5 (for engineers)
-                                                        if(isset($team_members))
-                                                            $engineers = explode(',', $team_members);
-                                                    
-                                                        $user_qry = $conn->query("SELECT u.empid, u.firstname, u.lastname, r.role_name 
-                                                        FROM users u 
-                                                        JOIN roles r ON r.role_id = u.role_id
-                                                        WHERE r.role_name in ('Engineer')
-                                                        ORDER BY 
-                                                            r.role_name, u.firstname;
-                                                                                                    ");
-                                                    if ($user_qry) {
-                                                        while ($user_row = $user_qry->fetch_assoc()):
+                                                    if ($engineer_qry) {
+                                                        while ($user_row = $engineer_qry->fetch_assoc()):
                                                             if(in_array($user_row['empid'], $engineers))
-                                                                if(!empty($disabledPersonality))
+                                                                if(!empty($disabledBroadcast))
                                                                     $all_members = array_diff($all_members, [$user_row['empid']]);
                                                         
                                                     ?>
@@ -542,26 +574,10 @@ if ($id) {
                                                 <select name="assignee[producer][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabledPersonality ?>>
                                                     <!-- <option value="">Select a reporter</option> -->
                                                     <?php
-                                                        $producers = [];
-
-                                                        if(isset($team_members))
-                                                            $all_members = explode(',', $team_members);
-
-                                                        // Fetch users with role_id = 5 (for producers)
-                                                        if(isset($team_members))
-                                                            $producers = explode(',', $team_members);
-                                                    
-                                                        $user_qry = $conn->query("SELECT u.empid, u.firstname, u.lastname, r.role_name 
-                                                        FROM users u 
-                                                        JOIN roles r ON r.role_id = u.role_id
-                                                        WHERE r.role_name in ('Producer', 'Broadcast Coordinator')
-                                                        ORDER BY 
-                                                            r.role_name, u.firstname;
-                                                                                                    ");
-                                                    if ($user_qry) {
-                                                        while ($user_row = $user_qry->fetch_assoc()):
+                                                    if ($producer_qry) {
+                                                        while ($user_row = $producer_qry->fetch_assoc()):
                                                             if(in_array($user_row['empid'], $producers))
-                                                                if(!empty($disabledPersonality))
+                                                                if(!empty($disabledBroadcast))
                                                                     $all_members = array_diff($all_members, [$user_row['empid']]);
                                                         
                                                     ?>
@@ -586,26 +602,11 @@ if ($id) {
                                                 <select name="assignee[reporter][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabled.$disabledDispatch?> required>
                                                     <!-- <option value="">Select a reporter</option> -->
                                                     <?php
-                                                        $reporters = [];
 
-                                                        if(isset($team_members))
-                                                            $all_members = explode(',', $team_members);
-
-                                                        // Fetch users with role_id = 5 (for reporters)
-                                                        if(isset($team_members))
-                                                            $reporters = explode(',', $team_members);
-                                                    
-                                                        $user_qry = $conn->query("SELECT u.empid, u.firstname, u.lastname, r.role_name 
-                                                        FROM users u 
-                                                        JOIN roles r ON r.role_id = u.role_id
-                                                        WHERE r.role_name in ('Reporter', 'Editor', 'Freelancer')
-                                                        ORDER BY 
-                                                            r.role_name, u.firstname;
-                                                                                                    ");
-                                                    if ($user_qry) {
-                                                        while ($user_row = $user_qry->fetch_assoc()):
+                                                    if ($reporter_qry) {
+                                                        while ($user_row = $reporter_qry->fetch_assoc()):
                                                             if(in_array($user_row['empid'], $reporters))
-                                                                if(!empty($disabledPersonality))
+                                                                if(!empty($disabledEditors))
                                                                     $all_members = array_diff($all_members, [$user_row['empid']]);
                                                         
                                                     ?>
@@ -629,25 +630,13 @@ if ($id) {
                                                 <select name="assignee[photographer][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabledDispatch.$disabledPersonality.$disabledMedia ?><?= $required?>>
                                                 <!-- <option value="">Select a photographer</option> -->
                                                     <?php
-                                                    // Fetch users with role_id = 6 (for photographers)
-                                                    $photographers = [];
-                                                    if(isset($team_members))
-                                                        $photographers = explode(',', $team_members);
-                                                    
-                                                    $user_qry = $conn->query("SELECT u.empid, u.firstname, u.lastname, r.role_name 
-                                                    FROM users u 
-                                                    JOIN roles r ON r.role_id = u.role_id
-                                                    WHERE u.role_id in (7, 11)
-                                                    ORDER BY 
-                                                        r.role_name, u.firstname;");
-                                                    if ($user_qry) {
-                                                        while ($user_row = $user_qry->fetch_assoc()):
+
+                                                    if ($photographer_qry) {
+                                                        while ($user_row = $photographer_qry->fetch_assoc()):
                                                             if(in_array($user_row['empid'], $photographers))
                                                                 if(!empty($disabledDigital))
                                                                     $all_members = array_diff($all_members, [$user_row['empid']]);
-                                                                
-                                                            // print_r($all_members);
-                                                            echo 'disabb'.$disabledDigital;
+                            
                                                     ?>
                                                     <option value="<?php echo htmlspecialchars($user_row['empid']); ?>" <?php echo isset($photographers) && in_array($user_row['empid'], $photographers) ? 'selected' : '' ?>>
                                                         <?php echo htmlspecialchars($user_row['firstname']) . ' ' . htmlspecialchars($user_row['lastname']); ?>
@@ -687,19 +676,8 @@ if ($id) {
                                                 <select name="assignee[videographer][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabledDispatch.$disabledPersonality.$disabledDigital ?>>
                                                 <!-- <option value="">Select a videographer</option> -->
                                                     <?php
-                                                    $videographers = [];
-                                                    // Fetch users with role_id = 7 (for videographers)
-                                                    if(isset($team_members))
-                                                        $videographers = explode(',', $team_members);
-                                                    
-                                                    $user_qry = $conn->query("SELECT u.empid, u.firstname, u.lastname, r.role_name 
-                                                    FROM users u 
-                                                    JOIN roles r ON r.role_id = u.role_id
-                                                    WHERE u.role_id in (8)
-                                                    ORDER BY 
-                                                        r.role_name, u.firstname;");
-                                                    if ($user_qry) {
-                                                        while ($user_row = $user_qry->fetch_assoc()):
+                                                    if ($videographer_qry) {
+                                                        while ($user_row = $videographer_qry->fetch_assoc()):
                                                             if(in_array($user_row['empid'], $videographers))
                                                                 if(!empty($disabledMedia))
                                                                     $all_members = array_diff($all_members, [$user_row['empid']]);
@@ -741,7 +719,6 @@ if ($id) {
                                             <div class="assignee-wrapper">
                                                 <select name="assignee[social][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabledDispatch.$disabledPersonality.$disabledDigital ?>>
                                                     <?php
-                                                    $socials = [];
                                                     // Fetch users with role_id = 7 (for videographers)
                                                     if(isset($team_members))
                                                         $socials = explode(',', $team_members);
@@ -796,14 +773,10 @@ if ($id) {
                                             <div class="assignee-wrapper">
                                                 <select name="assignee[driver][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabledPersonality.$disabledDigital ?><?= $requiredDispatch?>>
                                                     <?php
-                                                    $drivers = [];
                                                     // Fetch users with role_id = 9 (for drivers)
-                                                    if(isset($team_members))
-                                                        $drivers = explode(',', $team_members);
-                                                    
-                                                    $user_qry = $conn->query("SELECT empid, firstname, lastname FROM users WHERE role_id = 9");
-                                                    if ($user_qry) {
-                                                        while ($user_row = $user_qry->fetch_assoc()):
+                                                  
+                                                    if ($driver_qry) {
+                                                        while ($user_row = $driver_qry->fetch_assoc()):
                                                             if(in_array($user_row['empid'], $drivers))
                                                                 if(!empty($disabledDispatch) || !empty($disabledMedia))
                                                                     $all_members = array_diff($all_members, [$user_row['empid']]);
