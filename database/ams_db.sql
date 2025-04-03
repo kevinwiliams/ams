@@ -218,7 +218,7 @@ ADD COLUMN created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 ADD COLUMN updated_at DATETIME;
 
 ALTER TABLE `venue_inspections`
-ADD COLUMN `updated_by` INT(10) NOT NULL;
+ADD COLUMN `updated_by` INT(10) NULL;
 
 ALTER TABLE `venue_permits`
 MODIFY COLUMN `permit_type` VARCHAR(20) NOT NULL;
@@ -228,3 +228,17 @@ ADD COLUMN items_requested TINYINT(1) DEFAULT 0;
 
 ALTER TABLE assignment_list
 ADD COLUMN contact_information TEXT DEFAULT NULL;
+
+ALTER TABLE assignment_list
+ADD COLUMN is_exclusive TINYINT(1) DEFAULT 0,
+ADD COLUMN toll_required TINYINT(1) DEFAULT 0;
+
+ALTER TABLE venue_inspections
+ADD COLUMN toll_required TINYINT(1) DEFAULT 0,
+ADD COLUMN report_status VARCHAR(20) DEFAULT NULL,
+ADD COLUMN nearest_power_source int(10) DEFAULT NULL,
+ADD COLUMN bring_your_own TINYINT(1) DEFAULT 0,
+ADD COLUMN cell_network VARCHAR(20) DEFAULT NULL;
+
+
+

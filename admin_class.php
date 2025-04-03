@@ -524,6 +524,8 @@ Class Action {
 		$alert_op = isset($alert_manager) ? 1 : 0;
 		$notify = isset($send_notification) ? 1 : 0;
 		$cancelled = isset($is_cancelled) ? 1 : 0;
+		$exclusive = isset($is_exclusive) ? 1 : 0;
+		$toll = isset($toll_required) ? 1 : 0;
 		$permit_requested = isset($request_permit) ? 1 : 0;
 		$confirmed_transport = isset($transport_confirmed) ? 1 : 0;
 		$uuid = !empty($uid) ? $uid : uniqid('event_', true);
@@ -558,6 +560,12 @@ Class Action {
 						break;
 					case 'transport_confirmed':
 						$value = $confirmed_transport;
+						break;
+					case 'is_exclusive':
+						$value = $exclusive;
+						break;
+					case 'toll_required':
+						$value = $toll;
 						break;
 					case 'request_permit':
 						$value = $permit_requested;
@@ -747,6 +755,7 @@ Class Action {
 			'start_time' => $_POST['start_time'] ?? 'N/A',
 			'end_time' => $_POST['end_time'] ?? 'N/A',
 			'depart_time' => $_POST['depart_time'] ?? 'N/A',
+			'toll_required' => isset($_POST['toll_required']) ? 'Yes' : 'No',
 			'assignment' => $_POST['title'] ?? '',
 			'show' => $_POST['station_show'] ?? '',
 			'contact_information' => $_POST['contact_information'] ?? '',
@@ -760,7 +769,8 @@ Class Action {
 			'url' => $site_url . '/index.php?page=view_assignment&id=' . $id . '&confirm=true',
 			'uid' => $uuid,
 			'is_cancelled' => $cancelled,
-			'sb_staff'=> $_SESSION['login_sb_staff'] ?? ''
+			'sb_staff'=> $_SESSION['login_sb_staff'] ?? '',
+			
 		];
 	}
 	// Build email subject line
@@ -961,6 +971,9 @@ Class Action {
 							$value = (str_contains($subject, "Updated")) ? $value : '';
 							break;
 						case 'show':
+							$value = ($radio_staff) ? $value : '';
+							break;
+						case 'toll_required':
 							$value = ($radio_staff) ? $value : '';
 							break;
 						default:

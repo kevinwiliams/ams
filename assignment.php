@@ -235,6 +235,14 @@ if ($id) {
                                             ?>
                                         </select>
                                     </div>
+                                    <div class="form-group">
+                                        <div class="custom-control custom-switch my-2">
+                                            <input type="checkbox" class="custom-control-input" id="is_exclusive" name="is_exclusive" <?php echo isset($is_exclusive) && $is_exclusive == 1 ? 'checked' : '' ?><?= $readonlyPersonality ?>>
+                                            <label class="custom-control-label font-weight-light" for="is_exclusive">
+                                            Exclusive Show
+                                            </label>
+                                        </div>
+                                    </div>
                                     <?php } ?>
                                     <div class="form-group">
                                         <label for="title" class="control-label">Assignment</label>
@@ -271,7 +279,7 @@ if ($id) {
 
                         <div class="col-md-6 pl-3">
                             <!-- Transport Section -->
-                             <?php if (isset($_GET['id'])){ ?>
+                             <?php if (isset($_GET['id']) || $radio_staff){ ?>
                             <div class="card mb-4">
                                 <div class="card-header bg-light">
                                     <h4 class="mb-0"><i class="fas fa-car mr-2"></i>Transport <?= ($radio_staff) ? '/ Permit' : '' ?></h4>
@@ -320,6 +328,14 @@ if ($id) {
                                             <input type="checkbox" class="custom-control-input" id="request_permit" name="request_permit" <?php echo isset($request_permit) && $request_permit == 1 ? 'checked' : '' ?><?= $readonlyPersonality ?>>
                                             <label class="custom-control-label font-weight-light" for="request_permit">
                                             <?php echo (isset($request_permit) && $request_permit == 1) ? 'Permit Requested' : 'Request Permit'; ?>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="custom-control custom-switch my-2">
+                                            <input type="checkbox" class="custom-control-input" id="toll_required" name="toll_required" <?php echo isset($toll_required) && $toll_required == 1 ? 'checked' : '' ?><?= $readonlyPersonality ?>>
+                                            <label class="custom-control-label font-weight-light" for="toll_required">
+                                            <?php echo (isset($toll_required) && $toll_required == 1) ? 'Toll Requested' : 'Request Toll'; ?>
                                             </label>
                                         </div>
                                     </div>

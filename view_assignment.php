@@ -122,7 +122,7 @@ if ($id > 0) {
 $confirm = isset($_GET['confirm']) ? boolval($_GET['confirm']) : false; // Ensure confirm is bool
 
 $seen = true;
-$is_exclusive = false;
+// $is_exclusive = false;
 
 try {
     if (empty($team_members)) {
@@ -147,23 +147,23 @@ try {
 
     }
 
-    if ($radio_staff) {
-        $show_name = $station_show;
-        $station_name = '';
-        if (strpos($show_name, ':') !== false) {
-            $show_parts = explode(':', $show_name, 2);
-            $show_name = trim($show_parts[1]);
-            $station_name = trim($show_parts[0]);
-        }
+    // if ($radio_staff) {
+    //     $show_name = $station_show;
+    //     $station_name = '';
+    //     if (strpos($show_name, ':') !== false) {
+    //         $show_parts = explode(':', $show_name, 2);
+    //         $show_name = trim($show_parts[1]);
+    //         $station_name = trim($show_parts[0]);
+    //     }
 
-        $show = $conn->prepare("SELECT * FROM station_shows WHERE station = ? and show_name = ?");
-        $show->bind_param("ss", $station_name, $show_name);
-        $show->execute();
-        $exclusive = $show->get_result()->fetch_assoc();
-        if($exclusive)
-            $is_exclusive = $exclusive['is_exclusive'] == 1 ? true : false;
-        $show->close();
-    }
+    //     $show = $conn->prepare("SELECT * FROM station_shows WHERE station = ? and show_name = ?");
+    //     $show->bind_param("ss", $station_name, $show_name);
+    //     $show->execute();
+    //     $exclusive = $show->get_result()->fetch_assoc();
+    //     // if($exclusive)
+    //     //     $is_exclusive = $exclusive['is_exclusive'] == 1 ? true : false;
+    //     $show->close();
+    // }
 } catch (Exception $e) {
  echo "Error: " . $e->getMessage();
 
@@ -258,6 +258,12 @@ $conn->close();
                                         </span>
                                         <span><span class="badge bg-secondary">Gas</span> <?= htmlspecialchars($gas_level ?? 'N/A') ?></span>
                                     </div>
+                                </li>
+                                <?php endif; ?>
+                                <?php if ($radio_staff): ?>
+                                <li class="mb-2">
+                                    <strong>Toll Required:</strong> 
+                                    <?= isset($toll_required) && $toll_required ? 'Yes' : 'No' ?>
                                 </li>
                                 <?php endif; ?>
                                 <li>
