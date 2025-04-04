@@ -1469,7 +1469,9 @@ Class Action {
 			$env = $this->getEnv();
 			$emailFrom = $env->get('EMAIL_FROM');
 			$emailTable = $env->get('MSSQL_TABLE_NAME');
-
+			$user_role = $_SESSION['role_name'];
+			$radio_staff = $_SESSION['login_sb_staff'] == 1 ? true : false;
+			$req_status = ($user_role === 'Engineer') ? " (Confirmed) " : (($user_role === 'Op Manager') ? " (Approved) " : " (Pending) ");
 
 			$email = trim($email);
 			$bccEmails = "";      
@@ -1478,7 +1480,7 @@ Class Action {
 			$fromEmail = $emailFrom;   
 			$requestDetails = json_decode($message, true); // Convert back to array
 			$requestType = isset($requestDetails['items']) ? 'Outside Broadcast Form' : 'Equipment Request';
-			$subjectTxt = urlencode($requestType. " - ". date("D, M d, Y", strtotime($requestDetails['assignment_date'])));
+			$subjectTxt = urlencode($requestType . " - " . date("D, M d, Y", strtotime($requestDetails['assignment_date'])) . ($radio_staff ? $req_status : ""));
 			
 			// Create HTML structure
 			$htmlContent = '<h3>'.$requestType.'</h3>';
@@ -1655,7 +1657,8 @@ Class Action {
 		
 		if ($notify) {
 			$data['items_requested'] = $notify;
-			$data['report_status'] = 'Pending';
+			$data['report_status'] = "'Pending'";
+
 			try {
 				$this->equipment_ob_request($_POST);
 			} catch (Exception $e) {
@@ -1748,8 +1751,14 @@ Class Action {
 	// Send email request for equipment
 	function equipment_ob_request($postData) {
 		try {
+			$user_role = $_SESSION['role_name'] ?? null;
+			if ($user_role === null) {
+				return json_encode(["status" => "error", "message" => "User role not found"]);
+			}
+
 			$env = $this->getEnv();
-			$requestEmailTo = ($_SESSION['role_name'] === 'Engineer') ? $env->get('EMAIL_ITEMS_REQUEST_SB') : $env->get('EMAIL_ITEMS_REQUEST_EN');
+			$requestEmailTo = ($user_role === 'Engineer') ? $env->get('EMAIL_ITEMS_REQUEST_SB') : 
+							  ($user_role === 'Op Manager' ? $env->get('EMAIL_ITEMS_REQUEST_BC') : $env->get('EMAIL_ITEMS_REQUEST_EN'));
 			$id = intval($postData['assignment_id']) ?? null;
 			$request = intval($postData['items_requested']) ?? 0;
 			$inventory = isset($postData['inventory']) ? $postData['inventory'] : array();

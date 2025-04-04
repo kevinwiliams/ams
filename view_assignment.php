@@ -449,9 +449,9 @@ $conn->close();
                     </button>
                 <?php endif; ?>
                 
-                <?php if (in_array($user_role, ['Broadcast Coordinator', 'ITAdmin', 'Op Manager'])): ?>
+                <?php if (in_array($user_role, ['Broadcast Coordinator', 'ITAdmin', 'Op Manager', 'Engineer'])): ?>
                     <a href="index.php?page=view_site_report&id=<?= $a_id ?>" class="btn btn-outline-info mx-1">
-                        <i class="fas fa-clipboard-check mx-1"></i> View Report
+                        <i class="fas fa-clipboard-check mx-1"></i> View Req Form
                     </a>
                 <?php endif; ?>
                 

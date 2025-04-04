@@ -46,7 +46,7 @@ $result = $conn->query($query);
                                 <th>Parking</th>
                                 <th>Bathrooms</th>
                                 <th>Status</th>
-                                <th>Actions</th>
+                                <!-- <th>Actions</th> -->
                             </tr>
                         </thead>
                         <tbody>
@@ -75,22 +75,26 @@ $result = $conn->query($query);
                                         <?= $row['bathrooms_available'] ? '<span class="badge badge-success">Yes</span>' : '<span class="badge badge-danger">No</span>' ?>
                                     </td>
                                     <td class="text-center">
-                                        <?php if ($row['report_status'] == 'Pending'): ?>
-                                            <span class="badge badge-warning">Pending</span>
-                                        <?php elseif ($row['report_status'] == 'Confirmed'): ?>
-                                            <span class="badge badge-primary">Confirmed</span>
-                                        <?php elseif ($row['report_status'] == 'Approved'): ?>
-                                            <span class="badge badge-success">Approved</span>
+                                        <?php if (!empty($row['report_status'])): ?>
+                                            <?php if ($row['report_status'] == 'Pending'): ?>
+                                                <span class="badge badge-warning">Pending</span>
+                                            <?php elseif ($row['report_status'] == 'Confirmed'): ?>
+                                                <span class="badge badge-primary">Confirmed</span>
+                                            <?php elseif ($row['report_status'] == 'Approved'): ?>
+                                                <span class="badge badge-success">Approved</span>
+                                            <?php else: ?>
+                                                <span class="badge badge-secondary">Unknown</span>
+                                            <?php endif; ?>
                                         <?php else: ?>
-                                            <span class="badge badge-secondary">Unknown</span>
+                                            <span class="badge badge-secondary">No Status</span>
                                         <?php endif; ?>
                                     </td>
-                                    <td class="text-center">
+                                    <!-- <td class="text-center">
                                         <a href="index.php?page=site_report&id=<?= $row['assignment_id'] ?>" 
                                            class="btn btn-sm btn-outline-warning" title="Edit">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                    </td>
+                                    </td> -->
                                 </tr>
                             <?php endwhile; ?>
                             <?php if($result->num_rows == 0): ?>

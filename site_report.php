@@ -472,7 +472,7 @@ foreach ($all_items as $item) {
                                 }, 2500);
 
                         } else {
-                            alert_toast('Error: ' + response.message, 'danger');
+                            alert_toast('Error: ' + response.message, 'error');
                         }
                     },
                     error: function(xhr, status, error) {

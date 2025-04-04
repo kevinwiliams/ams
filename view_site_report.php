@@ -12,7 +12,8 @@ if (session_status() === PHP_SESSION_NONE) {
 $assignment_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 $user_role = $_SESSION['role_name'] ?? '';
 $radio_staff = $_SESSION['login_sb_staff'] == 1 ? true : false;
-$edit_roles = ['Broadcast Coordinator', 'Op Manager', 'ITAdmin'];
+$edit_roles = ['Broadcast Coordinator', 'Op Manager', 'Producer', 'ITAdmin', 'Engineer'];
+$tech_roles = ['Engineer'];
 
 
 if (!$assignment_id) die('Assignment ID is required');
@@ -341,24 +342,24 @@ $setup_time = $inspection['setup_time'] ?: 'Not specified';
                         <a href="index.php?page=view_assignment&id=<?= $assignment_id ?>" class="btn btn-secondary">
                             <i class="fas fa-arrow-left"></i> Back to Assignment
                         </a>
-                        <?php if (in_array($user_role, $edit_roles)): ?>
-                            <?php if ($user_role === 'Engineer' && $inspection['report_status'] === 'Pending'): ?>
+                        <?php if (in_array($user_role, $edit_roles) || in_array($user_role, $tech_roles)): ?>
+                            <?php if (isset($inspection['report_status']) && $user_role === 'Engineer' && $inspection['report_status'] === 'Pending'): ?>
                                 <button id="confirm-report-btn" class="update-status-btn btn btn-success float-right mx-2">
                                     <i class="fas fa-check-circle"></i> Confirm Report
                                 </button>
-                            <?php elseif ($user_role === 'Op Manager' && $inspection['report_status'] === 'Confirmed'): ?>
+                            <?php elseif (isset($inspection['report_status']) && $user_role === 'Op Manager' && $inspection['report_status'] === 'Confirmed'): ?>
                                 <button id="approve-report-btn" class="update-status-btn btn btn-success float-right mx-2">
                                     <i class="fas fa-check-circle"></i> Approve Report
                                 </button>
                             <?php endif; ?>
 
-                            <?php if ($inspection['report_status'] !== 'Approved'): ?>
+                            <?php if (isset($inspection['report_status']) && $inspection['report_status'] !== 'Approved' && in_array($user_role, $edit_roles)): ?>
                                 <a href="index.php?page=site_report&id=<?= $assignment_id ?>" class="btn btn-primary float-right">
                                     <i class="fas fa-edit"></i> Edit Form
                                 </a>
                             <?php endif; ?>
                         <?php endif; ?>
-                        <?php if ($inspection['report_status'] === 'Approved'): ?>
+                        <?php if (isset($inspection['report_status']) && $inspection['report_status'] === 'Approved'): ?>
                             <button onclick="window.print()" class="btn btn-primary no-print">
                                 <i class="fas fa-print"></i> Print Form
                             </button>
