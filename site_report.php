@@ -254,48 +254,65 @@ foreach ($all_items as $item) {
                         </div>
                         
                         <!-- General Notes & Amenities -->
-                        <div class="form-group col-lg-6 col-sm-12 px-lg-4">                           
-                            <label for="general_notes">Additional Notes</label>
-                            <textarea class="form-control form-control-sm summernote textarea" 
-                                      name="general_notes" id="general_notes" rows="2"><?= htmlspecialchars_decode($inspection['general_notes'] ?? '') ?>
-                            </textarea>
+                        <div class="form-group col-lg-6 col-sm-12 px-lg-4">
+                            <div class="form-group">
+                                <div class="custom-control custom-switch my-2">
+                                    <input type="checkbox" class="custom-control-input" id="toll_required" name="toll_required" value="1" <?php echo isset($inspection['toll_required']) && $inspection['toll_required'] == 1 ? 'checked' : '' ?>>
+                                    <label class="custom-control-label" for="toll_required">
+                                    <?php echo (isset($inspection['toll_required']) && $inspection['toll_required'] == 1) ? 'Toll Fee Requested' : 'Request Toll Fee'; ?>
+                                    </label>
+                                </div>
+                            </div>                           
+                            
                               
                             <!-- Amenities -->
-                            <div class="form-row my-4">
-                                <div class="col-md-6">
-                                    <label>Is parking available?</label>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="parking_available" 
-                                               id="parking_yes" value="1" <?= $inspection['parking_available'] ? 'checked' : '' ?> required>
-                                        <label class="form-check-label" for="parking_yes">Yes</label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="parking_available" 
-                                               id="parking_no" value="0" <?= !$inspection['parking_available'] ? 'checked' : '' ?>>
-                                        <label class="form-check-label" for="parking_no">No</label>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <label>Are bathrooms available?</label>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="bathrooms_available" 
-                                               id="bathrooms_yes" value="1" <?= $inspection['bathrooms_available'] ? 'checked' : '' ?> required>
-                                        <label class="form-check-label" for="bathrooms_yes">Yes</label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="bathrooms_available" 
-                                               id="bathrooms_no" value="0" <?= !$inspection['bathrooms_available'] ? 'checked' : '' ?>>
-                                        <label class="form-check-label" for="bathrooms_no">No</label>
-                                    </div>
-                                    
-                                    
-                                </div>
-                            </div>
+                            
 
                             <!-- Layout Details -->
                             <div class="card mb-3">
                                 <div class="card-header">Venue Layout</div>
                                     <div class="card-body">
+                                        <div class="form-row mb-3">
+                                            <div class="col-md-6">
+                                                <label>Is parking available?</label>
+                                                <div class="custom-control custom-switch">
+                                                    <input class="custom-control-input" type="checkbox" name="parking_available" 
+                                                           id="parking_available" value="1" <?= $inspection['parking_available'] ? 'checked' : '' ?>>
+                                                    <label class="custom-control-label" for="parking_available">Yes</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label>Are bathrooms available?</label>
+                                                <div class="custom-control custom-switch">
+                                                    <input class="custom-control-input" type="checkbox" name="bathrooms_available" 
+                                                           id="bathrooms_available" value="1" <?= $inspection['bathrooms_available'] ? 'checked' : '' ?>>
+                                                    <label class="custom-control-label" for="bathrooms_available">Yes</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <hr>
+                                        <div class="form-group">
+                                            <div class="custom-control custom-switch">
+                                                <input class="custom-control-input" type="checkbox" name="bring_your_own" id="bring_your_own" value="1" <?= isset($inspection['bring_your_own']) && $inspection['bring_your_own'] ? 'checked' : '' ?>>
+                                                <label class="custom-control-label font-weight-light" for="bring_your_own">Bring Your Own Power</label>
+                                            </div>
+                                        </div>
+                            
+                                        <div class="form-group" id="nearest_power_group" class="<?= isset($inspection['bring_your_own']) && $inspection['bring_your_own'] ? 'd-none' : '' ?>" style="">
+                                            <label for="nearest_power_source">Nearest Power Source (feet)</label>
+                                            <input type="number" class="form-control" name="nearest_power_source" id="nearest_power_source" value="<?= htmlspecialchars($inspection['nearest_power_source'] ?? '') ?>">
+                                        </div>
+                                        <hr>
+                                        <div class="form-group">
+                                            <label for="network_available">Network Available</label>
+                                            <select class="form-control custom-select-sm" name="network_available" id="network_available">
+                                                <option value="">-- Select --</option>
+                                                <option value="DIGICEL" <?= isset($inspection['network_available']) && $inspection['network_available'] == 'DIGICEL' ? 'selected' : '' ?>>DIGICEL</option>
+                                                <option value="FLOW" <?= isset($inspection['network_available']) && $inspection['network_available'] == 'FLOW' ? 'selected' : '' ?>>FLOW</option>
+                                                <option value="OTHER" <?= isset($inspection['network_available']) && $inspection['network_available'] == 'OTHER' ? 'selected' : '' ?>>OTHER</option>
+                                                <option value="NONE" <?= isset($inspection['network_available']) && $inspection['network_available'] == 'NONE' ? 'selected' : '' ?>>NONE</option>
+                                            </select>
+                                        </div>
                                         <div class="form-group">
                                             <label for="layout_notes">Layout Notes</label>
                                             <textarea class="form-control" name="layout_notes" id="layout_notes" rows="3"><?= htmlspecialchars($inspection['layout_notes'] ?? '') ?></textarea>
@@ -308,11 +325,17 @@ foreach ($all_items as $item) {
                                             <label for="banner_location">Banner Location</label>
                                             <textarea class="form-control" name="banner_location" id="banner_location" rows="2"><?= htmlspecialchars($inspection['banner_location'] ?? '') ?></textarea>
                                         </div>
+                                        
                                     </div>
                                 </div>
+                                <label for="general_notes">Additional Notes</label>
+                                <textarea class="form-control form-control-sm summernote textarea" 
+                                        name="general_notes" id="general_notes" rows="2"><?= htmlspecialchars_decode($inspection['general_notes'] ?? '') ?>
+                                </textarea>
                             </div>
+
                         </div>
-                    
+
                     <hr>
                     
                     <div class="row">
@@ -375,6 +398,22 @@ foreach ($all_items as $item) {
 
 <script>
         $(document).ready(function() {
+
+             // Update Yes/No text on toggle
+            $('#parking_available').change(function() {
+                $(this).next('label').text(this.checked ? 'Yes' : 'No');
+            }).trigger('change');
+
+            $('#bathrooms_available').change(function() {
+                $(this).next('label').text(this.checked ? 'Yes' : 'No');
+            }).trigger('change');
+
+            $('#bring_your_own').change(function() {
+                $('#nearest_power_group').toggle(!this.checked);
+            });
+            
+            // Trigger the change event on page load in case checkbox is already checked
+            $('#bring_your_own').trigger('change');
             
             $('.custom-select-sm').select2();
             $('.summernote').summernote({
@@ -431,7 +470,7 @@ foreach ($all_items as $item) {
                         }
                     },
                     error: function(xhr, status, error) {
-                        alert_toast('AJAX Error: ' + error, 'danger');
+                        alert_toast('AJAX Error: ' + error, 'error');
                         console.error(xhr.responseText);
                     },
                     complete: function() {

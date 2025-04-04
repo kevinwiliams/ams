@@ -45,6 +45,9 @@ if ($action == 'login') {
 } elseif ($action == 'equipment_request') {
     $save = $crud->equipment_request();
     if ($save) echo $save;
+} elseif ($action == 'update_report_status') {
+    $save = $crud->update_report_status();
+    if ($save) echo $save;
 }elseif ($action == 'save_inspection') {
     $save = $crud->save_inspection();
     if ($save) echo $save;

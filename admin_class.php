@@ -1635,11 +1635,12 @@ Class Action {
 		$notify = isset($items_requested) ? 1 : 0;
 		
 		// Build the data array with proper escaping
-		foreach($_POST as $k => $v) {
-			if(!in_array($k, array('id', 'permits', 'permit_notes', 'inventory', 'assignment_id','assignment_title', 'assignment_date', 'assignment_time','items_requested'))) {
-				if($k == 'general_notes' || $k == 'layout_notes' || $k == 'tent_location' || $k == 'banner_location') {
+		foreach ($_POST as $k => $v) {
+			if (!empty($v) && !in_array($k, array('id', 'permits', 'permit_notes', 'inventory', 'assignment_id', 'assignment_title', 'assignment_date', 'assignment_time', 'items_requested'))) {
+				if (in_array($k, array('general_notes', 'layout_notes', 'tent_location', 'banner_location'))) {
 					$data[$k] = "'" . $this->db->real_escape_string(htmlspecialchars($v, ENT_QUOTES, 'UTF-8')) . "'";
 				} else {
+					// Escape and sanitize other fields
 					$data[$k] = is_numeric($v) ? $v : "'" . $this->db->real_escape_string($v) . "'";
 				}
 			}
@@ -1654,7 +1655,11 @@ Class Action {
 		
 		if ($notify) {
 			$data['items_requested'] = $notify;
-			$this->equipment_ob_request($_POST);
+			try {
+				$this->equipment_ob_request($_POST);
+			} catch (Exception $e) {
+				return json_encode(['status' => 'error', 'message' => 'Failed to send equipment request: ' . $e->getMessage()]);
+			}
 		}
 		// Start transaction
 		$this->db->begin_transaction();
@@ -1675,48 +1680,58 @@ Class Action {
 			} else {
 				// Update existing inspection
 				$sql = "UPDATE venue_inspections SET $set_clause WHERE id = $inspection_id";
+				// Debug: Output the SQL query
+				//echo("SQL Query: " . $sql);
 				$save = $this->db->query($sql);
 			}
 	
 			if($save) {
 				// Handle permits
-				$this->db->query("DELETE FROM venue_permits WHERE inspection_id = $inspection_id");
-				if(!empty($permits)) {
-					foreach($permits as $permit_type) {
-						$permit_type = $this->db->real_escape_string($permit_type);
-						$this->db->query("INSERT INTO venue_permits (inspection_id, permit_type, notes) VALUES ($inspection_id, '$permit_type', '$permit_notes')");
+				try {
+					$this->db->query("DELETE FROM venue_permits WHERE inspection_id = $inspection_id");
+					if(!empty($permits)) {
+						foreach($permits as $permit_type) {
+							$permit_type = $this->db->real_escape_string($permit_type);
+							$this->db->query("INSERT INTO venue_permits (inspection_id, permit_type, notes) VALUES ($inspection_id, '$permit_type', '$permit_notes')");
+						}
 					}
+				} catch (Exception $e) {
+					throw new Exception('Failed to handle permits: ' . $e->getMessage());
 				}
 	
 				// Handle inventory
-				if(!empty($inventory)) {
-					foreach($inventory as $item) {
-						$item_id = $this->db->real_escape_string($item['item_id']);
-						$status = isset($item['status']) ? 1 : 0;
-						$quantity = isset($item['quantity']) ? intval($item['quantity']) : 0;
-						$notes = isset($item['notes']) ? $this->db->real_escape_string($item['notes']) : '';
-						
-						// Check if inventory record already exists
-						$check = $this->db->query("SELECT * FROM ob_inventory 
-												   WHERE assignment_id = $assignment_id 
-												   AND item_id = '$item_id'");
-						
-						if($check->num_rows > 0) {
-							// Update existing record
-							$this->db->query("UPDATE ob_inventory SET 
-											  status = $status,
-											  quantity = $quantity,
-											  notes = '$notes',
-											  updated_at = NOW()
-											  WHERE assignment_id = $assignment_id 
-											  AND item_id = '$item_id'");
-						} else {
-							// Insert new record
-							$this->db->query("INSERT INTO ob_inventory 
-											  (assignment_id, item_id, status, quantity, notes) 
-											  VALUES ($assignment_id, '$item_id', $status, $quantity, '$notes')");
+				try {
+					if(!empty($inventory)) {
+						foreach($inventory as $item) {
+							$item_id = $this->db->real_escape_string($item['item_id']);
+							$status = isset($item['status']) ? 1 : 0;
+							$quantity = isset($item['quantity']) ? intval($item['quantity']) : 0;
+							$notes = isset($item['notes']) ? $this->db->real_escape_string($item['notes']) : '';
+							
+							// Check if inventory record already exists
+							$check = $this->db->query("SELECT * FROM ob_inventory 
+													   WHERE assignment_id = $assignment_id 
+													   AND item_id = '$item_id'");
+							
+							if($check->num_rows > 0) {
+								// Update existing record
+								$this->db->query("UPDATE ob_inventory SET 
+												  status = $status,
+												  quantity = $quantity,
+												  notes = '$notes',
+												  updated_at = NOW()
+												  WHERE assignment_id = $assignment_id 
+												  AND item_id = '$item_id'");
+							} else {
+								// Insert new record
+								$this->db->query("INSERT INTO ob_inventory 
+												  (assignment_id, item_id, status, quantity, notes) 
+												  VALUES ($assignment_id, '$item_id', $status, $quantity, '$notes')");
+							}
 						}
 					}
+				} catch (Exception $e) {
+					throw new Exception('Failed to handle inventory: ' . $e->getMessage());
 				}
 	
 				$this->db->commit();
@@ -1806,6 +1821,41 @@ Class Action {
 			);
 		} catch (Exception $e) {
 			return json_encode(["status" => "error", "message" => $e->getMessage()]);
+		}
+	}
+
+	function update_report_status() {
+		extract($_POST);
+
+		if (!isset($assignment_id) || !isset($report_status)) {
+			return json_encode(['status' => 'error', 'message' => 'Invalid input data']);
+		}
+
+		$assignment_id = intval($assignment_id);
+		$report_status = $this->db->real_escape_string($report_status);
+		$current_datetime = date("Y-m-d H:i:s");
+
+		$role_name = $_SESSION['role_name'] ?? null;
+		$login_id = $_SESSION['login_id'] ?? null;
+
+		try {
+			if ($role_name === 'Engineer') {
+				$stmt = $this->db->prepare("UPDATE venue_inspections SET report_status = ?, confirmed_at = ? WHERE assignment_id = ?");
+				$stmt->bind_param("ssi", $report_status, $current_datetime, $assignment_id);
+			} elseif ($role_name === 'Op Manager') {
+				$stmt = $this->db->prepare("UPDATE venue_inspections SET report_status = ?, approved_at = ?, approved_by = ? WHERE assignment_id = ?");
+				$stmt->bind_param("ssii", $report_status, $current_datetime, $login_id, $assignment_id);
+			} else {
+				return json_encode(['status' => 'error', 'message' => 'Unauthorized role']);
+			}
+
+			if ($stmt->execute()) {
+				return json_encode(['status' => 'success', 'message' => 'Report status updated successfully']);
+			} else {
+				return json_encode(['status' => 'error', 'message' => 'Failed to update report status']);
+			}
+		} catch (Exception $e) {
+			return json_encode(['status' => 'error', 'message' => $e->getMessage()]);
 		}
 	}
 	

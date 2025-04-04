@@ -90,7 +90,20 @@ $setup_time = $inspection['setup_time'] ?: 'Not specified';
                         <hr>
                     </div>
                 </div>
-
+                <form id="inspection-form">
+                    <input type="hidden" name="assignment_id" value="<?= $assignment_id ?>">
+                    <?php
+                        $report_status = '';
+                        if (in_array($user_role, ['Producer', 'Broadcast Coordinator'])) {
+                            $report_status = 'Pending';
+                        } elseif ($user_role === 'Engineer') {
+                            $report_status = 'Confirmed';
+                        } elseif ($user_role === 'Op Manager') {
+                            $report_status = 'Approved';
+                        }
+                    ?>
+                    <input type="hidden" name="report_status" value="<?= $report_status ?>">
+                </form>
                 <!-- Basic Information -->
                 <div class="row mb-4">
                     <div class="col-md-6">
@@ -100,9 +113,19 @@ $setup_time = $inspection['setup_time'] ?: 'Not specified';
                             </div>
                             <div class="card-body">
                                 <p><strong>Site Visit Date:</strong> <?= $site_visit_date ?></p>
+                                <p><strong>Toll Required:</strong> <?= $inspection['toll_required'] ? 'Yes' : 'No' ?></p>
                                 <p><strong>Setup Time:</strong> <?= $setup_time ?></p>
                                 <p><strong>Parking Available:</strong> <?= $inspection['parking_available'] ? 'Yes' : 'No' ?></p>
                                 <p><strong>Bathrooms Available:</strong> <?= $inspection['bathrooms_available'] ? 'Yes' : 'No' ?></p>
+                                <p><strong>Network:</strong> <?= $inspection['network_available'] ?? 'Not Assigned' ?></p>
+                                <p><strong>Power Source:</strong> 
+                                    <?php if (!empty($inspection['bring_your_own'])): ?>
+                                        Bring own power source
+                                    <?php else: ?>
+                                        <?= isset($inspection['nearest_power_source']) ? $inspection['nearest_power_source'] . ' Feet' : 'Not Assigned' ?>
+                                    <?php endif; ?>
+                                </p>
+
                             </div>
                         </div>
                         <!-- Show & Personnel Card -->
@@ -289,7 +312,7 @@ $setup_time = $inspection['setup_time'] ?: 'Not specified';
                                 <i class="fas fa-file-alt"></i> Permits & Notes
                             </div>
                             <div class="card-body">
-                                <?php if (!empty($permits)): ?>
+                                <?php if (!empty($permits) && array_filter($permits)): ?>
                                     <h6>Permits Obtained:</h6>
                                     <ul>
                                         <?php foreach ($permits as $permit): ?>
@@ -301,8 +324,8 @@ $setup_time = $inspection['setup_time'] ?: 'Not specified';
                                     <p class="text-muted">No permits recorded</p>
                                 <?php endif; ?>
 
-
-                                <?php if ($inspection['general_notes']): ?>
+                                <!-- General Notes -->
+                                <?php if (!empty(trim($inspection['general_notes']))): ?>
                                     <h6>Additional Notes:</h6>
                                     <div class="border p-2 bg-white">
                                         <?= nl2br(htmlspecialchars_decode($inspection['general_notes'])) ?>
@@ -319,13 +342,27 @@ $setup_time = $inspection['setup_time'] ?: 'Not specified';
                             <i class="fas fa-arrow-left"></i> Back to Assignment
                         </a>
                         <?php if (in_array($user_role, $edit_roles)): ?>
-                            <a href="index.php?page=site_report&id=<?= $assignment_id ?>" class="btn btn-primary float-right">
-                                <i class="fas fa-edit"></i> Edit Inspection
-                            </a>
+                            <?php if ($user_role === 'Engineer' && $inspection['report_status'] === 'Pending'): ?>
+                                <button id="confirm-report-btn" class="update-status-btn btn btn-success float-right mx-2">
+                                    <i class="fas fa-check-circle"></i> Confirm Report
+                                </button>
+                            <?php elseif ($user_role === 'Op Manager' && $inspection['report_status'] === 'Confirmed'): ?>
+                                <button id="approve-report-btn" class="update-status-btn btn btn-success float-right mx-2">
+                                    <i class="fas fa-check-circle"></i> Approve Report
+                                </button>
+                            <?php endif; ?>
+
+                            <?php if ($inspection['report_status'] !== 'Approved'): ?>
+                                <a href="index.php?page=site_report&id=<?= $assignment_id ?>" class="btn btn-primary float-right">
+                                    <i class="fas fa-edit"></i> Edit Inspection
+                                </a>
+                            <?php endif; ?>
                         <?php endif; ?>
-                        <!-- <button onclick="printCard()" class="btn btn-primary no-print">
-                            <i class="fas fa-print"></i> Print Report
-                        </button> -->
+                        <?php if ($inspection['report_status'] === 'Approved'): ?>
+                            <button onclick="printCard()" class="btn btn-primary no-print">
+                                <i class="fas fa-print"></i> Print Report
+                            </button>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -378,5 +415,66 @@ $setup_time = $inspection['setup_time'] ?: 'Not specified';
         printWindow.document.close();
 
         // printWindow.print();
-}//
+    }//
+
+    $(document).ready(function() {
+        $(document).on('click', '.update-status-btn', function(e) {
+            e.preventDefault();
+            
+            // Get form data
+            var formData = {
+                assignment_id: $('#inspection-form').find('input[name="assignment_id"]').val(),
+                report_status: $('#inspection-form').find('input[name="report_status"]').val()
+            };
+
+            // Validate required fields
+            if (!formData.assignment_id || !formData.report_status) {
+                alert_toast('Please make sure all required fields are filled', 'error');
+                return false;
+            }
+
+            // Show confirmation dialog
+            alert_toast('', 'warning', '', {
+                isConfirmation: true,
+                title: 'Update Report Status',
+                text: 'Are you sure you want to update this report status?',
+                confirmText: 'Yes, update it',
+                confirmCallback: function() {
+                    // Show loading indicator
+                    alert_toast('Updating report status...', 'info', '', {
+                        showSuccessButton: false,
+                        timer: null // No auto-close
+                    });
+
+                    // Make AJAX request
+                    $.ajax({
+                        url: 'ajax.php?action=update_report_status', // Update with your endpoint
+                        type: 'POST',
+                        dataType: 'json',
+                        data: formData,
+                        success: function(response) {
+                            Swal.close(); // Close loading dialog
+                            if (response.status === 'success') {
+                                window.alert_toast(response.message, 'success', '', {
+                                    timer: 2000,
+                                    showSuccessButton: false
+                                });
+                                // Optional: Reload page or update UI after delay
+                                setTimeout(function() {
+                                    location.reload();
+                                }, 2000);
+                            } else {
+                                window.alert_toast(response.message, 'error');
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            Swal.close(); // Close loading dialog
+                            window.alert_toast('An error occurred: ' + error, 'error');
+                        }
+                    });
+                }
+            });
+        });
+    
+    });
 </script>
