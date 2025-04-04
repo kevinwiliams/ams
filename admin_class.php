@@ -1477,7 +1477,7 @@ Class Action {
 			$ccEmails = trim($_SESSION['login_email']);      
 			$fromEmail = $emailFrom;   
 			$requestDetails = json_decode($message, true); // Convert back to array
-			$requestType = isset($requestDetails['items']) ? 'Outside Broadcast Equipment' : 'Equipment Request';
+			$requestType = isset($requestDetails['items']) ? 'Outside Broadcast Form' : 'Equipment Request';
 			$subjectTxt = urlencode($requestType. " - ". date("D, M d, Y", strtotime($requestDetails['assignment_date'])));
 			
 			// Create HTML structure
@@ -1655,6 +1655,7 @@ Class Action {
 		
 		if ($notify) {
 			$data['items_requested'] = $notify;
+			$data['report_status'] = 'Pending';
 			try {
 				$this->equipment_ob_request($_POST);
 			} catch (Exception $e) {
@@ -1748,7 +1749,7 @@ Class Action {
 	function equipment_ob_request($postData) {
 		try {
 			$env = $this->getEnv();
-			$requestEmailTo = $env->get('EMAIL_ITEMS_REQUEST_SB');
+			$requestEmailTo = ($_SESSION['role_name'] === 'Engineer') ? $env->get('EMAIL_ITEMS_REQUEST_SB') : $env->get('EMAIL_ITEMS_REQUEST_EN');
 			$id = intval($postData['assignment_id']) ?? null;
 			$request = intval($postData['items_requested']) ?? 0;
 			$inventory = isset($postData['inventory']) ? $postData['inventory'] : array();
@@ -1801,8 +1802,9 @@ Class Action {
 				'duration' => $postData['assignment_time'] ?? 'N/A',
 				'assignment' => $postData['assignment_title'] ?? '',
 				'items' => urlencode($details ?? ''),
-				'broadcast_technician' => ':',
-				'security' => ':',
+				// 'broadcast_technician' => ':',
+				// 'security' => ':',
+				'confirm_form' => $env->get('SITE_URL').'/index.php?view_site_report&id='.$id,
 			];
 	
 			$stmt = $this->db->prepare("UPDATE venue_inspections SET items_requested = ? WHERE id = ?");

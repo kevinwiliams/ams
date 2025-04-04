@@ -74,7 +74,7 @@ $setup_time = $inspection['setup_time'] ?: 'Not specified';
                             <div>
                                 <p class="h5">
                                     <i class="fas fa-clipboard-check"></i>
-                                    <span class="text-muted">Report:</span> <?= htmlspecialchars_decode($assignment['title']) ?>
+                                    <span class="text-muted">Form :</span> <?= htmlspecialchars_decode($assignment['title']) ?>
                                 </p>
                                 <p class="text-muted">
                                     <i class="fas fa-map-marker-alt"></i> <?= htmlspecialchars($assignment['location']) ?>
@@ -354,13 +354,13 @@ $setup_time = $inspection['setup_time'] ?: 'Not specified';
 
                             <?php if ($inspection['report_status'] !== 'Approved'): ?>
                                 <a href="index.php?page=site_report&id=<?= $assignment_id ?>" class="btn btn-primary float-right">
-                                    <i class="fas fa-edit"></i> Edit Inspection
+                                    <i class="fas fa-edit"></i> Edit Form
                                 </a>
                             <?php endif; ?>
                         <?php endif; ?>
                         <?php if ($inspection['report_status'] === 'Approved'): ?>
-                            <button onclick="printCard()" class="btn btn-primary no-print">
-                                <i class="fas fa-print"></i> Print Report
+                            <button onclick="window.print()" class="btn btn-primary no-print">
+                                <i class="fas fa-print"></i> Print Form
                             </button>
                         <?php endif; ?>
                     </div>

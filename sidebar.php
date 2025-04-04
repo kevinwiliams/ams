@@ -50,7 +50,7 @@ $login_name = isset($_SESSION['login_name']) ? $_SESSION['login_name'] : 'User';
                     <li class="nav-item dropdown">
                         <a href="./index.php?page=site_reports" class="nav-link nav-site_reports">
                             <i class="nav-icon fas fa-search-location"></i>
-                            <p>Inspections</p>
+                            <p>Req Forms</p>
                         </a>
                     </li>
 

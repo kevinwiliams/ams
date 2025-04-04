@@ -130,7 +130,7 @@ foreach ($all_items as $item) {
                             <div>
                                 <p class="h5">
                                     <i class="fas fa-clipboard-check"></i>
-                                    <span class="text-muted">Report:</span> <?= htmlspecialchars($assignment['title']) ?>
+                                    <span class="text-muted">Form :</span> <?= htmlspecialchars($assignment['title']) ?>
                                 </p>
                                 <p class="text-muted mb-1">
                                 
@@ -243,7 +243,7 @@ foreach ($all_items as $item) {
                                             <?php endforeach; ?>
                                         </tbody>
                                     </table>
-                                    <div class="custom-control custom-switch d-none">
+                                    <div class="custom-control custom-switch">
                                         <input type="checkbox" class="custom-control-input text-primary" id="items_requested" name="items_requested" <?php //= isset($inspection['items_requested']) && $inspection['items_requested'] == 1 ? 'checked' : '' ?>>
                                         <label class="custom-control-label text-primary font-weight-light" for="items_requested">
                                         <?= isset($inspection['items_requested']) && $inspection['items_requested'] == 1 ? 'Form Sent' : 'Send Equipment Form' ?>
@@ -377,16 +377,22 @@ foreach ($all_items as $item) {
                             </div>
                         </div>
                     </div>
-                    
-                    <div class="row">
-                    
-                        <div class="col">
-                            <button type="submit" class="btn btn-primary mr-2" id="saveBtn">
-                                <i class="fas fa-save"></i> Save Inspection
-                            </button>
-                            <a href="index.php?page=view_site_report&id=<?= $assignment_id ?>" class="btn btn-secondary">
+
+                    <!-- Form Footer -->
+                    <div class="card mt-1">
+                        <div class="card-body d-flex justify-content-between align-items-center">
+                         
+                            
+                            <div class="ml-auto">
+                             
+                                <a href="index.php?page=view_site_report&id=<?= $assignment_id ?>" class="btn btn-secondary mr-2">
                                 <i class="fas fa-times"></i> Cancel
                             </a>
+                                <button type="submit" class="btn btn-primary " id="saveBtn">
+                                <i class="fas fa-save"></i> Save Form
+                            </button>
+                            
+                            </div>
                         </div>
                     </div>
                 </form>
