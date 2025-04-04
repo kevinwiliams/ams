@@ -326,7 +326,7 @@ $setup_time = $inspection['setup_time'] ?: 'Not specified';
                                 <?php endif; ?>
 
                                 <!-- General Notes -->
-                                <?php if (!empty(trim($inspection['general_notes']))): ?>
+                                <?php if (!empty(($inspection['general_notes']))): ?>
                                     <h6>Additional Notes:</h6>
                                     <div class="border p-2 bg-white">
                                         <?= nl2br(htmlspecialchars_decode($inspection['general_notes'])) ?>
