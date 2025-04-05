@@ -12,6 +12,7 @@ $create_roles = ['Manager', 'ITAdmin', 'Editor', 'Dept Admin', 'Security','Op Ma
 $report_roles = ['Manager', 'ITAdmin', 'Editor', 'Dept Admin','Op Manager' ];
 $show_roles = ['Op Manager','ITAdmin'];
 $it_roles = ['ITAdmin'];
+$req_roles = ['ITAdmin', 'Op Manager', 'Broadcast Coordinator', 'Producer', 'Broadcast Coordinator'];
 
 
 // Check if the required session variables are set, otherwise, default to a safe state
@@ -46,14 +47,15 @@ $login_name = isset($_SESSION['login_name']) ? $_SESSION['login_name'] : 'User';
                         <p>Assignments</p>
                     </a>
                 </li>
-                <?php if (in_array($user_role, $show_roles)): ?>
+                <?php if (in_array($user_role, $req_roles)): ?>
                     <li class="nav-item dropdown">
                         <a href="./index.php?page=site_reports" class="nav-link nav-site_reports">
                             <i class="nav-icon fas fa-search-location"></i>
                             <p>Req Forms</p>
                         </a>
                     </li>
-
+                    <?php endif; ?>
+                    <?php if (in_array($user_role, $show_roles)): ?>
                     <li class="nav-item dropdown">
                         <a href="./index.php?page=station_shows" class="nav-link nav-shows">
                             <i class="nav-icon fa fa-bullhorn"></i>
