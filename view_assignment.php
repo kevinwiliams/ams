@@ -427,7 +427,7 @@ $conn->close();
                
                 
                 if (in_array($user_role, $edit_roles)): ?>
-                    <?php if (!str_contains($_SERVER['HTTP_REFERER'], 'page=assignment_')): ?>
+                    <?php if (isset($_SERVER['HTTP_REFERER']) && !str_contains($_SERVER['HTTP_REFERER'], 'page=assignment_')): ?>
                         <a href="index.php?page=assignment_list" class="btn btn-outline-secondary">
                             <i class="fas fa-list me-2"></i> Back to List
                         </a>
