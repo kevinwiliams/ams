@@ -1758,7 +1758,7 @@ Class Action {
 
 			$env = $this->getEnv();
 			$requestEmailTo = ($user_role === 'Engineer') ? $env->get('EMAIL_ITEMS_REQUEST_SB') : 
-							  ($user_role === 'Op Manager' ? $env->get('EMAIL_ITEMS_REQUEST_BC') : $env->get('EMAIL_ITEMS_REQUEST_EN'));
+								($user_role === 'Op Manager' ? $env->get('EMAIL_ITEMS_REQUEST_BC') : $env->get('EMAIL_ITEMS_REQUEST_EN'));
 			$id = intval($postData['assignment_id']) ?? null;
 			$request = intval($postData['items_requested']) ?? 0;
 			$inventory = isset($postData['inventory']) ? $postData['inventory'] : array();
@@ -1834,7 +1834,7 @@ Class Action {
 			return json_encode(["status" => "error", "message" => $e->getMessage()]);
 		}
 	}
-
+	// Update report status and send email
 	function update_report_status() {
 		extract($_POST);
 
@@ -1842,6 +1842,7 @@ Class Action {
 			return json_encode(['status' => 'error', 'message' => 'Invalid input data']);
 		}
 
+		$env = $this->getEnv();
 		$assignment_id = intval($assignment_id);
 		$report_status = $this->db->real_escape_string($report_status);
 		$current_datetime = date("Y-m-d H:i:s");
@@ -1850,7 +1851,11 @@ Class Action {
 		$login_id = $_SESSION['login_id'] ?? null;
 
 		try {
-			if ($role_name === 'Engineer') {
+			// Update the report status based on the role
+			if (in_array($role_name,['Broadcast Coordinator', 'Producer'])) {
+				$stmt = $this->db->prepare("UPDATE venue_inspections SET report_status = ?, updated_at = ? WHERE assignment_id = ?");
+				$stmt->bind_param("ssi", $report_status, $current_datetime, $assignment_id);
+			} elseif ($role_name === 'Engineer') {
 				$stmt = $this->db->prepare("UPDATE venue_inspections SET report_status = ?, confirmed_at = ? WHERE assignment_id = ?");
 				$stmt->bind_param("ssi", $report_status, $current_datetime, $assignment_id);
 			} elseif ($role_name === 'Op Manager') {
@@ -1861,7 +1866,46 @@ Class Action {
 			}
 
 			if ($stmt->execute()) {
-				return json_encode(['status' => 'success', 'message' => 'Report status updated successfully']);
+				// Fetch assignment details for the email
+				$query = "SELECT a.title AS assignment_title, a.assignment_date, a.start_time, a.end_time, v.items_requested 
+						  FROM assignment_list a 
+						  JOIN venue_inspections v ON a.id = v.assignment_id 
+						  WHERE a.id = ?";
+				$detailsStmt = $this->db->prepare($query);
+				$detailsStmt->bind_param("i", $assignment_id);
+				$detailsStmt->execute();
+				$result = $detailsStmt->get_result()->fetch_assoc();
+				$detailsStmt->close();
+
+				if ($result) {
+					// Prepare email details
+					$emailDetails = [
+						'assignment_date' => date("D, M d, Y", strtotime($result['assignment_date'])),
+						'duration' => $result['start_time'] . ' - ' . $result['end_time'],
+						'assignment' => $result['assignment_title'],
+						'status' => $report_status,
+						'url' => $env->get('SITE_URL') . '/index.php?page=view_site_report&id=' . $assignment_id,
+					];
+
+					// Determine recipient email based on role
+					$requestEmailTo = ($role_name === 'Engineer') ? $env->get('EMAIL_ITEMS_REQUEST_SB') : 
+									  ($role_name === 'Op Manager' ? $env->get('EMAIL_ITEMS_REQUEST_BC') : $env->get('EMAIL_ITEMS_REQUEST_EN'));
+
+					// Send the email
+					$message = [
+						'subject' => 'Requisition Form - ' . $emailDetails['assignment'].' ('.$emailDetails['status'].')',
+						'body' => '<h3>Requisition for OB</h3>' .
+								  '<p><strong>Assignment:</strong> ' . $emailDetails['assignment'] . '</p>' .
+								  '<p><strong>Date:</strong> ' . $emailDetails['assignment_date'] . '</p>' .
+								  '<p><strong>Duration:</strong> ' . $emailDetails['duration'] . '</p>' .
+								  '<p><strong>Status:</strong> ' . $emailDetails['status'] . '</p>' .
+								  '<p><strong>Submitted By:</strong> ' . $_SESSION['login_firstname'].' '.$_SESSION['login_lastname'] . '</p>' .
+								  '<p><strong>View Form:</strong> <a href="' . $emailDetails['url'] . '">' . $emailDetails['url'] . '</a></p>',
+					];
+					$this->send_mail($requestEmailTo, $message);
+				}
+
+				return json_encode(['status' => 'success', 'message' => 'Report status updated and email sent successfully']);
 			} else {
 				return json_encode(['status' => 'error', 'message' => 'Failed to update report status']);
 			}
