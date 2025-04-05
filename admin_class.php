@@ -1162,7 +1162,7 @@ Class Action {
 			$env = $this->getEnv();
 			$emailFrom = $env->get('EMAIL_FROM');
 			$emailTable = $env->get('MSSQL_TABLE_NAME');
-			$copyEmail = $env->get('EMAIL_CC');
+			$copyEmail = (str_contains($bodyDetails['body'], "Form")) ? $_SESSION['login_email'] : $env->get('EMAIL_CC');
 
 			$bccEmails = "";      
 			$ccEmails = str_replace(',', ';', $copyEmail);        
