@@ -8,7 +8,11 @@ if ($conn->connect_error) {
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+
+$user_role = $_SESSION['role_name'];
+$create_roles = ['Manager', 'ITAdmin', 'Editor', 'Dept Admin','Op Manager' ];
 $channels = [];
+
 
 // Retrieve the user ID from the URL
 $id = $_GET['id'] ?? '';
@@ -63,6 +67,12 @@ if ($id) {
                                     <label for="empid" class="form-label">Employee ID</label>
                                     <input type="text" class="form-control" value="<?= htmlspecialchars($empid ?? '') ?>" readonly>
                                 </div>
+                                <div class="form-group">
+                                    <div class="custom-control custom-switch my-2">
+                                        <input type="checkbox" class="custom-control-input" id="sb_staff" name="sb_staff" value="1"  <?= isset($sb_staff) && $sb_staff == 1 ? 'checked' : '' ?>>
+                                        <label class="custom-control-label" for="sb_staff">S&B Staff</label>
+                                    </div>
+                                </div>
                                 
                                 <div class="mb-3">
                                     <label for="firstname" class="form-label">First Name <span class="text-danger">*</span></label>
@@ -75,6 +85,13 @@ if ($id) {
                                     <input type="text" class="form-control" id="lastname" name="lastname" 
                                            value="<?= htmlspecialchars($lastname ?? '') ?>" required>
                                 </div>
+
+                                <div class="mb-3" id="alis_div" <?= isset($sb_staff) && $sb_staff == 1 ? '' :  'style="display:none;"' ?>>
+                                    <label for="alias" class="form-label">Alias <span class="text-muted">(optional)</span></label>
+                                    <input type="text" class="form-control" id="alias" name="alias" 
+                                            placeholder="e.g. DJ Cool Cat"
+                                           value="<?= htmlspecialchars($alias ?? '') ?>" required>
+                                </div>
                                 
                                 <div class="mb-3">
                                     <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
@@ -82,10 +99,26 @@ if ($id) {
                                            value="<?= htmlspecialchars($email ?? '') ?>" required>
                                 </div>
                                 
-                                <div class="form-check mb-3">
-                                    <input class="form-check-input" type="checkbox" id="sb_staff" name="sb_staff" 
-                                           <?= isset($sb_staff) && $sb_staff == 1 ? 'checked' : '' ?>>
-                                    <label class="form-check-label" for="sb_staff">S&B Staff</label>
+                                  
+                                <div class="card border-0 shadow-sm" id="station_div" <?= isset($sb_staff) && $sb_staff == 1 ? '' : 'style="display:none;"' ?>>
+                                    <div class="card-header bg-light">
+                                        <h6 class="mb-0">Radio Station(s)</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" name="station[]" 
+                                                   id="fyah" value="FYAH" 
+                                                   <?= isset($station) && in_array('FYAH', explode(',', $station)) ? 'checked' : '' ?>>
+                                            <label class="form-check-label" for="fyah">FYAH</label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" name="station[]" 
+                                                   id="edge" value="EDGE" 
+                                                   <?= isset($station) && in_array('EDGE', explode(',', $station)) ? 'checked' : '' ?>>
+                                            <label class="form-check-label" for="edge">EDGE</label>
+                                        </div>
+                                        
+                                    </div>
                                 </div>
                             </div>
                             
@@ -165,7 +198,7 @@ if ($id) {
                     </div>
                     
                     <!-- Footer -->
-                    <?php if (isset($login_role_id) && $login_role_id < 5): ?>
+                    <?php if (in_array($user_role, $create_roles)): ?>
                     <div class="card-footer bg-light">
                         <div class="d-flex justify-content-between align-items-center">
                             <button type="submit" class="btn btn-primary mx-3">
@@ -245,6 +278,16 @@ $(document).ready(function(){
         } else {
             passwordField.attr('type', 'password');
             icon.removeClass('fa-eye-slash').addClass('fa-eye');
+        }
+    });
+
+    $('#sb_staff').change(function() {
+        if ($(this).is(':checked')) {
+            $('#alis_div').show();
+            $('#station_div').show();
+        } else {
+            $('#alis_div').hide();
+            $('#station_div').hide();
         }
     });
 });                                        

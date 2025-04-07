@@ -393,7 +393,7 @@ if ($id) {
                                                                 ORDER BY r.role_name, u.firstname");
 
                                 // DJs
-                                $dj_qry = $conn->query("SELECT u.empid, u.firstname, u.lastname, r.role_name 
+                                $dj_qry = $conn->query("SELECT u.empid, COALESCE(u.alias, CONCAT(u.firstname, ' ', u.lastname)) AS display_name, r.role_name 
                                                     FROM users u 
                                                     JOIN roles r ON r.role_id = u.role_id
                                                     WHERE r.role_name in ('DJ')
@@ -557,7 +557,7 @@ if ($id) {
                                                         
                                                     ?>
                                                     <option value="<?php echo htmlspecialchars($user_row['empid']); ?>" <?php  echo isset($djs) && in_array($user_row['empid'], $djs) ? 'selected' : '' ?>>
-                                                        <?php echo trim($user_row['firstname']) . ' ' . trim($user_row['lastname']).' ('.$user_row['role_name'].')'; ?>
+                                                        <?php echo trim($user_row['display_name']).' ('.$user_row['role_name'].')'; ?>
                                                     </option>
                                                     <?php 
                                                         endwhile;

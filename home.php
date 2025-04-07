@@ -58,9 +58,13 @@ $recentQry = "SELECT a.*,t.*,v.*,
     t.id AS transport_log_id,
     t.transport_id,
     v.id AS vehicle_id,
-
                 (SELECT GROUP_CONCAT(
-                    CONCAT(u.firstname, ' ', u.lastname, ' (', r.role_name, ')', 
+                    CONCAT(
+                        CASE 
+                            WHEN u.alias IS NOT NULL AND u.alias <> '' THEN u.alias
+                            ELSE CONCAT(u.firstname, ' ', u.lastname)
+                        END, 
+                        ' (', r.role_name, ')', 
                         CASE 
                             WHEN EXISTS (
                                 SELECT 1 

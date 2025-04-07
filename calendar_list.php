@@ -21,11 +21,16 @@ if(in_array($user_role,  $freelance_roles)){
 
 $query = "SELECT a.*,  
 (SELECT GROUP_CONCAT(
-        CONCAT('<b>',u.firstname, ' ', u.lastname, '</b> (', r.role_name, ')'
-            
-        ) SEPARATOR ', ')  
-     FROM users u 
-     LEFT JOIN roles r ON u.role_id = r.role_id
+                    CONCAT(
+                        CASE 
+                            WHEN u.alias IS NOT NULL AND u.alias <> '' THEN u.alias
+                            ELSE CONCAT(u.firstname, ' ', u.lastname)
+                        END, 
+                        ' (', r.role_name, ')'
+                    
+                    ) SEPARATOR ', ') 
+                FROM users u 
+                LEFT JOIN roles r ON u.role_id = r.role_id
      WHERE FIND_IN_SET(u.empid, a.team_members)) AS team_members_names_with_roles,
     (SELECT CONCAT(u.firstname, ' ', u.lastname) 
      FROM users u 
@@ -58,7 +63,7 @@ while ($row = $result->fetch_assoc()) {
         .'<br><b>Start Time:</b> '.$row['start_time'].((!empty($row['end_time'])) ? ' - <b>End Time:</b> '. $row['end_time'] : '')
         .'<br><b>Assigned By:</b> '.$row['assigned_by_name']
         .'<br><br><small><b>Team:</b> '.$row['team_members_names_with_roles'].'</small>'
-        .(!empty($row['team_members_names_with_roles']) ? ', ' : '').$resourcesRequested,
+        .(!empty($row['team_members_names_with_roles']) && !empty($resourcesRequested) ? ', ' : '') . $resourcesRequested,
         'textColor' => ($row['is_cancelled'] == 1 ? 'red' : 'black'),
         'backgroundColor' => ($row['is_cancelled'] == 1 ? 'red' : 'green'),
     ];

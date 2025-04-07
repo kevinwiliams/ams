@@ -9,6 +9,9 @@ $login_empid = intval($login_empid);
 $sessionempid = $_SESSION['login_empid'] ?? 0; // Ensure proper initialization
 $radio_staff = $_SESSION['login_sb_staff'] == 1 ? true : false;
 
+$user_role = $_SESSION['role_name'];
+$create_roles = ['Manager', 'ITAdmin', 'Editor', 'Dept Admin','Op Manager' ];
+
 
 // Fetch user details
 $user_details_query = $conn->prepare("SELECT firstname, lastname FROM users WHERE id = ?");
@@ -30,7 +33,7 @@ if ($user_details_result->num_rows > 0) {
 $sbQry = ($radio_staff) ? " WHERE u.sb_staff = 1 " : "";
 
 // Fetch user data (without the `is_deleted` condition)
-$query = "SELECT u.id, u.empid, CONCAT(u.firstname, ' ', u.lastname) AS name, u.email, u.address, u.contact_number, r.role_name, u.preferred_channel
+$query = "SELECT u.id, u.empid, CONCAT(u.firstname, ' ', u.lastname) AS name, u.alias, u.email, u.address, u.contact_number, r.role_name, u.preferred_channel
           FROM users u 
           LEFT JOIN roles r ON u.role_id = r.role_id
           $sbQry
@@ -51,7 +54,7 @@ if (!$user_list) {
         <div class="card-header">
             <h3 class="card-title">User List</h3>
             <div class="card-tools">
-                <?php if ($login_role_id < 5): // Only allow users with role less than 5 to add new users ?>
+                <?php if (in_array($user_role, $create_roles)): // Only allow users with role less than 5 to add new users ?>
                     <a class="btn btn-block btn-sm btn-danger" href="./index.php?page=user">
                         <i class="fa fa-plus"></i> Add New User
                     </a>
@@ -70,7 +73,7 @@ if (!$user_list) {
                         <th>Contact Number</th>
                         <th>Role</th>
                         <th>Preferred Channel</th>
-                        <?php if ($login_role_id < 5) { ?><th>Actions</th> <?php } ?>
+                        <?php if (in_array($user_role, $create_roles)) { ?><th>Actions</th> <?php } ?>
                     </tr>
                 </thead>
                 <tbody>
@@ -79,15 +82,20 @@ if (!$user_list) {
                  
                     <td>
                         <a href="index.php?page=view_user&id=<?php echo htmlspecialchars($row['id']); ?>" class="text-decoration-none">  
-                            <?php echo ucwords(htmlspecialchars($row['name'])); ?>
+                            <?php 
+                                echo ucwords(htmlspecialchars($row['name'])); 
+                                if (!empty($row['alias'])) {
+                                    echo " (" . htmlspecialchars($row['alias']) . ")";
+                                }
+                            ?>
                         </a>
                     </td>
-                    <td><?php echo htmlspecialchars($row['email'] ?? 'N/A'); ?></td>
+                    <td><?php echo htmlspecialchars($row['email'] ?? 'N/A'); ?> </td>
                     <!-- <td><?php echo htmlspecialchars($row['address'] ?? 'N/A'); ?></td> -->
                     <td><?php echo htmlspecialchars($row['contact_number'] ?? 'N/A'); ?></td>
                     <td><?php echo htmlspecialchars($row['role_name'] ?? 'N/A'); ?></td>
                     <td><?php echo htmlspecialchars($row['preferred_channel'] ?? 'N/A'); ?> </td>
-                    <?php if ($login_role_id < 5) { ?>
+                    <?php if (in_array($user_role, $create_roles)) { ?>
                     <td>
                         <a data-id="<?php echo htmlspecialchars($row['id']); ?>" href="#" class="btn text-info edit-user">
                             <i class="fas fa-edit"></i>

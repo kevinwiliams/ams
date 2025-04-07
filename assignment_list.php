@@ -53,7 +53,12 @@ $sbQry = ($radio_staff) ? " AND a.station_show <> '' " : " AND a.station_show IS
 
 $query = "SELECT a.*, 
                 (SELECT GROUP_CONCAT(
-                    CONCAT(u.firstname, ' ', u.lastname, ' (', r.role_name, ')', 
+                    CONCAT(
+                        CASE 
+                            WHEN u.alias IS NOT NULL AND u.alias <> '' THEN u.alias
+                            ELSE CONCAT(u.firstname, ' ', u.lastname)
+                        END, 
+                        ' (', r.role_name, ')', 
                         CASE 
                             WHEN EXISTS (
                                 SELECT 1 
@@ -62,9 +67,9 @@ $query = "SELECT a.*,
                             ) THEN ' /' 
                             ELSE ' |' 
                         END
-                    ) SEPARATOR ', ')  
-                 FROM users u 
-                 LEFT JOIN roles r ON u.role_id = r.role_id
+                    ) SEPARATOR ', ') 
+                FROM users u 
+                LEFT JOIN roles r ON u.role_id = r.role_id
                  WHERE FIND_IN_SET(u.empid, a.team_members)) AS team_members_names_with_roles,
                 (SELECT CONCAT(u.firstname, ' ', u.lastname) 
                  FROM users u 

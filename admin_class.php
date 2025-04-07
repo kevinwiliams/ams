@@ -291,7 +291,7 @@ Class Action {
 		
 
 		foreach($_POST as $k => $v){
-			if(!in_array($k, array('id','cpass','password', 'channels', 'contact_number','sb_staff')) && !is_numeric($k)){
+			if(!in_array($k, array('id','cpass','password', 'channels', 'contact_number','sb_staff', 'station')) && !is_numeric($k)){
 				if(empty($data)){
 					// Set new employee ID
 					if ($k == 'empid')
@@ -310,6 +310,16 @@ Class Action {
 			$phone = $this->sanitize_number($_POST['contact_number']); 
 			$data .= ", contact_number='$phone' ";
 		}
+
+		$stationList = [];
+		if (isset($_POST['station'])) {
+			foreach ($_POST['station'] as $key => $value) {
+				$stationList = array_merge($stationList, [$value]);
+			}
+			$chosen_stations = implode(',', $stationList);
+			$data .= ", station='$chosen_stations' ";
+		}
+
 		$channelList = [];
 		if (isset($_POST['channels'])) {
 			foreach ($_POST['channels'] as $key => $value) {
