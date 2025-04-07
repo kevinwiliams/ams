@@ -1162,13 +1162,14 @@ Class Action {
 			$env = $this->getEnv();
 			$emailFrom = $env->get('EMAIL_FROM');
 			$emailTable = $env->get('MSSQL_TABLE_NAME');
-			$copyEmail = (str_contains($bodyDetails['body'], "Requisition Form")) ? $_SESSION['login_email'] : $env->get('EMAIL_CC');
 
 			$bccEmails = "";      
 			$ccEmails = str_replace(',', ';', $copyEmail);        
 			$fromEmail = $emailFrom;   
 			$bodyDetails = $message; // Convert back to array
 			$subjectTxt = urlencode($bodyDetails['subject']);
+			$copyEmail = (str_contains($subjectTxt, "Requisition Form")) ? $_SESSION['login_email'] : $env->get('EMAIL_CC');
+
 			
 			// Create HTML structure
 			// $htmlContent = "<h3>Reset Details</h3>";
