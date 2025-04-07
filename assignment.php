@@ -485,6 +485,34 @@ if ($id) {
                                             </div>
                                         </div>
 
+                                        <!-- Producer -->
+                                        <div class="role-group">
+                                            <label>Producer</label>
+                                            <div class="assignee-wrapper">
+                                                <select name="assignee[producer][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabledPersonality ?>>
+                                                    <!-- <option value="">Select a reporter</option> -->
+                                                    <?php
+                                        
+                                                    if ($producer_qry) {
+                                                        while ($user_row = $producer_qry->fetch_assoc()):
+                                                            if(in_array($user_row['empid'], $producers))
+                                                                if(!empty($disabledBroadcast))
+                                                                    $all_members = array_diff($all_members, [$user_row['empid']]);
+                                                        
+                                                    ?>
+                                                    <option value="<?php echo htmlspecialchars($user_row['empid']); ?>" <?php  echo isset($producers) && in_array($user_row['empid'], $producers) ? 'selected' : '' ?>>
+                                                        <?php echo trim($user_row['firstname']) . ' ' . trim($user_row['lastname']).' ('.$user_row['role_name'].')'; ?>
+                                                    </option>
+                                                    <?php 
+                                                        endwhile;
+                                                    } else {
+                                                        echo "<option>No producers available</option>";
+                                                    }
+                                                    ?>
+                                                </select>
+                                            </div>
+                                        </div>
+
                                         <!-- Personality -->
                                         <div class="role-group">
                                             <label>Personality</label>
@@ -582,34 +610,6 @@ if ($id) {
                                                         endwhile;
                                                     } else {
                                                         echo "<option>No engineers available</option>";
-                                                    }
-                                                    ?>
-                                                </select>
-                                            </div>
-                                        </div>
-
-                                        <!-- Producer -->
-                                        <div class="role-group">
-                                            <label>Producer</label>
-                                            <div class="assignee-wrapper">
-                                                <select name="assignee[producer][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabledPersonality ?>>
-                                                    <!-- <option value="">Select a reporter</option> -->
-                                                    <?php
-                                        
-                                                    if ($producer_qry) {
-                                                        while ($user_row = $producer_qry->fetch_assoc()):
-                                                            if(in_array($user_row['empid'], $producers))
-                                                                if(!empty($disabledBroadcast))
-                                                                    $all_members = array_diff($all_members, [$user_row['empid']]);
-                                                        
-                                                    ?>
-                                                    <option value="<?php echo htmlspecialchars($user_row['empid']); ?>" <?php  echo isset($producers) && in_array($user_row['empid'], $producers) ? 'selected' : '' ?>>
-                                                        <?php echo trim($user_row['firstname']) . ' ' . trim($user_row['lastname']).' ('.$user_row['role_name'].')'; ?>
-                                                    </option>
-                                                    <?php 
-                                                        endwhile;
-                                                    } else {
-                                                        echo "<option>No producers available</option>";
                                                     }
                                                     ?>
                                                 </select>
