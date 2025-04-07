@@ -1904,17 +1904,21 @@ Class Action {
 									  ($role_name === 'Op Manager' ? $env->get('EMAIL_ITEMS_REQUEST_BC') : $env->get('EMAIL_ITEMS_REQUEST_EN'));
 
 					// Send the email
-					$message = [
-						'subject' => 'Requisition Form - ' . $emailDetails['assignment'].' ('.$emailDetails['status'].')',
-						'body' => '<h3>Requisition for OB</h3>' .
-								  '<p><strong>Assignment:</strong> ' . $emailDetails['assignment'] . '</p>' .
-								  '<p><strong>Date:</strong> ' . $emailDetails['assignment_date'] . '</p>' .
-								  '<p><strong>Duration:</strong> ' . $emailDetails['duration'] . '</p>' .
-								  '<p><strong>Status:</strong> ' . $emailDetails['status'] . '</p>' .
-								  '<p><strong>Submitted By:</strong> ' . $_SESSION['login_firstname'].' '.$_SESSION['login_lastname'] . '</p>' .
-								  '<p><strong>View Form:</strong> <a href="' . $emailDetails['url'] . '">Requisition Form</a></p>',
-					];
-					$this->send_mail($requestEmailTo, $message);
+					$subject = 'Requisition Form - ' . $emailDetails['assignment'].' ('.$emailDetails['status'].')';
+					$body = '<h3>Requisition for OB</h3>';
+					$body .= '<p><strong>Assignment:</strong> ' . $emailDetails['assignment'] . '</p>' ;
+					$body .= '<p><strong>Date:</strong> ' . $emailDetails['assignment_date'] . '</p>' ;
+					$body .= '<p><strong>Duration:</strong> ' . $emailDetails['duration'] . '</p>' ;
+					$body .= '<p><strong>Status:</strong> ' . $emailDetails['status'] . '</p>' ;
+					$body .= '<p><strong>Submitted By:</strong> ' . $_SESSION['login_firstname'].' '.$_SESSION['login_lastname'] . '</p>' ;
+					$body .= '<p><strong>View Form:</strong> <a href="' . urlencode($emailDetails['url']) . '">Requisition Form</a></p>';
+
+
+					$this->send_mail($requestEmailTo, [
+						'subject' => $subject,
+						'body' => $body
+					]);
+					
 				}
 
 				return json_encode(['status' => 'success', 'message' => 'Report status updated and email sent successfully']);
