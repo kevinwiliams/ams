@@ -14,6 +14,7 @@ $user_role = $_SESSION['role_name'] ?? '';
 $radio_staff = $_SESSION['login_sb_staff'] == 1 ? true : false;
 $edit_roles = ['Broadcast Coordinator', 'Op Manager', 'Producer', 'ITAdmin', 'Engineer'];
 $tech_roles = ['Engineer'];
+$admin_roles = ['Op Manager','ITAdmin'];
 
 
 if (!$assignment_id) die('Assignment ID is required');
@@ -357,7 +358,7 @@ $setup_time = $inspection['setup_time'] ?: 'Not specified';
                                 </button>
                             <?php endif; ?>
 
-                            <?php if ($inspection['report_status'] !== 'Approved' && in_array($user_role, $edit_roles)): ?>
+                            <?php if ($inspection['report_status'] !== 'Approved' && in_array($user_role, $edit_roles) || in_array($user_role, $admin_roles)): ?>
                                 <a href="index.php?page=site_report&id=<?= $assignment_id ?>" class="btn btn-primary float-right">
                                     <i class="fas fa-edit"></i> Edit Form
                                 </a>

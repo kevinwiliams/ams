@@ -194,7 +194,7 @@ foreach ($all_items as $item) {
                         <div class="card-header text-bold d-flex justify-content-between align-items-center">
                             <span>Execution Requirements</span>
                             <?php if (in_array($user_role, $editor_roles)): ?>
-                            <button type="button" class="btn btn-sm btn-outline-secondary ml-auto" onclick="printEquipmentForm()">
+                            <button type="button" class="btn btn-sm btn-outline-info ml-auto" onclick="printEquipmentForm()">
                                 <i class="fas fa-print"></i> Print Gate Pass
                             </button>
                             <?php endif; ?>
