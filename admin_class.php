@@ -1925,6 +1925,53 @@ Class Action {
 			return json_encode(['status' => 'error', 'message' => $e->getMessage()]);
 		}
 	}
+	// Get users with specific roles and optional station filter
+	public function get_users_roles_station($conn, $roles, $station = null) {
+		// Convert single role to array for consistency
+		if (!is_array($roles)) {
+			$roles = [$roles];
+		}
+		
+		// Prepare the role placeholders
+		$role_placeholders = implode(',', array_fill(0, count($roles), '?'));
+		
+		// Base query
+		$query = "SELECT u.empid, 
+						CASE 
+							WHEN CHAR_LENGTH(u.alias) > 0 THEN u.alias 
+							ELSE CONCAT(u.firstname, ' ', u.lastname) 
+						END AS display_name, 
+						r.role_name 
+				FROM users u 
+				JOIN roles r ON r.role_id = u.role_id
+				WHERE r.role_name IN ($role_placeholders)";
+		
+		// Add station filter if provided
+		$params = $roles;
+		if (!empty($station)) {
+			$query .= " AND (FIND_IN_SET(?, u.station) > 0 OR u.station = '' OR u.station IS NULL)";
+			$params[] = $station;
+		}
+		
+		$query .= " ORDER BY r.role_name, u.firstname";
+		
+		// Prepare and execute the query
+		$stmt = $conn->prepare($query);
+		
+		// Bind parameters dynamically
+		$types = str_repeat('s', count($params));
+		$stmt->bind_param($types, ...$params);
+		
+		$stmt->execute();
+		$result = $stmt->get_result();
+		
+		$users = [];
+		while ($row = $result->fetch_assoc()) {
+			$users[] = $row;
+		}
+		
+		return $users;
+	}
 	
 }
 

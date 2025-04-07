@@ -90,7 +90,7 @@ if ($id) {
                                     <label for="alias" class="form-label">Alias <span class="text-muted">(optional)</span></label>
                                     <input type="text" class="form-control" id="alias" name="alias" 
                                             placeholder="e.g. DJ Cool Cat"
-                                           value="<?= htmlspecialchars($alias ?? '') ?>" required>
+                                           value="<?= htmlspecialchars($alias ?? '') ?>">
                                 </div>
                                 
                                 <div class="mb-3">

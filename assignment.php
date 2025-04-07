@@ -11,6 +11,8 @@ if (!isset($_SESSION['login_id'])) {
 
 
 include 'db_connect.php'; // Removed sidebar and topbar includes
+include 'admin_class.php'; // Removed sidebar and topbar includes
+$admin = new Action($conn);
 
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
@@ -349,6 +351,7 @@ if ($id) {
                             <?php } ?>
                             <input type="hidden" name="id" value="<?php echo htmlspecialchars($id ?? ''); ?>">
                             <input type="hidden" name="assigned_by" value="<?php echo htmlspecialchars($assigned_by ?? ''); ?>">
+                            <!-- Team Assignment Section -->
                             <?php
                                 $all_members = [];
                                 $salesreps = [];
@@ -362,6 +365,7 @@ if ($id) {
                                 $drivers = [];
                                 $djs = [];
                                 $teamRem = "";
+                                $station = isset($station_show) ? explode(' : ', $station_show)[0] : null;
                                 
                                 if (isset($team_members)) { // Check if $team_members is set
                                     // Split the team members string into an array
@@ -378,74 +382,6 @@ if ($id) {
                                     $djs = explode(',', $team_members);
                                 }
 
-                                // Sales Reps
-                                $salesrep_qry = $conn->query("SELECT u.empid, u.firstname, u.lastname, r.role_name 
-                                                                FROM users u 
-                                                                JOIN roles r ON r.role_id = u.role_id
-                                                                WHERE r.role_name in ('Sales Rep')
-                                                                ORDER BY r.role_name, u.firstname");
-
-                                // Personalities
-                                $personality_qry = $conn->query("SELECT u.empid, u.firstname, u.lastname, r.role_name 
-                                                                FROM users u 
-                                                                JOIN roles r ON r.role_id = u.role_id
-                                                                WHERE r.role_name in ('Personality', 'Programme Director')
-                                                                ORDER BY r.role_name, u.firstname");
-
-                                // DJs
-                                $dj_qry = $conn->query("SELECT u.empid, COALESCE(u.alias, CONCAT(u.firstname, ' ', u.lastname)) AS display_name, r.role_name 
-                                                    FROM users u 
-                                                    JOIN roles r ON r.role_id = u.role_id
-                                                    WHERE r.role_name in ('DJ')
-                                                    ORDER BY r.role_name, u.firstname");
-
-                                // Engineers
-                                $engineer_qry = $conn->query("SELECT u.empid, u.firstname, u.lastname, r.role_name 
-                                                            FROM users u 
-                                                            JOIN roles r ON r.role_id = u.role_id
-                                                            WHERE r.role_name in ('Engineer')
-                                                            ORDER BY r.role_name, u.firstname");
-
-                                // Producers
-                                $producer_qry = $conn->query("SELECT u.empid, u.firstname, u.lastname, r.role_name 
-                                                            FROM users u 
-                                                            JOIN roles r ON r.role_id = u.role_id
-                                                            WHERE r.role_name in ('Producer', 'Broadcast Coordinator')
-                                                            ORDER BY r.role_name, u.firstname");
-
-                                // Reporters
-                                $reporter_qry = $conn->query("SELECT u.empid, u.firstname, u.lastname, r.role_name 
-                                                            FROM users u 
-                                                            JOIN roles r ON r.role_id = u.role_id
-                                                            WHERE r.role_name in ('Reporter', 'Editor', 'Freelancer')
-                                                            ORDER BY r.role_name, u.firstname");
-
-                                // Photographers
-                                $photographer_qry = $conn->query("SELECT u.empid, u.firstname, u.lastname, r.role_name 
-                                                                FROM users u 
-                                                                JOIN roles r ON r.role_id = u.role_id
-                                                                WHERE r.role_name in ('Photographer', 'Photo Editor')
-                                                                ORDER BY r.role_name, u.firstname");
-
-                                // Videographers
-                                $videographer_qry = $conn->query("SELECT u.empid, u.firstname, u.lastname, r.role_name 
-                                                                FROM users u 
-                                                                JOIN roles r ON r.role_id = u.role_id
-                                                                WHERE r.role_name in ('Videographer')
-                                                                ORDER BY r.role_name, u.firstname");
-
-                                // Social Media
-                                $social_qry = $conn->query("SELECT u.empid, u.firstname, u.lastname, r.role_name 
-                                                        FROM users u 
-                                                        JOIN roles r ON r.role_id = u.role_id
-                                                        WHERE r.role_name in ('Multimedia', 'Social Media')
-                                                        ORDER BY r.role_name, u.firstname");
-                                // Drivers
-                                $driver_qry = $conn->query("SELECT u.empid, u.firstname, u.lastname, r.role_name 
-                                                            FROM users u 
-                                                            JOIN roles r ON r.role_id = u.role_id
-                                                            WHERE r.role_name in ('Driver')
-                                                            ORDER BY r.role_name, u.firstname");
                                 // Vehicles                                                             
                                 $vehicle_qry = $conn->query("SELECT id, plate_number, make_model FROM transport_vehicles");
                             ?>
@@ -461,26 +397,23 @@ if ($id) {
                                         <div class="role-group">
                                             <label>Sales Rep</label>
                                             <div class="assignee-wrapper">
+                                                <?php 
+                                                $salesrep_qry = $admin->get_users_roles_station($conn, 'Sales Rep', $station); ?>
                                                 <select name="assignee[salesrep][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabledPersonality.$required ?>>
                                                     <!-- <option value="">Select a reporter</option> -->
-                                                    <?php
-                                                        
-                                                    if ($salesrep_qry) {
-                                                        while ($user_row = $salesrep_qry->fetch_assoc()):
-                                                            if(in_array($user_row['empid'], $salesreps))
+
+                                                <?php if($salesrep_qry):
+                                                    foreach ($salesrep_qry as $salesrep): 
+                                                            if(in_array($salesrep['empid'], $salesreps))
                                                                 if(!empty($disabledBroadcast))
-                                                                    $all_members = array_diff($all_members, [$user_row['empid']]);
-                                                        
-                                                    ?>
-                                                    <option value="<?php echo htmlspecialchars($user_row['empid']); ?>" <?php  echo isset($salesreps) && in_array($user_row['empid'], $salesreps) ? 'selected' : '' ?>>
-                                                        <?php echo trim($user_row['firstname']) . ' ' . trim($user_row['lastname']).' ('.$user_row['role_name'].')'; ?>
-                                                    </option>
-                                                    <?php 
-                                                        endwhile;
-                                                    } else {
-                                                        echo "<option>No salesreps available</option>";
-                                                    }
-                                                    ?>
+                                                                    $all_members = array_diff($all_members, [$salesrep['empid']]);
+                                                        ?>
+                                                        <option value="<?= htmlspecialchars($salesrep['empid']) ?>" <?php  echo isset($salesreps) && in_array($salesrep['empid'], $salesreps) ? 'selected' : '' ?>>
+                                                            <?= htmlspecialchars($salesrep['display_name']) ?> (<?= htmlspecialchars($salesrep['role_name']) ?>)
+                                                        </option>
+                                                    <?php endforeach; else: ?>
+                                                        <option>No salesreps available</option>
+                                                    <?php endif; ?>
                                                 </select>
                                             </div>
                                         </div>
@@ -489,26 +422,21 @@ if ($id) {
                                         <div class="role-group">
                                             <label>Producer</label>
                                             <div class="assignee-wrapper">
+                                                <?php 
+                                                $producer_qry = $admin->get_users_roles_station($conn, ['Producer', 'Broadcast Coordinator'], $station); ?>
                                                 <select name="assignee[producer][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabledPersonality ?>>
-                                                    <!-- <option value="">Select a reporter</option> -->
-                                                    <?php
-                                        
-                                                    if ($producer_qry) {
-                                                        while ($user_row = $producer_qry->fetch_assoc()):
-                                                            if(in_array($user_row['empid'], $producers))
+                                                <?php if($producer_qry):
+                                                    foreach ($producer_qry as $producer): 
+                                                            if(in_array($producer['empid'], $producers))
                                                                 if(!empty($disabledBroadcast))
-                                                                    $all_members = array_diff($all_members, [$user_row['empid']]);
-                                                        
-                                                    ?>
-                                                    <option value="<?php echo htmlspecialchars($user_row['empid']); ?>" <?php  echo isset($producers) && in_array($user_row['empid'], $producers) ? 'selected' : '' ?>>
-                                                        <?php echo trim($user_row['firstname']) . ' ' . trim($user_row['lastname']).' ('.$user_row['role_name'].')'; ?>
-                                                    </option>
-                                                    <?php 
-                                                        endwhile;
-                                                    } else {
-                                                        echo "<option>No producers available</option>";
-                                                    }
-                                                    ?>
+                                                                    $all_members = array_diff($all_members, [$producer['empid']]);
+                                                        ?>
+                                                        <option value="<?= htmlspecialchars($producer['empid']) ?>" <?php  echo isset($producers) && in_array($producer['empid'], $producers) ? 'selected' : '' ?>>
+                                                            <?= htmlspecialchars($producer['display_name']) ?> (<?= htmlspecialchars($producer['role_name']) ?>)
+                                                        </option>
+                                                    <?php endforeach; else: ?>
+                                                        <option>No producers available</option>
+                                                    <?php endif; ?>
                                                 </select>
                                             </div>
                                         </div>
@@ -517,26 +445,22 @@ if ($id) {
                                         <div class="role-group">
                                             <label>Personality</label>
                                             <div class="assignee-wrapper">
+                                               
+                                                <?php 
+                                                $personality_qry = $admin->get_users_roles_station($conn, ['Personality', 'Programme Director'], $station); ?>
                                                 <select name="assignee[personality][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabledPersonality ?>>
-                                                    <!-- <option value="">Select a reporter</option> -->
-                                                    <?php
-
-                                                    if ($personality_qry) {
-                                                        while ($user_row = $personality_qry->fetch_assoc()):
-                                                            if(in_array($user_row['empid'], $personalities))
+                                                <?php if($personality_qry):
+                                                    foreach ($personality_qry as $personality): 
+                                                            if(in_array($personality['empid'], $personalities))
                                                                 if(!empty($disabledBroadcast))
-                                                                    $all_members = array_diff($all_members, [$user_row['empid']]);
-                                                        
-                                                    ?>
-                                                    <option value="<?php echo htmlspecialchars($user_row['empid']); ?>" <?php  echo isset($personalities) && in_array($user_row['empid'], $personalities) ? 'selected' : '' ?>>
-                                                        <?php echo trim($user_row['firstname']) . ' ' . trim($user_row['lastname']).' ('.$user_row['role_name'].')'; ?>
-                                                    </option>
-                                                    <?php 
-                                                        endwhile;
-                                                    } else {
-                                                        echo "<option>No personalities available</option>";
-                                                    }
-                                                    ?>
+                                                                    $all_members = array_diff($all_members, [$personality['empid']]);
+                                                        ?>
+                                                        <option value="<?= htmlspecialchars($personality['empid']) ?>" <?php  echo isset($personalities) && in_array($personality['empid'], $personalities) ? 'selected' : '' ?>>
+                                                            <?= htmlspecialchars($personality['display_name']) ?> (<?= htmlspecialchars($personality['role_name']) ?>)
+                                                        </option>
+                                                    <?php endforeach; else: ?>
+                                                        <option>No personalities available</option>
+                                                    <?php endif; ?>
                                                 </select>
                                             </div>
                                         </div>
@@ -545,26 +469,21 @@ if ($id) {
                                         <div class="role-group">
                                             <label>DJ</label>
                                             <div class="assignee-wrapper">
+                                                <?php 
+                                                $dj_qry = $admin->get_users_roles_station($conn, 'DJ', $station); ?>
                                                 <select name="assignee[dj][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabledBroadcast.$requiredPersonality ?>>
-                                                    <!-- <option value="">Select a reporter</option> -->
-                                                    <?php
-
-                                                    if ($dj_qry) {
-                                                        while ($user_row = $dj_qry->fetch_assoc()):
-                                                            if(in_array($user_row['empid'], $djs))
+                                                <?php if($dj_qry):
+                                                    foreach ($dj_qry as $dj): 
+                                                            if(in_array($dj['empid'], $djs))
                                                                 if(!empty($disabledPersonality))
-                                                                $all_members = array_diff($all_members, [$user_row['empid']]);
-                                                        
-                                                    ?>
-                                                    <option value="<?php echo htmlspecialchars($user_row['empid']); ?>" <?php  echo isset($djs) && in_array($user_row['empid'], $djs) ? 'selected' : '' ?>>
-                                                        <?php echo trim($user_row['display_name']).' ('.$user_row['role_name'].')'; ?>
-                                                    </option>
-                                                    <?php 
-                                                        endwhile;
-                                                    } else {
-                                                        echo "<option>No djs available</option>";
-                                                    }
-                                                    ?>
+                                                                    $all_members = array_diff($all_members, [$dj['empid']]);
+                                                        ?>
+                                                        <option value="<?= htmlspecialchars($dj['empid']) ?>" <?php  echo isset($djs) && in_array($dj['empid'], $djs) ? 'selected' : '' ?>>
+                                                            <?= htmlspecialchars($dj['display_name']) ?> (<?= htmlspecialchars($dj['role_name']) ?>)
+                                                        </option>
+                                                    <?php endforeach; else: ?>
+                                                        <option>No djs available</option>
+                                                    <?php endif; ?>
                                                 </select>
                                             </div>
 
@@ -592,26 +511,21 @@ if ($id) {
                                         <div class="role-group">
                                             <label>Engineer</label>
                                             <div class="assignee-wrapper">
+                                                <?php 
+                                                $engineer_qry = $admin->get_users_roles_station($conn, ['Engineer'], $station); ?>
                                                 <select name="assignee[engineer][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabledPersonality ?>>
-                                                    <!-- <option value="">Select a reporter</option> -->
-                                                    <?php
-
-                                                    if ($engineer_qry) {
-                                                        while ($user_row = $engineer_qry->fetch_assoc()):
-                                                            if(in_array($user_row['empid'], $engineers))
+                                                <?php if($engineer_qry):
+                                                    foreach ($engineer_qry as $engineer): 
+                                                            if(in_array($engineer['empid'], $engineers))
                                                                 if(!empty($disabledBroadcast))
-                                                                    $all_members = array_diff($all_members, [$user_row['empid']]);
-                                                        
-                                                    ?>
-                                                    <option value="<?php echo htmlspecialchars($user_row['empid']); ?>" <?php  echo isset($engineers) && in_array($user_row['empid'], $engineers) ? 'selected' : '' ?>>
-                                                        <?php echo trim($user_row['firstname']) . ' ' . trim($user_row['lastname']).' ('.$user_row['role_name'].')'; ?>
-                                                    </option>
-                                                    <?php 
-                                                        endwhile;
-                                                    } else {
-                                                        echo "<option>No engineers available</option>";
-                                                    }
-                                                    ?>
+                                                                    $all_members = array_diff($all_members, [$engineer['empid']]);
+                                                        ?>
+                                                        <option value="<?= htmlspecialchars($engineer['empid']) ?>" <?php  echo isset($engineers) && in_array($engineer['empid'], $engineers) ? 'selected' : '' ?>>
+                                                            <?= htmlspecialchars($engineer['display_name']) ?> (<?= htmlspecialchars($engineer['role_name']) ?>)
+                                                        </option>
+                                                    <?php endforeach; else: ?>
+                                                        <option>No engineers available</option>
+                                                    <?php endif; ?>
                                                 </select>
                                             </div>
                                         </div>
@@ -621,26 +535,22 @@ if ($id) {
                                         <div class="role-group">
                                             <label>Reporters</label>
                                             <div class="assignee-wrapper">
-                                                <select name="assignee[reporter][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabled.$disabledDispatch?> >
-                                                    <!-- <option value="">Select a reporter</option> -->
-                                                    <?php
-
-                                                    if ($reporter_qry) {
-                                                        while ($user_row = $reporter_qry->fetch_assoc()):
-                                                            if(in_array($user_row['empid'], $reporters))
+                                                
+                                                <?php 
+                                                $reporter_qry = $admin->get_users_roles_station($conn, ['Reporter', 'Editor', 'Freelancer']); ?>
+                                                <select name="assignee[reporter][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabled.$disabledDispatch ?>>
+                                                <?php if($reporter_qry):
+                                                    foreach ($reporter_qry as $reporter): 
+                                                            if(in_array($reporter['empid'], $reporters))
                                                                 if(!empty($disabledEditors))
-                                                                    $all_members = array_diff($all_members, [$user_row['empid']]);
-                                                        
-                                                    ?>
-                                                    <option value="<?php echo htmlspecialchars($user_row['empid']); ?>" <?php  echo isset($reporters) && in_array($user_row['empid'], $reporters) ? 'selected' : '' ?>>
-                                                        <?php echo trim($user_row['firstname']) . ' ' . trim($user_row['lastname']).' ('.$user_row['role_name'].')'; ?>
-                                                    </option>
-                                                    <?php 
-                                                        endwhile;
-                                                    } else {
-                                                        echo "<option>No reporters available</option>";
-                                                    }
-                                                    ?>
+                                                                    $all_members = array_diff($all_members, [$reporter['empid']]);
+                                                        ?>
+                                                        <option value="<?= htmlspecialchars($reporter['empid']) ?>" <?php  echo isset($reporters) && in_array($reporter['empid'], $reporters) ? 'selected' : '' ?>>
+                                                            <?= htmlspecialchars($reporter['display_name']) ?> (<?= htmlspecialchars($reporter['role_name']) ?>)
+                                                        </option>
+                                                    <?php endforeach; else: ?>
+                                                        <option>No reporters available</option>
+                                                    <?php endif; ?>
                                                 </select>
                                             </div>
                                         </div>
@@ -649,26 +559,22 @@ if ($id) {
                                         <div class="role-group">
                                             <label>Photographers</label>
                                             <div class="assignee-wrapper">
+                                                
+                                                <?php 
+                                                $photographer_qry = $admin->get_users_roles_station($conn, ['Photographer']); ?>
                                                 <select name="assignee[photographer][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabledDispatch.$disabledEditors.$disabledMedia ?><?= $required?>>
-                                                <!-- <option value="">Select a photographer</option> -->
-                                                    <?php
-
-                                                    if ($photographer_qry) {
-                                                        while ($user_row = $photographer_qry->fetch_assoc()):
-                                                            if(in_array($user_row['empid'], $photographers))
+                                                <?php if($photographer_qry):
+                                                    foreach ($photographer_qry as $photographer): 
+                                                            if(in_array($photographer['empid'], $photographers))
                                                                 if(!empty($disabledDigital))
-                                                                    $all_members = array_diff($all_members, [$user_row['empid']]);
-
-                                                    ?>
-                                                    <option value="<?php echo htmlspecialchars($user_row['empid']); ?>" <?php echo isset($photographers) && in_array($user_row['empid'], $photographers) ? 'selected' : '' ?>>
-                                                        <?php echo htmlspecialchars($user_row['firstname']) . ' ' . htmlspecialchars($user_row['lastname']); ?>
-                                                    </option>
-                                                    <?php 
-                                                        endwhile;
-                                                    } else {
-                                                        echo "<option>No photographers available</option>";
-                                                    }
-                                                    ?>
+                                                                    $all_members = array_diff($all_members, [$photographer['empid']]);
+                                                        ?>
+                                                        <option value="<?= htmlspecialchars($photographer['empid']) ?>" <?php  echo isset($photographers) && in_array($photographer['empid'], $photographers) ? 'selected' : '' ?>>
+                                                            <?= htmlspecialchars($photographer['display_name']) ?> 
+                                                        </option>
+                                                    <?php endforeach; else: ?>
+                                                        <option>No photographers available</option>
+                                                    <?php endif; ?>
                                                 </select>
                                             </div>
                                             <!-- Checkbox and Dropdown for Request -->
@@ -695,25 +601,22 @@ if ($id) {
                                         <div class="role-group">
                                             <label>Videographers</label>
                                             <div class="assignee-wrapper">
+    
+                                                <?php 
+                                                $videographer_qry = $admin->get_users_roles_station($conn, ['Videographer']); ?>
                                                 <select name="assignee[videographer][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabledDispatch.$disabledEditors.$disabledDigital ?>>
-                                                <!-- <option value="">Select a videographer</option> -->
-                                                    <?php
-
-                                                    if ($videographer_qry) {
-                                                        while ($user_row = $videographer_qry->fetch_assoc()):
-                                                            if(in_array($user_row['empid'], $videographers))
+                                                <?php if($videographer_qry):
+                                                    foreach ($videographer_qry as $videographer): 
+                                                            if(in_array($videographer['empid'], $videographers))
                                                                 if(!empty($disabledMedia))
-                                                                    $all_members = array_diff($all_members, [$user_row['empid']]);
-                                                    ?>
-                                                    <option value="<?php echo htmlspecialchars($user_row['empid']); ?>" <?php echo isset($videographers) && in_array($user_row['empid'], $videographers) ? 'selected' : '' ?>>
-                                                        <?php echo htmlspecialchars($user_row['firstname']) . ' ' . htmlspecialchars($user_row['lastname']); ?>
-                                                    </option>
-                                                    <?php 
-                                                        endwhile;
-                                                    } else {
-                                                        echo "<option>No videographers available</option>";
-                                                    }
-                                                    ?>
+                                                                    $all_members = array_diff($all_members, [$videographer['empid']]);
+                                                        ?>
+                                                        <option value="<?= htmlspecialchars($videographer['empid']) ?>" <?php  echo isset($videographers) && in_array($videographer['empid'], $videographers) ? 'selected' : '' ?>>
+                                                            <?= htmlspecialchars($videographer['display_name']) ?> 
+                                                        </option>
+                                                    <?php endforeach; else: ?>
+                                                        <option>No videographers available</option>
+                                                    <?php endif; ?>
                                                 </select>
                                             </div>
                                             <!-- Checkbox and Dropdown for Request -->
@@ -740,24 +643,22 @@ if ($id) {
                                         <div class="role-group">
                                             <label>Social Media</label>
                                             <div class="assignee-wrapper">
+                                                
+                                                <?php 
+                                                $social_qry = $admin->get_users_roles_station($conn, ['Multimedia', 'Social Media']); ?>
                                                 <select name="assignee[social][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabledDispatch.$disabledEditors.$disabledDigital ?>>
-                                                    <?php
-
-                                                    if ($social_qry) {
-                                                        while ($user_row = $social_qry->fetch_assoc()):
-                                                            if(in_array($user_row['empid'], $socials))
+                                                <?php if($social_qry):
+                                                    foreach ($social_qry as $social): 
+                                                            if(in_array($social['empid'], $socials))
                                                                 if(!empty($disabledMedia))
-                                                                    $all_members = array_diff($all_members, [$user_row['empid']]);
-                                                    ?>
-                                                    <option value="<?php echo htmlspecialchars($user_row['empid']); ?>" <?php echo isset($socials) && in_array($user_row['empid'], $socials) ? 'selected' : '' ?>>
-                                                        <?php echo htmlspecialchars($user_row['firstname']) . ' ' . htmlspecialchars($user_row['lastname']); ?>
-                                                    </option>
-                                                    <?php 
-                                                        endwhile;
-                                                    } else {
-                                                        echo "<option>No social media available</option>";
-                                                    }
-                                                    ?>
+                                                                    $all_members = array_diff($all_members, [$social['empid']]);
+                                                        ?>
+                                                        <option value="<?= htmlspecialchars($social['empid']) ?>" <?php  echo isset($socials) && in_array($social['empid'], $socials) ? 'selected' : '' ?>>
+                                                            <?= htmlspecialchars($social['display_name']) ?> 
+                                                        </option>
+                                                    <?php endforeach; else: ?>
+                                                        <option>No social media available</option>
+                                                    <?php endif; ?>
                                                 </select>
                                             </div>
                                             <!-- Checkbox and Dropdown for Request -->
@@ -785,24 +686,22 @@ if ($id) {
                                         <div class="role-group <?= ($user_role == 'Dispatcher') ? '' : 'd-none' ?>" >
                                             <label>Drivers</label>
                                             <div class="assignee-wrapper">
+                                                
+                                                <?php 
+                                                $driver_qry = $admin->get_users_roles_station($conn, 'Driver'); ?>
                                                 <select name="assignee[driver][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabledEditors.$disabledDigital ?><?= $requiredDispatch?>>
-                                                    <?php
-
-                                                    if ($driver_qry) {
-                                                        while ($user_row = $driver_qry->fetch_assoc()):
-                                                            if(in_array($user_row['empid'], $drivers))
-                                                                if(!empty($disabledDispatch) || !empty($disabledMedia))
-                                                                    $all_members = array_diff($all_members, [$user_row['empid']]);
-                                                    ?>
-                                                    <option value="<?php echo htmlspecialchars($user_row['empid']); ?>" <?php echo isset($drivers) && in_array($user_row['empid'], $drivers) ? 'selected' : '' ?>>
-                                                        <?php echo htmlspecialchars($user_row['firstname']) . ' ' . htmlspecialchars($user_row['lastname']) ; ?>
-                                                    </option>
-                                                    <?php 
-                                                        endwhile;
-                                                    } else {
-                                                        echo "<option>No drivers available</option>";
-                                                    }
-                                                    ?>
+                                                <?php if($driver_qry):
+                                                    foreach ($driver_qry as $driver): 
+                                                        if(!empty($disabledDispatch) || !empty($disabledMedia))
+                                                                if(!empty($disabledMedia))
+                                                                    $all_members = array_diff($all_members, [$driver['empid']]);
+                                                        ?>
+                                                        <option value="<?= htmlspecialchars($driver['empid']) ?>" <?php  echo isset($drivers) && in_array($driver['empid'], $drivers) ? 'selected' : '' ?>>
+                                                            <?= htmlspecialchars($driver['display_name']) ?> 
+                                                        </option>
+                                                    <?php endforeach; else: ?>
+                                                        <option>No driver media available</option>
+                                                    <?php endif; ?>
                                                 </select>
                                             </div>
                                             <!-- Checkbox and Dropdown for Request -->
