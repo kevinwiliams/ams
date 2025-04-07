@@ -209,7 +209,13 @@ if (!$assignment_list) {
                         <td>
                             <span class="<?php echo ($row['is_cancelled'] == 1) ? 'strike-through' : ''; ?>">
                             <?php //echo ($row['team_members_names_with_roles']); 
-                            
+                                 $requestedTypes = [];
+                                 if ($row['dj_requested'] == 1) $requestedTypes[] = 'DJ';
+                                 if ($row['photo_requested'] == 1) $requestedTypes[] = 'Photo';
+                                 if ($row['video_requested'] == 1) $requestedTypes[] = 'Video';
+                                 if ($row['social_requested'] == 1) $requestedTypes[] = 'Social';
+                                 if ($row['driver_requested'] == 1) $requestedTypes[] = 'Driver';
+                                 
                                 if(!empty($row['team_members_names_with_roles'])){
                                     $teamMembers = explode(', ', $row['team_members_names_with_roles']);
                                     $charactersToRemove = ["/", "|"];
@@ -224,7 +230,11 @@ if (!$assignment_list) {
                                             echo "<span class='text-danger'>$member</span><br>";
                                         }
                                     }
-                                }else{ echo 'N/A';}
+                                } else { echo 'No Reporter Assigned<br>'; }
+
+                                if (!empty($requestedTypes)) {
+                                    echo '<span class="text-info">' . implode(', ', $requestedTypes) . ' Requested</span>';
+                                }
                                     
                             ?>
                             </span>
