@@ -1492,7 +1492,7 @@ Class Action {
 			$fromEmail = $emailFrom;   
 			$requestDetails = json_decode($message, true); // Convert back to array
 			$requestType = isset($requestDetails['items']) ? 'Outside Broadcast Form' : 'Equipment Request';
-			$subjectTxt = urlencode($requestType . " - " . date("D, M d, Y", strtotime($requestDetails['assignment_date'])) . ($radio_staff ? $req_status : ""));
+			$subjectTxt = urlencode($requestType . " - " . date("D, M d, Y", strtotime($requestDetails['assignment_date'])) . (isset($requestDetails['items']) ? $req_status : ""));
 			
 			// Create HTML structure
 			$htmlContent = '<h3>'.$requestType.'</h3>';
