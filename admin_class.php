@@ -582,7 +582,7 @@ Class Action {
 	
 		// Combine assignees into a comma-separated string
 		$team_members = $this->get_team_members_from_post($_POST);
-		if (!empty($team_members)) {
+		if (!empty($team_members) && count($team_members) > 0) {
 			$team_members_str = implode(',', $team_members);
 			$data['team_members'] = "'$team_members_str'";
 		}
@@ -1164,11 +1164,12 @@ Class Action {
 			$emailTable = $env->get('MSSQL_TABLE_NAME');
 
 			$bccEmails = "";      
-			$ccEmails = str_replace(',', ';', $copyEmail);        
 			$fromEmail = $emailFrom;   
 			$bodyDetails = $message; // Convert back to array
 			$subjectTxt = urlencode($bodyDetails['subject']);
 			$copyEmail = (str_contains($subjectTxt, "Requisition Form")) ? $_SESSION['login_email'] : $env->get('EMAIL_CC');
+			$ccEmails = str_replace(',', ';', $copyEmail);        
+
 
 			
 			// Create HTML structure

@@ -621,7 +621,7 @@ if ($id) {
                                         <div class="role-group">
                                             <label>Reporters</label>
                                             <div class="assignee-wrapper">
-                                                <select name="assignee[reporter][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabled.$disabledDispatch?> required>
+                                                <select name="assignee[reporter][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabled.$disabledDispatch?> >
                                                     <!-- <option value="">Select a reporter</option> -->
                                                     <?php
 

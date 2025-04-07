@@ -311,10 +311,11 @@ $conn->close();
                             <h6 class="text-bold mb-0">Team Members</h6>
                         </div>
                         <div class="card-body">
-                            <?php if (empty($team_member_names)): ?>
+                            <?php if (empty($team_member_names) && empty($photo_requested) && empty($video_requested) && empty($social_requested) && empty($dj_requested)): ?>
                                 <p class="text-muted">No team members assigned</p>
-                            <?php else: ?>
+                            <?php endif; ?>
                                 <div class="d-flex flex-wrap gap-2">
+                                <?php if (!empty($team_member_names)): ?>
                                     <?php 
                                     $charactersToRemove = ["/", "|"];
                                     foreach (explode(', ', $team_member_names) as $member): 
@@ -325,6 +326,7 @@ $conn->close();
                                             <?= htmlspecialchars($member) ?>
                                         </span>
                                     <?php endforeach; ?>
+                                <?php endif; ?>
                                       <!-- Add badges for requested fields -->
                                       <?php if (!empty($photo_requested) && $photo_requested == 1): ?>
                                         <span class="font-weight-normal badge badge-warning p-2 m-1" style="font-size: 0.9rem;">
@@ -352,7 +354,7 @@ $conn->close();
                                         </span>
                                     <?php endif; ?>
                                 </div>
-                            <?php endif; ?>
+                            
                         </div>
                     </div>
                 </div>
