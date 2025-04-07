@@ -10,6 +10,8 @@ error_reporting(E_ALL);
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+$user_role = $_SESSION['role_name'];
+$create_roles = ['Manager', 'ITAdmin', 'Editor', 'Dept Admin','Op Manager' ];
 
 // Check if ID is provided and valid
 $id = isset($_GET['id']) ? intval($_GET['id']) : 0; // Ensure ID is an integer
@@ -183,7 +185,7 @@ $conn->close();
                 </div>
 
                 <!-- Footer with Action Buttons -->
-                <?php if ($login_role_id < 5): ?>
+                <?php if (in_array($user_role, $create_roles)): ?>
                 <div class="card-footer bg-light py-3">
                     <div class="d-flex flex-wrap justify-content-between align-items-center">
                         <a href="index.php?page=user&id=<?= $id ?>" class="btn btn-primary">
