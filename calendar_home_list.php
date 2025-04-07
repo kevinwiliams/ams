@@ -63,7 +63,19 @@ FROM assignment_list a WHERE 1=1 $editorQry $dispatchQry";
 $result = $conn->query($query);
 
 $events = [];
+$requestedTypes = [];
+$resourcesRequested = "";
+$events = [];
+
 while ($row = $result->fetch_assoc()) {
+    if ($row['dj_requested'] == 1) $requestedTypes[] = 'DJ';
+    if ($row['photo_requested'] == 1) $requestedTypes[] = 'Photo';
+    if ($row['video_requested'] == 1) $requestedTypes[] = 'Video';
+    if ($row['social_requested'] == 1) $requestedTypes[] = 'Social';
+    if ($row['driver_requested'] == 1) $requestedTypes[] = 'Driver';
+    if (!empty($requestedTypes)) {
+        $resourcesRequested = '<span class="text-info small">' . implode(', ', $requestedTypes) . ' Requested</span>';
+    }
     // Combine date & time and convert to 24-hour ISO format for FullCalendar
     $full_datetime = date("Y-m-d H:i:s", strtotime("{$row['assignment_date']} {$row['start_time']}"));
 
@@ -71,8 +83,16 @@ while ($row = $result->fetch_assoc()) {
         'id' => $row['id'],
         'title' => htmlspecialchars_decode($row['title']),
         'start' => $full_datetime,
-        'description' => '<b>Venue:</b> '.$row['location'].'<br><b>Start Time:</b> '.$row['start_time'].((!empty($row['end_time'])) ? ' - <b>End Time:</b> '. $row['end_time'] : '').'<br><b>Assigned By:</b> '.$row['assigned_by_name'].'<br><br><small><b>Team:</b> '.$row['team_members_names_with_roles'].'</small><br>'
+        'description' => '<b>Venue:</b> '.$row['location']
+        .'<br><b>Start Time:</b> '.$row['start_time'].((!empty($row['end_time'])) ? ' - <b>End Time:</b> '. $row['end_time'] : '')
+        .'<br><b>Assigned By:</b> '.$row['assigned_by_name']
+        .'<br><br><small><b>Team:</b> '.$row['team_members_names_with_roles'].'</small><br>'
+        .(!empty($row['team_members_names_with_roles']) ? ', ' : '').$resourcesRequested,
+        'textColor' => ($row['is_cancelled'] == 1 ? 'red' : 'black'),
+        'backgroundColor' => ($row['is_cancelled'] == 1 ? 'red' : 'green'),
     ];
+    $requestedTypes = []; // Reset for next iteration
+
 }
 
 echo json_encode($events);
