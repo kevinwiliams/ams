@@ -243,7 +243,7 @@ foreach ($all_items as $item) {
                                             <?php endforeach; ?>
                                         </tbody>
                                     </table>
-                                    <div class="custom-control custom-switch">
+                                    <div class="custom-control custom-switch d-none">
                                         <input type="checkbox" class="custom-control-input text-primary" id="items_requested" name="items_requested" <?php //= isset($inspection['items_requested']) && $inspection['items_requested'] == 1 ? 'checked' : '' ?>>
                                         <label class="custom-control-label text-primary font-weight-light" for="items_requested">
                                         <?= isset($inspection['items_requested']) && $inspection['items_requested'] == 1 ? 'Form Sent' : 'Send Equipment Form' ?>
