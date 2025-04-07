@@ -1912,7 +1912,7 @@ Class Action {
 								  '<p><strong>Duration:</strong> ' . $emailDetails['duration'] . '</p>' .
 								  '<p><strong>Status:</strong> ' . $emailDetails['status'] . '</p>' .
 								  '<p><strong>Submitted By:</strong> ' . $_SESSION['login_firstname'].' '.$_SESSION['login_lastname'] . '</p>' .
-								  '<p><strong>View Form:</strong> <a href="' . $emailDetails['url'] . '">' . $emailDetails['url'] . '</a></p>',
+								  '<p><strong>View Form:</strong> <a href="' . urlencode($emailDetails['url']) . '">Requisition Form</a></p>',
 					];
 					$this->send_mail($requestEmailTo, $message);
 				}
