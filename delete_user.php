@@ -1,11 +1,17 @@
 <?php
 include('db_connect.php');
 
-// Ensure proper session
-session_start();
+// Start the session if not already started
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+$user_role = $_SESSION['role_name'];
+$create_roles = ['Manager', 'ITAdmin', 'Editor', 'Dept Admin','Op Manager'];
 
 // Check if user is authorized
-if ($_SESSION['role_id'] >= 5) {
+if (!in_array($user_role, $create_roles)) {
+    // User is not authorized to delete
     echo 'Permission denied';
     exit;
 }
