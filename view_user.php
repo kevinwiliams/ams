@@ -26,7 +26,10 @@ if ($id > 0) {
         u.address,
         u.contact_number,
         r.role_name,
-        u.preferred_channel
+        u.preferred_channel,
+        u.station,
+        u.alias,
+        u.sb_staff
     FROM 
         users u
     LEFT JOIN roles r
@@ -123,7 +126,12 @@ $conn->close();
                                 <span class="detail-label">Full Name</span>
                                 <span class="detail-value"><?= htmlspecialchars($firstname . ' ' . $lastname ?? 'N/A') ?></span>
                             </div>
-                            
+                            <?php if ($sb_staff == 1): ?>
+                            <div class="employee-detail">
+                                <span class="detail-label">Alias</span>
+                                <span class="detail-value"><?= htmlspecialchars($alias ?? 'N/A') ?></span>
+                            </div>
+                            <?php endif; ?>
                             <div class="employee-detail">
                                 <span class="detail-label">Email</span>
                                 <span class="detail-value">
@@ -158,7 +166,27 @@ $conn->close();
                                     </span>
                                 </span>
                             </div>
-                            
+                        <?php if ($sb_staff == 1): ?>
+                            <div class="employee-detail">
+                                <span class="detail-label">Radio Station</span>
+                                <span class="detail-value">
+                                    <?php 
+                                    if (!empty($station)) {
+                                        $stations = explode(',', $station);
+                                        foreach ($stations as $radio):
+                                    ?>
+                                        <span class="badge bg-light text-dark me-1">
+                                            <?= htmlspecialchars(strtoupper($radio)) ?>
+                                        </span>
+                                    <?php 
+                                        endforeach;
+                                    } else {
+                                        echo 'N/A';
+                                    }
+                                    ?>
+                                </span>
+                            </div>
+                        <?php endif; ?>    
                             <div class="employee-detail">
                                 <span class="detail-label">Notification Preferences</span>
                                 <span class="detail-value">

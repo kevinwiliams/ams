@@ -1953,7 +1953,7 @@ Class Action {
 		// Add station filter if provided
 		$params = $roles;
 		if (!empty($station)) {
-			$query .= " AND (FIND_IN_SET(?, u.station) > 0 OR u.station = '' OR u.station IS NULL)";
+			$query .= " AND (FIND_IN_SET(?, u.station) > 0 )";
 			$params[] = $station;
 		}
 		

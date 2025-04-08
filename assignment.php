@@ -232,7 +232,7 @@ if ($id) {
                                                 $station = htmlspecialchars($show['station']);
                                                 $display_text = "$station : $show_name"; // Concatenate show name and station
                                                 $selected = (isset($station_show) && $station_show == $display_text) ? 'selected' : ''; // Check if selected
-                                                echo '<option value="' . $display_text . '"'. $selected .'>' . $display_text . '</option>';
+                                                echo '<option value="' . $display_text . '" data-station="' . $station . '" '.  $selected .'>' . $display_text . '</option>';
                                             }
                                             ?>
                                         </select>
@@ -399,7 +399,7 @@ if ($id) {
                                             <div class="assignee-wrapper">
                                                 <?php 
                                                 $salesrep_qry = $admin->get_users_roles_station($conn, 'Sales Rep', $station); ?>
-                                                <select name="assignee[salesrep][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabledPersonality.$required ?>>
+                                                <select id="salesrep-select" name="assignee[salesrep][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabledPersonality.$required ?>>
                                                     <!-- <option value="">Select a reporter</option> -->
 
                                                 <?php if($salesrep_qry):
@@ -424,7 +424,7 @@ if ($id) {
                                             <div class="assignee-wrapper">
                                                 <?php 
                                                 $producer_qry = $admin->get_users_roles_station($conn, ['Producer', 'Broadcast Coordinator'], $station); ?>
-                                                <select name="assignee[producer][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabledPersonality ?>>
+                                                <select id="producer-select" name="assignee[producer][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabledPersonality ?>>
                                                 <?php if($producer_qry):
                                                     foreach ($producer_qry as $producer): 
                                                             if(in_array($producer['empid'], $producers))
@@ -448,7 +448,7 @@ if ($id) {
                                                
                                                 <?php 
                                                 $personality_qry = $admin->get_users_roles_station($conn, ['Personality', 'Programme Director'], $station); ?>
-                                                <select name="assignee[personality][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabledPersonality ?>>
+                                                <select id="personality-select" name="assignee[personality][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabledPersonality ?>>
                                                 <?php if($personality_qry):
                                                     foreach ($personality_qry as $personality): 
                                                             if(in_array($personality['empid'], $personalities))
@@ -471,7 +471,7 @@ if ($id) {
                                             <div class="assignee-wrapper">
                                                 <?php 
                                                 $dj_qry = $admin->get_users_roles_station($conn, 'DJ', $station); ?>
-                                                <select name="assignee[dj][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabledBroadcast.$requiredPersonality ?>>
+                                                <select id="dj-select" name="assignee[dj][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabledBroadcast.$requiredPersonality ?>>
                                                 <?php if($dj_qry):
                                                     foreach ($dj_qry as $dj): 
                                                             if(in_array($dj['empid'], $djs))
@@ -513,7 +513,7 @@ if ($id) {
                                             <div class="assignee-wrapper">
                                                 <?php 
                                                 $engineer_qry = $admin->get_users_roles_station($conn, ['Engineer'], $station); ?>
-                                                <select name="assignee[engineer][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabledPersonality ?>>
+                                                <select id="engineer-select" name="assignee[engineer][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabledPersonality ?>>
                                                 <?php if($engineer_qry):
                                                     foreach ($engineer_qry as $engineer): 
                                                             if(in_array($engineer['empid'], $engineers))
@@ -862,7 +862,49 @@ function convertTo24Hour(time) {
     }
     return `${hours.toString().padStart(2, "0")}:${minutes}`;
 }
+
+function loadUsersForStation(roles, station, targetSelectId) {
+    const rolesParam = Array.isArray(roles) ? roles.join(',') : roles;
+    
+    $.ajax({
+        url: 'get_users.php',
+        method: 'GET',
+        data: {
+            roles: rolesParam,
+            station: station
+        },
+        dataType: 'json',
+        success: function(users) {
+            const $select = $('#' + targetSelectId);
+            $select.empty();
+            
+            $.each(users, function(index, user) {
+                $select.append(
+                    $('<option></option>')
+                        .val(user.empid)
+                        .text(user.display_name + ' (' + user.role_name + ')')
+                );
+            });
+        },
+        error: function(xhr, status, error) {
+            console.error('Error loading users:', error);
+        }
+    });
+}
+
 $(document).ready(function(){
+
+    $('#station_show').on('change', function() {
+        const station = $(this).find('option:selected').data('station');
+        
+        // Load selects based on the selected station
+        loadUsersForStation('Sales Rep', station, 'salesrep-select');
+        loadUsersForStation(['Personality', 'Programme Director'], station, 'personality-select');
+        loadUsersForStation('Engineer', station, 'engineer-select');
+        loadUsersForStation(['Producer', 'Broadcast Coordinator'], station, 'producer-select');
+        loadUsersForStation('DJ', station, 'dj-select');
+
+    });
     
     var isReadonly = $('.summernote').data('readonly');
     // Initialize Summernote editor
