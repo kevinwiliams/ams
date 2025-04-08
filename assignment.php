@@ -561,7 +561,7 @@ if ($id) {
                                             <div class="assignee-wrapper">
                                                 
                                                 <?php 
-                                                $photographer_qry = $admin->get_users_roles_station($conn, ['Photographer']); ?>
+                                                $photographer_qry = $admin->get_users_roles_station($conn, ['Photographer','Photo Editor']); ?>
                                                 <select name="assignee[photographer][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabledDispatch.$disabledEditors.$disabledMedia ?><?= $required?>>
                                                 <?php if($photographer_qry):
                                                     foreach ($photographer_qry as $photographer): 
