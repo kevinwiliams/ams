@@ -63,6 +63,7 @@ $inspection = array_merge([
     'parking_available' => 0,
     'bathrooms_available' => 0,
     'setup_time' => '',
+    'report_status' => '',
     'layout_notes' => '',
     'tent_location' => '',
     'banner_location' => '',
@@ -193,7 +194,7 @@ foreach ($all_items as $item) {
                         <div class="card mb-3 col-lg-6 col-sm-12">
                         <div class="card-header text-bold d-flex justify-content-between align-items-center">
                             <span>Execution Requirements</span>
-                            <?php if (in_array($user_role, $editor_roles)): ?>
+                            <?php if (in_array($user_role, $editor_roles) && in_array($inspection['report_status'], ['Pending', 'Confirmed', 'Approved'])): ?>
                             <button type="button" class="btn btn-sm btn-outline-info ml-auto" onclick="printEquipmentForm()">
                                 <i class="fas fa-print"></i> Print Gate Pass
                             </button>

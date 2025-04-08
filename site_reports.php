@@ -13,7 +13,11 @@ $query = "SELECT vi.*, a.title, a.location, a.assignment_date, a.station_show
 
 $result = $conn->query($query);
 ?>
-
+<style>
+    .badge {
+        font-size: 0.7rem;
+    }
+</style>
 <div class="container-fluid">
     <div class="col-lg-12">
         <div class="card">
