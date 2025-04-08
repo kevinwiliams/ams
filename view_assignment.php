@@ -56,7 +56,12 @@ if ($id > 0) {
                             tv.*,
                             -- Get comma-separated team member names
                             (SELECT GROUP_CONCAT(
-                                CONCAT(u.firstname, ' ', u.lastname, ' (', r.role_name, ')', 
+                                CONCAT(
+                                    CASE 
+                                        WHEN u.alias IS NOT NULL AND u.alias <> '' THEN u.alias
+                                        ELSE CONCAT(u.firstname, ' ', u.lastname)
+                                    END, 
+                                    ' (', r.role_name, ')', 
                                     CASE 
                                         WHEN EXISTS (
                                             SELECT 1 
@@ -66,9 +71,8 @@ if ($id > 0) {
                                         ELSE ' |' 
                                     END
                                 ) SEPARATOR ', ') 
-                            FROM users u
-                            LEFT JOIN roles r
-                            ON u.role_id = r.role_id
+                            FROM users u 
+                            LEFT JOIN roles r ON u.role_id = r.role_id
                             WHERE FIND_IN_SET(u.empid, REPLACE(a.team_members, ' ', '')) > 0
                             ) AS team_member_names,
                             -- Get assigned_by user name
