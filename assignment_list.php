@@ -110,12 +110,17 @@ if (!$assignment_list) {
                 <option value="">All Team Members</option>
                 <?php
                 $disAllowedRoles = "'ITAdmin', 'Dispatcher', 'Dept Admin', 'Driver'"; // Define allowed role names
-
+                $sbQry = ($radio_staff) ? " AND u.sb_staff = 1 " : " ";
                 $teamMembersList = $conn->query("
-                    SELECT CONCAT(u.firstname, ' ', u.lastname) AS name 
+                    SELECT 
+                        CASE 
+                            WHEN u.alias IS NOT NULL AND CHAR_LENGTH(u.alias) > 0 THEN u.alias 
+                            ELSE CONCAT(u.firstname, ' ', u.lastname) 
+                        END AS name 
                     FROM users u 
                     LEFT JOIN roles r ON u.role_id = r.role_id 
                     WHERE r.role_name NOT IN ($disAllowedRoles)
+                    AND u.is_deleted = 0 $sbQry
                     ORDER BY u.firstname
                 ");
                 while ($member = $teamMembersList->fetch_assoc()) {
@@ -330,11 +335,8 @@ if (!$assignment_list) {
 
             $.fn.dataTable.ext.search.push(function (settings, data) {
                 var assignmentDate = "";
-                <?php if (in_array($user_role,  $edit_roles)){ ?>
-                assignmentDate = data[1]; // Adjust index based on table columns
-                <?php } else{ ?>
                 assignmentDate = data[0]; // Adjust index based on table columns
-                <?php } ?>
+               
                 var formattedDate = moment(assignmentDate, 'ddd, MMM D, YYYY').format('YYYY-MM-DD');
 
                 if (startDate && formattedDate < startDate) return false;
@@ -354,11 +356,7 @@ if (!$assignment_list) {
 
         // Team Member Filter
         $('#teamMemberFilter').on('change', function () {
-            <?php if (in_array($user_role,  $edit_roles)){ ?>
-            table.column(6).search(this.value).draw(); // Adjust index based on table columns
-            <?php } else { ?>
-            table.column(5).search(this.value).draw(); // Adjust index based on table columns
-                <?php } ?>
+            table.column(4).search(this.value).draw(); // Adjust index based on table columns
         });
         // Clear Filters Button
         $('#clearFilters').on('click', function () {

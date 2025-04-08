@@ -1948,7 +1948,7 @@ Class Action {
 						r.role_name 
 				FROM users u 
 				JOIN roles r ON r.role_id = u.role_id
-				WHERE r.role_name IN ($role_placeholders)";
+				WHERE u.is_deleted = 0 AND r.role_name IN ($role_placeholders)";
 		
 		// Add station filter if provided
 		$params = $roles;

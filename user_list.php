@@ -30,12 +30,13 @@ if ($user_details_result->num_rows > 0) {
 
 "";
 
-$sbQry = ($radio_staff) ? " WHERE u.sb_staff = 1 " : "";
+$sbQry = ($radio_staff) ? " AND u.sb_staff = 1 " : "";
 
 // Fetch user data (without the `is_deleted` condition)
 $query = "SELECT u.id, u.empid, CONCAT(u.firstname, ' ', u.lastname) AS name, u.alias, u.email, u.address, u.contact_number, r.role_name, u.preferred_channel
           FROM users u 
           LEFT JOIN roles r ON u.role_id = r.role_id
+          WHERE u.is_deleted = 0
           $sbQry
           ORDER BY u.firstname, u.lastname";
 
