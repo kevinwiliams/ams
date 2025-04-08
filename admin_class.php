@@ -759,7 +759,12 @@ Class Action {
 		$assigned_id = intval($_POST['assigned_by']);
 		$assignedBy = $this->get_user_by_id($assigned_id);
 		$assigned_by = (!empty($_POST['id'])) ? $assignedBy['firstname']. ' '. $assignedBy['lastname'] : $_SESSION['login_firstname'].' '.$_SESSION['login_lastname'];
-
+		$options = [
+			'dropOffOnly' => 'Drop Off Only',
+			'dropOffReturn' => 'Drop Off/Return',
+			'pickupOnly' => 'Pick Up Only',
+			'' => 'N/A'
+		];
 		return [
 			'assignment_date' => $assignmentDate,
 			'start_time' => $_POST['start_time'] ?? 'N/A',
@@ -773,7 +778,7 @@ Class Action {
 			'venue' => $_POST['location'] ?? '',
 			'transport_confirmed' => ($transport_confirmed == 1) ? 'Yes' :  'No',
 			'team' => $this->get_team_members($team_members_str),
-			// 'transport_option' => $_POST['drop_option'] ?? 'No transport required',
+			// 'transport_option' => $options[$_POST['drop_option'] ?? 'No transport required',
 			'assigned_by' => $assigned_by,
 			'assigned_by_email' => $assignedBy['email'] ?? $_SESSION['login_email'],
 			'updated_by' => $_SESSION['login_firstname'] . ' ' . $_SESSION['login_lastname'],
