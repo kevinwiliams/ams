@@ -778,7 +778,7 @@ Class Action {
 			'venue' => $_POST['location'] ?? '',
 			'transport_confirmed' => ($transport_confirmed == 1) ? 'Yes' :  'No',
 			'team' => $this->get_team_members($team_members_str),
-			// 'transport_option' => $options[$_POST['drop_option'] ?? 'No transport required',
+			'transport_option' => $options[$_POST['drop_option'] ?? ''],
 			'assigned_by' => $assigned_by,
 			'assigned_by_email' => $assignedBy['email'] ?? $_SESSION['login_email'],
 			'updated_by' => $_SESSION['login_firstname'] . ' ' . $_SESSION['login_lastname'],
@@ -951,6 +951,7 @@ Class Action {
 			$env = $this->getEnv();
 			$emailFrom = $env->get('EMAIL_FROM');
 			$copyAssignEmail = $env->get('EMAIL_ASSIGNMENT_CC');
+			$copyDispatchEmail = $env->get('EMAIL_ASSIGNMENT_DISPATCH');
 			$emailTable = $env->get('MSSQL_TABLE_NAME');
 			$radio_staff = $_SESSION['login_sb_staff'] == 1 ? true : false;
 			$mailtype = ($radio_staff) ? "Outside Broadcast" : "Assignment";
@@ -967,14 +968,14 @@ Class Action {
 			$icsFilePath = $this->generate_ics_file($assignDetails);
 			$subjectTxt = urlencode($subject);
 			
-			if (isset($assignDetails['transport_option']) && $assignDetails['transport_option'] !="") {
-				$ccEmails .= "";
+			if (isset($assignDetails['transport_option']) && $assignDetails['transport_option'] != 'N/A') {
+				$ccEmails .= (!empty($ccEmails) ? ';' : '') . str_replace(',', ';', $copyDispatchEmail);
 			}
 			// Create HTML structure
 			$htmlContent = '<h3>'.$mailtype.' Details</h3>';
 			$htmlContent .= '<table style="width: 100%; border-collapse: collapse;">';
 			foreach ($assignDetails as $key => $value) {
-				if($value && !in_array($key, ['uid', 'is_cancelled', 'sb_staff'] )){
+				if($value && !in_array($key, ['uid', 'is_cancelled', 'sb_staff', 'transport_option'] )){
 				
 					switch ($key) {
 						case 'assignment_date':
@@ -1129,7 +1130,7 @@ Class Action {
 				if($key == 'show')
 					$value = ($radio_staff) ? $value : '';
 				
-				if(!in_array($key, ['assigned_by_email', 'url', 'updated_by', 'uid', 'is_cancelled', 'sb_staff']) && !empty($value))
+				if(!in_array($key, ['assigned_by_email', 'url', 'updated_by', 'uid', 'is_cancelled', 'sb_staff', 'transport_option']) && !empty($value))
 					$body .= '<tr>
 							<td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>' . ucfirst(str_replace('_', ' ', $key)) . '</strong></td>
 							<td style="padding: 8px; border-bottom: 1px solid #ddd;">' . ($value) . '</td>

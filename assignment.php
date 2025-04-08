@@ -308,7 +308,7 @@ if ($id) {
                                                 </label>
                                             </div>
                                             <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="drop_option" id="noTransport" value="noTransport" <?php echo isset($drop_option) && $drop_option == '' || (isset($drop_option) && $drop_option == NULL) ? 'checked' : '' ?> <?= $disabled.$disabledDispatch ?>>
+                                                <input class="form-check-input" type="radio" name="drop_option" id="noTransport" value="" <?php echo !isset($drop_option) || $drop_option == '' || (isset($drop_option) && $drop_option == NULL) ? 'checked' : '' ?> <?= $disabled.$disabledDispatch ?>>
                                                 <label class="form-check-label" for="noTransport">
                                                     No Transport Required
                                                 </label>
