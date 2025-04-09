@@ -105,13 +105,13 @@ $conn->close();
                                 <div class="mb-3">
                                     <label for="contact_number" class="form-label">Contact Number</label>
                                     <input type="tel" class="form-control" id="contact_number" name="contact_number" 
-                                           value="<?= htmlspecialchars($contact_number) ?>">
+                                           value="<?= htmlspecialchars($contact_number ?? '') ?>">
                                 </div>
                                 
                                 <div class="mb-3">
                                     <label for="address" class="form-label">Address</label>
                                     <textarea class="form-control" id="address" name="address" 
-                                              rows="3"><?= htmlspecialchars($address) ?></textarea>
+                                              rows="3"><?= htmlspecialchars($address ?? '') ?></textarea>
                                 </div>
                             </div>
                             

@@ -217,8 +217,8 @@ $setup_time = $inspection['setup_time'] ?: 'Not specified';
                             
                             <div class="col-md-4">
                                 <p><strong>Engineer:</strong><br>
-                                <?php if ($personnel['Engineer']): ?>
-                                    <?= htmlspecialchars($personnel['Engineer']['firstname'] . ' ' . $personnel['Engineer']['lastname']) ?>
+                                <?php if ($inspection['confirmed_by']): ?>
+                                    <?= htmlspecialchars($inspection['confirmed_by']) ?>
                                 <?php else: ?>
                                     <span class="text-muted">Not assigned</span>
                                 <?php endif; ?>

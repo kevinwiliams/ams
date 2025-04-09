@@ -1869,6 +1869,7 @@ Class Action {
 
 		$role_name = $_SESSION['role_name'] ?? null;
 		$login_id = $_SESSION['login_id'] ?? null;
+		$login_name = $_SESSION['login_firstname'].' '.$_SESSION['login_lastname'] ?? null;
 
 		try {
 			// Update the report status based on the role
@@ -1876,11 +1877,11 @@ Class Action {
 				$stmt = $this->db->prepare("UPDATE venue_inspections SET report_status = ?, updated_at = ? WHERE assignment_id = ?");
 				$stmt->bind_param("ssi", $report_status, $current_datetime, $assignment_id);
 			} elseif ($role_name === 'Engineer') {
-				$stmt = $this->db->prepare("UPDATE venue_inspections SET report_status = ?, confirmed_at = ? WHERE assignment_id = ?");
-				$stmt->bind_param("ssi", $report_status, $current_datetime, $assignment_id);
+				$stmt = $this->db->prepare("UPDATE venue_inspections SET report_status = ?, confirmed_at = ?, confirmed_by = ? WHERE assignment_id = ?");
+				$stmt->bind_param("sssi", $report_status, $current_datetime, $login_name, $assignment_id);
 			} elseif ($role_name === 'Op Manager') {
 				$stmt = $this->db->prepare("UPDATE venue_inspections SET report_status = ?, approved_at = ?, approved_by = ? WHERE assignment_id = ?");
-				$stmt->bind_param("ssii", $report_status, $current_datetime, $login_id, $assignment_id);
+				$stmt->bind_param("sssi", $report_status, $current_datetime, $login_name, $assignment_id);
 			} else {
 				return json_encode(['status' => 'error', 'message' => 'Unauthorized role']);
 			}
