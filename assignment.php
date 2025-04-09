@@ -512,7 +512,7 @@ if ($id) {
                                             <label>Engineer</label>
                                             <div class="assignee-wrapper">
                                                 <?php 
-                                                $engineer_qry = $admin->get_users_roles_station($conn, ['Engineer'], $station); ?>
+                                                $engineer_qry = $admin->get_users_roles_station($conn, ['Engineer', 'Tech Op'], $station); ?>
                                                 <select id="engineer-select" name="assignee[engineer][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabledPersonality ?>>
                                                 <?php if($engineer_qry):
                                                     foreach ($engineer_qry as $engineer): 
