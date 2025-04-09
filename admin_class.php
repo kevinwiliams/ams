@@ -972,6 +972,14 @@ Class Action {
 			if (isset($assignDetails['transport_option']) && $assignDetails['transport_option'] != 'N/A') {
 				$ccEmails .= (!empty($ccEmails) ? ';' : '') . str_replace(',', ';', $copyDispatchEmail);
 			}
+			// Check if the assignment is for a specific show
+			if (isset($assignDetails['show'])) {
+				if (str_contains($assignDetails['show'], 'FYAH')) {
+					$ccEmails .= (!empty($ccEmails) ? ';' : '') . str_replace(',', ';', $env->get('EMAIL_DJ_REQUEST_FYAH'));
+				} elseif (str_contains($assignDetails['show'], 'EDGE')) {
+					$ccEmails .= (!empty($ccEmails) ? ';' : '') . str_replace(',', ';', $env->get('EMAIL_DJ_REQUEST_EDGE'));
+				}
+			}
 			// Create HTML structure
 			$htmlContent = '<h3>'.$mailtype.' Details</h3>';
 			$htmlContent .= '<table style="width: 100%; border-collapse: collapse;">';
