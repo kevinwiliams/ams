@@ -900,7 +900,7 @@ $(document).ready(function(){
         // Load selects based on the selected station
         loadUsersForStation('Sales Rep', station, 'salesrep-select');
         loadUsersForStation(['Personality', 'Programme Director'], station, 'personality-select');
-        loadUsersForStation('Engineer', station, 'engineer-select');
+        loadUsersForStation(['Engineer', 'Tech Op'], station, 'engineer-select');
         loadUsersForStation(['Producer', 'Broadcast Coordinator'], station, 'producer-select');
         loadUsersForStation('DJ', station, 'dj-select');
 
