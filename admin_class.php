@@ -947,13 +947,14 @@ Class Action {
 		}
 		
 		try {
+
+			$radio_staff = $_SESSION['login_sb_staff'] == 1 ? true : false;
 			//Get ENV Variables
 			$env = $this->getEnv();
 			$emailFrom = $env->get('EMAIL_FROM');
-			$copyAssignEmail = $env->get('EMAIL_ASSIGNMENT_CC');
+			$copyAssignEmail = ($radio_staff) ? $env->get('EMAIL_ASSIGNMENT_CC_SB') : $env->get('EMAIL_ASSIGNMENT_CC');
 			$copyDispatchEmail = $env->get('EMAIL_ASSIGNMENT_DISPATCH');
 			$emailTable = $env->get('MSSQL_TABLE_NAME');
-			$radio_staff = $_SESSION['login_sb_staff'] == 1 ? true : false;
 			$mailtype = ($radio_staff) ? "Outside Broadcast" : "Assignment";
 			$subject = $mailtype . " - " . $subject;
 			
