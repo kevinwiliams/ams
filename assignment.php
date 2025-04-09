@@ -761,7 +761,7 @@ if ($id) {
                             <?php } ?>
                             <?php 
 
-                                $currentStatus = ($user_role == 'Dispatcher') ? 'Approved': 'Pending';
+                                $currentStatus = (in_array($user_role,['Dispatcher', 'Op Manager'])) ? 'Approved': 'Pending';
                                 $currentStatus = (isset($status) && $status == 'Approved') ? $status : $currentStatus;
                             ?>
                             <!-- Stub out Status -->
@@ -817,7 +817,7 @@ if ($id) {
                                 </div>
                                 <?php endif; ?>
                                 
-                                <?php if (!isset($_GET['id']) && (in_array($user_role, ['Broadcast Coordinator', 'ITAdmin']))): ?>
+                                <?php if (in_array($user_role, ['Broadcast Coordinator', 'ITAdmin']) && (isset($status) && $status == 'Pending')): ?>
                                 <div class="custom-control custom-switch mt-2">
                                     <input type="checkbox" class="custom-control-input text-primary" id="alert_manager" name="alert_manager">
                                     <label class="custom-control-label text-primary" for="alert_manager">
