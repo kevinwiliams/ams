@@ -1195,8 +1195,12 @@ Class Action {
 			$bodyDetails = $message; // Convert back to array
 			$subjectTxt = urlencode($bodyDetails['subject']);
 			$copyEmail = (str_contains($subjectTxt, "Requisition Form")) ? $_SESSION['login_email'] : $env->get('EMAIL_CC');
-			$ccEmails = str_replace(',', ';', $copyEmail);        
-
+			$ccEmails = str_replace(',', ';', $copyEmail);
+			//Remove copy for password email        
+			$ccEmails = (str_contains($subjectTxt, "Password Reset")) ? '' : $ccEmails;
+			$ccEmails = (str_contains($subjectTxt, "Resource Request")) ? '' : $ccEmails;
+			$ccEmails = (str_contains($subjectTxt, "Permit Request")) ? '': $ccEmails;
+			$ccEmails = (str_contains($subjectTxt, "Assignment")) ? $env->get('EMAIL_ASSIGNMENT_CC') : $ccEmails;
 
 			
 			// Create HTML structure
