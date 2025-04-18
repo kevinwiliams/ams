@@ -685,6 +685,11 @@ Class Action {
 			// Send notifications
 			if ($notify) {
 				$subjectTxt = $this->build_email_subject($assignmentDate, $notifyAlreadySent, $cancelled, $postponed);
+				// Check for additional team members
+				if (isset($_POST['studio_engineer'])) {
+					$team_members = array_merge($team_members, array_filter(explode(',', $_POST['studio_engineer'])));
+				}
+
 				$this->send_notifications($team_members, $data_json, $subjectTxt);
 			}
 
@@ -716,6 +721,7 @@ Class Action {
 		if (isset($postData['team'])) {
 			$team_members = array_merge($team_members, array_filter(explode(',', $postData['team'])));
 		}
+		
 		return $team_members;
 	}
 	// Check for double booking
@@ -1097,7 +1103,7 @@ Class Action {
 		$env = $this->getEnv();
         $recip_photo = $env->get('EMAIL_PHOTO_REQUEST');
         $recip_video = $env->get('EMAIL_VIDEO_REQUEST');
-        $recip_social = $env->get('EMAIL_SOCIAL_REQUEST');
+        $recip_social = ($radio_staff) ? $env->get('EMAIL_SOCIAL_REQUEST') : $env->get('EMAIL_SOCIAL_REQUEST_SB');
         $recip_driver = $env->get('EMAIL_DRIVER_REQUEST');
         $recip_dj = '';
 		if (str_contains($assignmentInfo['show'], 'FYAH')) {
@@ -1962,7 +1968,7 @@ Class Action {
 		$role_placeholders = implode(',', array_fill(0, count($roles), '?'));
 		
 		// Base query
-		$query = "SELECT u.empid, 
+		$query = "SELECT u.id, u.empid, 
 						CASE 
 							WHEN CHAR_LENGTH(u.alias) > 0 THEN u.alias 
 							ELSE CONCAT(u.firstname, ' ', u.lastname) 

@@ -76,8 +76,22 @@ $query = "SELECT a.*,
                  WHERE u.id = a.assigned_by) AS assigned_by_name,
                 (SELECT CONCAT(u.firstname, ' ', u.lastname) 
                  FROM users u 
-                 WHERE u.id = a.approved_by) AS approved_by_name
+                 WHERE u.id = a.approved_by) AS approved_by_name,
+                 (SELECT CONCAT(
+                    u.firstname, ' ', u.lastname, 
+                    CASE 
+                        WHEN EXISTS (
+                            SELECT 1 
+                            FROM confirmed_logs cl 
+                            WHERE cl.assignment_id = a.id AND cl.empid = studio_engineer_user.empid
+                        ) THEN ' /' 
+                        ELSE ' |' 
+                    END
+                ) 
+                FROM users u 
+                WHERE u.empid = a.studio_engineer) AS studio_engineer_name
             FROM assignment_list a 
+            LEFT JOIN users studio_engineer_user ON a.studio_engineer = studio_engineer_user.empid
             $where $sbQry
             ORDER BY a.assignment_date DESC";
 $assignment_list = $conn->query($query);
@@ -241,6 +255,11 @@ if (!$assignment_list) {
                                         }
                                     }
                                 } else { echo 'No Reporter Assigned<br>'; }
+
+                                if (!empty($row['studio_engineer_name'])) {
+                                    $statusClass = strpos($row['studio_engineer_name'], '/') !== false ? 'text-success fw-bold' : 'text-danger';
+                                    echo "<span class='$statusClass'>" . str_replace($charactersToRemove, "", $row['studio_engineer_name']) . " (Studio Engineer)</span>";
+                                }
 
                                 if (!empty($requestedTypes)) {
                                     echo '<span class="text-info">' . implode(', ', $requestedTypes) . ' Requested</span>';

@@ -80,7 +80,20 @@ if ($id > 0) {
                             -- Get edited_by user name
                             CONCAT(edited_by_user.firstname, ' ', edited_by_user.lastname) AS edited_by_name,
                             -- Get approved_by user name
-                            CONCAT(approved_by_user.firstname, ' ', approved_by_user.lastname) AS approved_by_name
+                            CONCAT(approved_by_user.firstname, ' ', approved_by_user.lastname) AS approved_by_name,
+                            -- Get studio engineer user name with confirmation status
+                            CONCAT(
+                                CONCAT(studio_engineer_user.firstname, ' ', studio_engineer_user.lastname),
+                                ' (Studio Engineer)',
+                                CASE 
+                                    WHEN EXISTS (
+                                        SELECT 1 
+                                        FROM confirmed_logs cl 
+                                        WHERE cl.assignment_id = a.id AND cl.empid = studio_engineer_user.empid
+                                    ) THEN ' /' 
+                                    ELSE ' |' 
+                                END
+                            ) AS studio_engineer_name
                             FROM 
                                 assignment_list a
                             -- Join to get assigned_by user details
@@ -92,12 +105,15 @@ if ($id > 0) {
                             -- Join to get approved_by user details
                             LEFT JOIN users approved_by_user 
                                 ON a.approved_by = approved_by_user.id
-                            -- Join to get transporttion details
+                            -- Join to get studio_engineer user details
+                            LEFT JOIN users studio_engineer_user 
+                                ON a.studio_engineer = studio_engineer_user.empid
+                            -- Join to get transportation details
                             LEFT JOIN transport_log t 
                                 ON a.id = t.assignment_id
-                           LEFT JOIN transport_vehicles tv
+                            LEFT JOIN transport_vehicles tv
                                 ON t.transport_id = tv.id
-                             WHERE a.id = ?");
+                            WHERE a.id = ?");
     if ($stmt === false) {
         die('Prepare failed: ' . $conn->error);
     }
@@ -133,7 +149,7 @@ try {
         $team_members = '';
     }
     $current_team = explode(',', $team_members);
-    if (in_array($db_empid, $current_team)) {
+    if (in_array($db_empid, $current_team) || $user_id == $studio_engineer) {
 
         $seenCheck = "
         SELECT id 
@@ -331,8 +347,17 @@ $conn->close();
                                         </span>
                                     <?php endforeach; ?>
                                 <?php endif; ?>
+                                <?php if (!empty($studio_engineer)): 
+                                    $statusClass = strpos($studio_engineer_name, '/') !== false ? 'badge-success' : 'badge-secondary';
+                                    $studio_engineer_name = str_replace($charactersToRemove, "", $studio_engineer_name);
+                                    ?>
+                                    
+                                    <span class="font-weight-normal badge <?= $statusClass ?> p-2 m-1" style="font-size: 0.9rem;">
+                                        <?= $studio_engineer_name ?> 
+                                    </span>
+                                <?php endif; ?>
                                       <!-- Add badges for requested fields -->
-                                      <?php if (!empty($photo_requested) && $photo_requested == 1): ?>
+                                    <?php if (!empty($photo_requested) && $photo_requested == 1): ?>
                                         <span class="font-weight-normal badge badge-warning p-2 m-1" style="font-size: 0.9rem;">
                                             Photographer Requested
                                         </span>
@@ -440,7 +465,7 @@ $conn->close();
                     <?php endif; ?>
                 <?php endif; ?>
                 
-                <?php if (!$seen && in_array($db_empid, $current_team)): ?>
+                <?php if (!$seen && (in_array($db_empid, $current_team) || $user_id == $studio_engineer)): ?>
                     <button class="btn btn-success mx-1" id="confirm_seen" 
                         data-id="<?= $a_id ?>" 
                         data-empid="<?= $db_empid ?>" 

@@ -258,6 +258,9 @@ ADD COLUMN confirmed_by VARCHAR(150) DEFAULT NULL;
 ALTER TABLE venue_inspections
 MODIFY COLUMN approved_by VARCHAR(150) DEFAULT NULL;
 
+ALTER TABLE assignment_list
+ADD COLUMN studio_engineer VARCHAR(10) DEFAULT NULL;
+
 
 
 

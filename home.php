@@ -33,13 +33,16 @@ $create_roles = ['Manager', 'ITAdmin', 'Editor', 'Dept Admin', 'Security','Op Ma
 $sbQry .= ($radio_staff) ? " AND a.station_show <> '' " : " AND a.station_show IS NULL ";
 
 if(!in_array($user_role,  $view_roles))
-    $editorQry = " AND FIND_IN_SET('".$db_empid."', REPLACE(a.team_members, ' ', '')) > 0 ";
+    $editorQry = " AND FIND_IN_SET('".$db_empid."', REPLACE(a.team_members, ' ', '')) > 0 OR studio_engineer = '".$db_empid."' ";
 
 if(in_array($user_role,  $digital_roles))
     $editorQry = " AND a.photo_requested = 1 ";
 
 if(in_array($user_role,  $multimedia_roles))
     $editorQry = " AND (a.video_requested = 1 OR a.social_requested = 1) ";
+
+if(in_array($user_role,  $multimedia_roles) && $radio_staff)
+    $editorQry .= " AND station_show IS NOT NULL ";
 
 
 if($user_role =='Dispatcher')
@@ -82,10 +85,25 @@ $recentQry = "SELECT a.*,t.*,v.*,
                 WHERE u.id = a.assigned_by) AS assigned_by_name,
                 (SELECT CONCAT(u.firstname, ' ', u.lastname) 
                 FROM users u 
-                WHERE u.id = a.approved_by) AS approved_by_name
-                FROM assignment_list a 
+                WHERE u.id = a.approved_by) AS approved_by_name,
+                 (SELECT CONCAT(
+                    u.firstname, ' ', u.lastname, 
+                    CASE 
+                        WHEN EXISTS (
+                            SELECT 1 
+                            FROM confirmed_logs cl 
+                            WHERE cl.assignment_id = a.id AND cl.empid = studio_engineer_user.empid
+                        ) THEN ' /' 
+                        ELSE ' |' 
+                    END
+                ) 
+                FROM users u 
+                WHERE u.empid = a.studio_engineer) AS studio_engineer_name
+               
+                FROM assignment_list a
                 LEFT JOIN transport_log t ON a.id = t.assignment_id
                 LEFT JOIN transport_vehicles v ON t.transport_id = v.id
+                  LEFT JOIN users studio_engineer_user ON a.studio_engineer = studio_engineer_user.empid
                 WHERE  (a.is_deleted = 0 OR a.is_deleted IS NULL) 
                 $editorQry $dispatchQry $sbQry
                 ORDER BY a.assignment_date DESC 
@@ -286,34 +304,32 @@ $options = [
                             <td>
                                 <span class="<?php echo ($row['is_cancelled'] == 1) ? 'strike-through' : ''; ?>">
                                 <?php 
-                                    //echo htmlspecialchars(($row['team_members_names'])); 
-                                    $requestedTypes = [];
-                                    if ($row['dj_requested'] == 1) $requestedTypes[] = 'DJ';
-                                    if ($row['photo_requested'] == 1) $requestedTypes[] = 'Photo';
-                                    if ($row['video_requested'] == 1) $requestedTypes[] = 'Video';
-                                    if ($row['social_requested'] == 1) $requestedTypes[] = 'Social';
-                                    if ($row['driver_requested'] == 1) $requestedTypes[] = 'Driver';
+                                    $charactersToRemove = ["/", "|"];
+                                    $requestedTypes = array_filter([
+                                        $row['dj_requested'] == 1 ? 'DJ' : null,
+                                        $row['photo_requested'] == 1 ? 'Photo' : null,
+                                        $row['video_requested'] == 1 ? 'Video' : null,
+                                        $row['social_requested'] == 1 ? 'Social' : null,
+                                        $row['driver_requested'] == 1 ? 'Driver' : null
+                                    ]);
 
-                                    if(!empty($row['team_members_names'])){
-                                        $teamMembers = explode(', ', $row['team_members_names']);
-                                        $charactersToRemove = ["/", "|"];
-
-                                        foreach ($teamMembers as $member) {
-                                            // Check if status is "Confirmed" or "Pending"
-                                            if (strpos($member, '/') !== false) {
-                                                $member = str_replace($charactersToRemove, "", $member);
-                                                echo "<span class='text-success fw-bold'>$member</span><br>";
-                                            } else {
-                                                $member = str_replace($charactersToRemove, "", $member);
-                                                echo "<span class='text-seoncdary'>$member</span><br>";
-                                            }
+                                    if (!empty($row['team_members_names'])) {
+                                        foreach (explode(', ', $row['team_members_names']) as $member) {
+                                            $statusClass = strpos($member, '/') !== false ? 'text-success fw-bold' : 'text-secondary';
+                                            echo "<span class='$statusClass'>" . str_replace($charactersToRemove, "", $member) . "</span><br>";
                                         }
-                                    }else{ echo 'No Reporter Assigned<br>';}
+                                    } else {
+                                        echo 'No Reporter Assigned<br>';
+                                    }
+
+                                    if (!empty($row['studio_engineer_name'])) {
+                                        $statusClass = strpos($row['studio_engineer_name'], '/') !== false ? 'text-success fw-bold' : 'text-secondary';
+                                        echo "<span class='$statusClass'>" . str_replace($charactersToRemove, "", $row['studio_engineer_name']) . " (Studio Engineer)</span>";
+                                    }
 
                                     if (!empty($requestedTypes)) {
                                         echo '<span class="text-info">' . implode(', ', $requestedTypes) . ' Requested</span>';
                                     }
-                                    
                                 ?>
                                 </span>
                         

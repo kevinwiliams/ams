@@ -34,9 +34,17 @@ $query = "SELECT a.*,
      WHERE FIND_IN_SET(u.empid, a.team_members)) AS team_members_names_with_roles,
     (SELECT CONCAT(u.firstname, ' ', u.lastname) 
      FROM users u 
-     WHERE u.id = a.assigned_by) AS assigned_by_name
+     WHERE u.id = a.assigned_by) AS assigned_by_name,
+     (SELECT CONCAT(
+                    u.firstname, ' ', u.lastname
+                  
+                ) 
+                FROM users u
+                WHERE u.empid = a.studio_engineer) AS studio_engineer_name
    
-FROM assignment_list a $where $sbQry";
+FROM assignment_list a 
+ LEFT JOIN users studio_engineer_user ON a.studio_engineer = studio_engineer_user.empid
+$where $sbQry";
 $result = $conn->query($query);
 
 $events = [];
@@ -52,6 +60,8 @@ while ($row = $result->fetch_assoc()) {
     if (!empty($requestedTypes)) {
         $resourcesRequested = '<span class="text-info small">' . implode(', ', $requestedTypes) . ' Requested</span>';
     }
+
+    $inhouse_engineer = empty($row['studio_engineer']) ? '' :  ', '.($row['studio_engineer_name'].' (Studio Engineer)');
     // Combine date & time and convert to 24-hour ISO format for FullCalendar
     $full_datetime = date("Y-m-d H:i:s", strtotime("{$row['assignment_date']} {$row['start_time']}"));
     $events[] = [
@@ -62,7 +72,7 @@ while ($row = $result->fetch_assoc()) {
         . htmlspecialchars_decode($row['location']) 
         .'<br><b>Start Time:</b> '.$row['start_time'].((!empty($row['end_time'])) ? ' - <b>End Time:</b> '. $row['end_time'] : '')
         .'<br><b>Assigned By:</b> '.$row['assigned_by_name']
-        .'<br><br><small><b>Team:</b> '.$row['team_members_names_with_roles'].'</small>'
+        .'<br><br><small><b>Team:</b> '.$row['team_members_names_with_roles'].$inhouse_engineer.'</small>'
         .(!empty($row['team_members_names_with_roles']) && !empty($resourcesRequested) ? ', ' : '') . $resourcesRequested,
         'textColor' => ($row['is_cancelled'] == 1 ? 'red' : 'black'),
         'backgroundColor' => ($row['is_cancelled'] == 1 ? 'red' : 'green'),
