@@ -149,7 +149,7 @@ try {
         $team_members = '';
     }
     $current_team = explode(',', $team_members);
-    if (in_array($db_empid, $current_team) || $user_id == $studio_engineer) {
+    if (in_array($db_empid, $current_team) || $db_empid == $studio_engineer) {
 
         $seenCheck = "
         SELECT id 
@@ -465,7 +465,7 @@ $conn->close();
                     <?php endif; ?>
                 <?php endif; ?>
                 
-                <?php if (!$seen && (in_array($db_empid, $current_team) || $user_id == $studio_engineer)): ?>
+                <?php if (!$seen && (in_array($db_empid, $current_team) || $db_empid == $studio_engineer)): ?>
                     <button class="btn btn-success mx-1" id="confirm_seen" 
                         data-id="<?= $a_id ?>" 
                         data-empid="<?= $db_empid ?>" 
