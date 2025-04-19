@@ -690,7 +690,9 @@ Class Action {
 					$team_members = array_merge($team_members, array_filter(explode(',', $_POST['studio_engineer'])));
 				}
 
-				$this->send_notifications($team_members, $data_json, $subjectTxt);
+				if (!empty($team_members)) {
+					$this->send_notifications($team_members, $data_json, $subjectTxt);
+				}
 			}
 
 			// Log the assignment confirmation for the current user if they are part of the team
