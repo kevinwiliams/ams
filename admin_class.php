@@ -525,7 +525,7 @@ Class Action {
 	
 		// Initialize variables
 		$env = $this->getEnv();
-		$ob_approval_email = $env->get('APPROVE_ASSIGNMENT_CC');
+		$ob_approval_email = str_replace(',', ';', $env->get('APPROVE_ASSIGNMENT_CC'));
 		$data = [];
 		$log = [];
 		$status = '';
@@ -960,8 +960,8 @@ Class Action {
 			//Get ENV Variables
 			$env = $this->getEnv();
 			$emailFrom = $env->get('EMAIL_FROM');
-			$copyAssignEmail = ($radio_staff) ? $env->get('EMAIL_ASSIGNMENT_CC_SB') : $env->get('EMAIL_ASSIGNMENT_CC');
-			$copyDispatchEmail = $env->get('EMAIL_ASSIGNMENT_DISPATCH');
+			$copyAssignEmail = ($radio_staff) ? str_replace(',', ';', $env->get('EMAIL_ASSIGNMENT_CC_SB')) : str_replace(',', ';', $env->get('EMAIL_ASSIGNMENT_CC'));
+			$copyDispatchEmail = str_replace(',', ';', $env->get('EMAIL_ASSIGNMENT_DISPATCH'));
 			$emailTable = $env->get('MSSQL_TABLE_NAME');
 			$mailtype = ($radio_staff) ? "Outside Broadcast" : "Assignment";
 			$subject = $mailtype . " - " . $subject;
@@ -1103,15 +1103,15 @@ Class Action {
 	
 		// Define role-specific recipients
 		$env = $this->getEnv();
-        $recip_photo = $env->get('EMAIL_PHOTO_REQUEST');
-        $recip_video = $env->get('EMAIL_VIDEO_REQUEST');
-        $recip_social = ($radio_staff) ? $env->get('EMAIL_SOCIAL_REQUEST') : $env->get('EMAIL_SOCIAL_REQUEST_SB');
-        $recip_driver = $env->get('EMAIL_DRIVER_REQUEST');
+		$recip_photo = str_replace(',', ';', $env->get('EMAIL_PHOTO_REQUEST')); // 
+        $recip_video = str_replace(',', ';', $env->get('EMAIL_VIDEO_REQUEST'));
+        $recip_social = ($radio_staff) ? str_replace(',', ';', $env->get('EMAIL_SOCIAL_REQUEST')) : str_replace(',', ';', $env->get('EMAIL_SOCIAL_REQUEST_SB'));
+        $recip_driver = str_replace(',', ';', $env->get('EMAIL_DRIVER_REQUEST'));
         $recip_dj = '';
 		if (str_contains($assignmentInfo['show'], 'FYAH')) {
-			$recip_dj = $env->get('EMAIL_DJ_REQUEST_FYAH');
+			$recip_dj = str_replace(',', ';', $env->get('EMAIL_DJ_REQUEST_FYAH'));
 		} else {
-			$recip_dj = $env->get('EMAIL_DJ_REQUEST_EDGE');
+			$recip_dj = str_replace(',', ';', $env->get('EMAIL_DJ_REQUEST_EDGE'));
 		}
 		//Split in case there are multiple recipients for each
 		$roleRecipients = [
@@ -1122,7 +1122,7 @@ Class Action {
 			'dj' => str_replace(',', ';', $recip_dj)
 		];
 		
-        $permit_email = $env->get('PERMIT_REQUEST');
+        $permit_email = str_replace(',', ';', $env->get('PERMIT_REQUEST'));
 		$mailType = ($permit) ? "Permit" : "Resource";
 
 		// Prepare email subject and body
@@ -1208,7 +1208,7 @@ Class Action {
 			$ccEmails = (str_contains($subjectTxt, "Password Reset")) ? '' : $ccEmails;
 			$ccEmails = (str_contains($subjectTxt, "Resource Request")) ? '' : $ccEmails;
 			$ccEmails = (str_contains($subjectTxt, "Permit Request")) ? '': $ccEmails;
-			$ccEmails = (str_contains($subjectTxt, "Assignment")) ? $env->get('EMAIL_ASSIGNMENT_CC') : $ccEmails;
+			$ccEmails = (str_contains($subjectTxt, "Assignment")) ? str_replace(',', ';', $env->get('EMAIL_ASSIGNMENT_CC')) : $ccEmails;
 
 			
 			// Create HTML structure
@@ -1465,7 +1465,7 @@ Class Action {
 			$details = $_POST['equipment_details'] ?? '';
 			$env = $this->getEnv();
 			$radio_staff = $_SESSION['login_sb_staff'] == 1 ? true : false;
-			$requestEmailTo = ($radio_staff) ? $env->get('EMAIL_EQUIPMENT_REQUEST_SB'): $env->get('EMAIL_EQUIPMENT_REQUEST');
+			$requestEmailTo = ($radio_staff) ? str_replace(',', ';', $env->get('EMAIL_EQUIPMENT_REQUEST_SB')): str_replace(',', ';', $env->get('EMAIL_EQUIPMENT_REQUEST'));
 
 			
 			$emailDetails = [
@@ -1800,7 +1800,7 @@ Class Action {
 			$env = $this->getEnv();
 			// $requestEmailTo = ($user_role === 'Engineer') ? $env->get('EMAIL_ITEMS_REQUEST_SB') : 
 			// 					($user_role === 'Op Manager' ? $env->get('EMAIL_ITEMS_REQUEST_BC') : $env->get('EMAIL_ITEMS_REQUEST_EN'));
-			$requestEmailTo = $env->get('PERMIT_REQUEST');
+			$requestEmailTo = str_replace(',', ';', $env->get('PERMIT_REQUEST'));
 			$id = intval($postData['assignment_id']) ?? null;
 			$request = intval($postData['items_requested']) ?? 0;
 			$inventory = isset($postData['inventory']) ? $postData['inventory'] : array();
@@ -1931,8 +1931,8 @@ Class Action {
 					];
 
 					// Determine recipient email based on role
-					$requestEmailTo = ($role_name === 'Engineer') ? $env->get('EMAIL_ITEMS_REQUEST_SB') : 
-									  ($role_name === 'Op Manager' ? $env->get('EMAIL_ITEMS_REQUEST_BC') : $env->get('EMAIL_ITEMS_REQUEST_EN'));
+					$requestEmailTo = ($role_name === 'Engineer') ? str_replace(',', ';', $env->get('EMAIL_ITEMS_REQUEST_SB')) : 
+									  ($role_name === 'Op Manager' ? str_replace(',', ';', $env->get('EMAIL_ITEMS_REQUEST_BC')) : str_replace(',', ';', $env->get('EMAIL_ITEMS_REQUEST_EN')));
 
 					// Send the email
 					$subject = 'Requisition Form - ' . $emailDetails['assignment'].' ('.$emailDetails['status'].')';
