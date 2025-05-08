@@ -12,7 +12,7 @@ $create_roles = ['Manager', 'ITAdmin', 'Editor', 'Dept Admin', 'Security','Op Ma
 $report_roles = ['Manager', 'ITAdmin', 'Editor', 'Dept Admin','Op Manager' ];
 $show_roles = ['Op Manager','ITAdmin'];
 $it_roles = ['ITAdmin'];
-$req_roles = ['ITAdmin', 'Op Manager', 'Broadcast Coordinator', 'Producer', 'Broadcast Coordinator'];
+$req_roles = ['ITAdmin', 'Op Manager', 'Broadcast Coordinator', 'Producer', 'Engineer', 'Tech Op'];
 
 
 // Check if the required session variables are set, otherwise, default to a safe state
