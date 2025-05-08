@@ -12,6 +12,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 $edit_roles = ['Manager', 'ITAdmin', 'Editor', 'Multimedia', 'Dispatcher', 'Photo Editor', 'Dept Admin', 'Op Manager', 'Broadcast Coordinator', 'Programme Director'];
+$view_req_form_roles = ['Broadcast Coordinator', 'ITAdmin', 'Op Manager', 'Engineer', 'Producer', 'Programme Director', 'Tech Op'];
 $user_role = $_SESSION['role_name'] ?? '';
 $radio_staff = $_SESSION['login_sb_staff'] == 1 ? true : false;
 
@@ -480,7 +481,7 @@ $conn->close();
                     </button>
                 <?php endif; ?>
                 
-                <?php if (in_array($user_role, ['Broadcast Coordinator', 'ITAdmin', 'Op Manager', 'Engineer'])): ?>
+                <?php if (in_array($user_role, $view_req_form_roles)): ?>
                     <a href="index.php?page=view_site_report&id=<?= $a_id ?>" class="btn btn-outline-info mx-1">
                         <i class="fas fa-clipboard-check mx-1"></i> View Req Form
                     </a>
