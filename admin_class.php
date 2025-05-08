@@ -1799,7 +1799,8 @@ Class Action {
 
 			$env = $this->getEnv();
 			$requestEmailTo = ($user_role === 'Engineer') ? $env->get('EMAIL_ITEMS_REQUEST_SB') : 
-								($user_role === 'Op Manager' ? $env->get('EMAIL_ITEMS_REQUEST_BC') : $env->get('EMAIL_ITEMS_REQUEST_EN'));
+								(($user_role === 'Op Manager') ? $env->get('EMAIL_ITEMS_REQUEST_BC') : 
+								(($user_role === 'Producer') ? $env->get('EMAIL_ITEMS_REQUEST_SB') : $env->get('PERMIT_REQUEST')));
 			$id = intval($postData['assignment_id']) ?? null;
 			$request = intval($postData['items_requested']) ?? 0;
 			$inventory = isset($postData['inventory']) ? $postData['inventory'] : array();
