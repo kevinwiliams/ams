@@ -750,9 +750,14 @@ Class Action {
 	// Check if notification was alreadu sent out
 	function check_notification_sent($assignmentId) {
 		if (!empty($assignmentId)) {
-			$checkQuery = "SELECT send_notification FROM assignment_list WHERE id = $assignmentId";
-			$checkResult = $this->db->query($checkQuery);
-			return $checkResult ? $checkResult->fetch_assoc()['send_notification'] == 1 : false;
+			$checkQuery = "SELECT send_notification FROM assignment_list WHERE id = ?";
+			$stmt = $this->db->prepare($checkQuery);
+			$stmt->bind_param("i", $assignmentId);
+			$stmt->execute();
+			$result = $stmt->get_result();
+			$checkResult = $result->fetch_assoc();
+			$stmt->close();
+			return $checkResult ? $checkResult['send_notification'] == 1 : false;
 		}
 		return false;
 	}
@@ -1095,7 +1100,7 @@ Class Action {
 		}
 	
 		// If no roles were requested, return early
-		if (empty($requestedRoles)) {
+		if (empty($requestedRoles) && !$permit) {
 			return json_encode(['status' => 'error', 'message' => 'No roles requested.']);
 		}
 		// Decode the JSON data
@@ -1104,10 +1109,10 @@ Class Action {
 		// Define role-specific recipients
 		$env = $this->getEnv();
 		$recip_photo = str_replace(',', ';', $env->get('EMAIL_PHOTO_REQUEST')); // 
-        $recip_video = str_replace(',', ';', $env->get('EMAIL_VIDEO_REQUEST'));
-        $recip_social = ($radio_staff) ? str_replace(',', ';', $env->get('EMAIL_SOCIAL_REQUEST')) : str_replace(',', ';', $env->get('EMAIL_SOCIAL_REQUEST_SB'));
-        $recip_driver = str_replace(',', ';', $env->get('EMAIL_DRIVER_REQUEST'));
-        $recip_dj = '';
+		$recip_video = str_replace(',', ';', $env->get('EMAIL_VIDEO_REQUEST'));
+		$recip_social = ($radio_staff) ? str_replace(',', ';', $env->get('EMAIL_SOCIAL_REQUEST_SB')) : str_replace(',', ';', $env->get('EMAIL_SOCIAL_REQUEST'));
+		$recip_driver = str_replace(',', ';', $env->get('EMAIL_DRIVER_REQUEST'));
+		$recip_dj = '';
 		if (str_contains($assignmentInfo['show'], 'FYAH')) {
 			$recip_dj = str_replace(',', ';', $env->get('EMAIL_DJ_REQUEST_FYAH'));
 		} else {
@@ -1122,7 +1127,7 @@ Class Action {
 			'dj' => str_replace(',', ';', $recip_dj)
 		];
 		
-        $permit_email = str_replace(',', ';', $env->get('PERMIT_REQUEST'));
+		$permit_email = str_replace(',', ';', $env->get('PERMIT_REQUEST'));
 		$mailType = ($permit) ? "Permit" : "Resource";
 
 		// Prepare email subject and body
@@ -1158,17 +1163,21 @@ Class Action {
 		if(empty($permit)){ // Add URL for resource requests only
 		$body .= '<tr>
 				  <td colspan="2" style="padding: 8px; border-bottom: 1px solid #ddd;">
-				  	<a href="' . urlencode($assignmentInfo["url"]) . '">Add Resource to Assignment</a>
+					<a href="' . urlencode($assignmentInfo["url"]) . '">Add Resource to Assignment</a>
 				  </td>
 				  </tr>';
 		}
 		$body .= '</table>'; 
 	
-		// Determine recipients based on requested roles
+		// Determine recipients based on requested roles or permit
 		$recipients = [];
-		foreach ($requestedRoles as $role) {
-			if (isset($roleRecipients[$role])) {
-				$recipients[] = $roleRecipients[$role];
+		if ($permit) {
+			$recipients[] = $permit_email;
+		} else {
+			foreach ($requestedRoles as $role) {
+				if (isset($roleRecipients[$role])) {
+					$recipients[] = $roleRecipients[$role];
+				}
 			}
 		}
 	
