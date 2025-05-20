@@ -862,8 +862,7 @@ if ($id) {
                         <div class="card-body d-flex justify-content-between align-items-center">
                             <div>
                                 <div class="custom-control custom-switch mb-2 <?= (in_array($user_role, ['Broadcast Coordinator'])) ? 'd-none' : '' ?>">
-                                    <input type="checkbox" class="custom-control-input" id="send_notification" name="send_notification" 
-                                           <?= (!($radio_staff)) && (!in_array($user_role, ['Broadcast Coordinator'])) ? 'checked' : '' ?>>
+                                    <input type="checkbox" class="custom-control-input" id="send_notification" name="send_notification" checked>
                                     <label class="custom-control-label" for="send_notification">
                                         <?= (isset($send_notification) && $send_notification == 1) ? 
                                             'Notification Sent (uncheck if you do not wish to send another)' : 'Send Notification' ?>

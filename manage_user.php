@@ -111,7 +111,7 @@ $conn->close();
                                 <div class="mb-3">
                                     <label for="address" class="form-label">Address</label>
                                     <textarea class="form-control" id="address" name="address" 
-                                              rows="3"><?= htmlspecialchars($address ?? '') ?></textarea>
+                                              rows="3"><?= htmlspecialchars_decode($address ?? '') ?></textarea>
                                 </div>
                             </div>
                             
