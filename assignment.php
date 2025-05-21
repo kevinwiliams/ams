@@ -879,9 +879,10 @@ if ($id) {
                                 </div>
                                 <?php endif; ?>
                                 
-                                <?php if (in_array($user_role, ['Broadcast Coordinator', 'ITAdmin']) && (isset($status) && $status == 'Pending')): ?>
+                                <?php if (in_array($user_role, ['Broadcast Coordinator', 'Producer' , 'Programme Director', 'ITAdmin'])): ?> <!-- && (isset($status) && $status == 'Pending') -->
                                 <div class="custom-control custom-switch mt-2">
-                                    <input type="checkbox" class="custom-control-input text-primary" id="alert_manager" name="alert_manager">
+                                    <input type="checkbox" class="custom-control-input text-primary" id="alert_manager" name="alert_manager" value="1" checked 
+                                           <?= (isset($alert_manager) && $alert_manager == 1) ? 'checked' : '' ?>>
                                     <label class="custom-control-label text-primary" for="alert_manager">
                                         Alert Manager for Approval
                                     </label>
