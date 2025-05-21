@@ -289,7 +289,7 @@ $options = [
                             <?php if(in_array($user_role,  ['Dispatcher', 'Security'])) :?>
                             <td><span class="<?php echo ($row['is_cancelled'] == 1) ? 'strike-through' : ''; ?>"><?php echo htmlspecialchars($row['plate_number']).' '.htmlspecialchars($row['make_model']); ?></span></td>
                             <?php endif ?>
-                            <td style="width: 110px;"><span class="flex-nowrap <?php echo ($row['is_cancelled'] == 1) ? 'strike-through' : ''; ?>"><?= htmlspecialchars($row['start_time']).' - '.htmlspecialchars($row['end_time']) ?? 'N/A'; ?></span></td>
+                            <td style="width: 110px;"><span class="flex-nowrap <?php echo ($row['is_cancelled'] == 1) ? 'strike-through' : ''; ?>"><?= htmlspecialchars($row['start_time']).' - '.htmlspecialchars($row['end_time'] ?? 'N/A'); ?></span></td>
                             <!-- <td><span class="<?php echo ($row['is_cancelled'] == 1) ? 'strike-through' : ''; ?>"><?php echo htmlspecialchars($row['end_time']); ?></span></td> -->
                             
                             <td>
