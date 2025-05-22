@@ -179,6 +179,7 @@ if ($id) {
                                             <input class="form-check-input" type="checkbox" name="channels[]" 
                                                    value="email" checked disabled>
                                             <label class="form-check-label">Email (required)</label>
+                                            <input type="hidden" name="channels[]" value="email">
                                         </div>
                                         <div class="form-check mb-2">
                                             <input class="form-check-input" type="checkbox" name="channels[]" 
