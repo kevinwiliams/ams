@@ -1623,7 +1623,7 @@ Class Action {
 	public function generate_ics_file($info)  {
 		$env = $this->getEnv();
 		$site_url = $env->get('SITE_URL');
-		$folder_loc = $env->get('ICS_FOLDER');
+		$folder_location = $env->get('ICS_FOLDER');
 		$status = ($info['is_cancelled']) ? 'CANCELLED' : 'CONFIRMED';
 
 		$uid = isset($info['uid']) ? $info['uid'] : uniqid('event_', true); // Generate a unique ID if not provided
@@ -1663,18 +1663,19 @@ Class Action {
 		$icsContent .= "END:VCALENDAR\r\n";
 	
 		// Define the folder to store .ics files
-		$icsFolder = $folder_loc . 'calendar_attachments'; 
+		$folder_name = 'calendar_attachments';
+		$icsFolder = $folder_location . $folder_name; 
 		if (!is_dir($icsFolder)) {
 			mkdir($icsFolder, 0777, true); // Create the folder if it doesn't exist
 		}
 	
 		// Save the .ics file temporarily
 		$icsFileName = $uid . '.ics';
-		$icsFilePath = $icsFolder . '\\' . $icsFileName;
+		$icsFilePath = $icsFolder . DIRECTORY_SEPARATOR . $icsFileName;
 		file_put_contents($icsFilePath, $icsContent);
 	
 		// Generate the HTTPS URL
-		$icsFileUrl = $site_url.'/calendar_attachments/' . $icsFileName; // Update with your domain
+		$icsFileUrl = $site_url . '/' . $folder_name . '/' . $icsFileName; 
 	
 		return $icsFileUrl;
 	}
