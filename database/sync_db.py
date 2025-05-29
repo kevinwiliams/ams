@@ -2,7 +2,7 @@ import os
 import time
 import threading
 from datetime import datetime
-from sqlalchemy import create_engine, MetaData, Table, select, insert, update, and_, func
+from sqlalchemy import create_engine, MetaData, Table, select, insert, update, and_, func, text
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.exc import SQLAlchemyError
 from dotenv import load_dotenv
@@ -141,7 +141,7 @@ def sync_direction(source_table, target_table, source_session, target_session, d
         print(f"[SYNC] Found {len(deleted_ids)} records deleted from source")
         # Create a backup of the target table
         backup_table = f"{table_name}_backup_{datetime.now().strftime('%Y%m%d')}"
-        target_session.execute(f"CREATE TABLE {backup_table} AS SELECT * FROM {table_name}")
+        target_session.execute(text(f"CREATE TABLE {backup_table} AS SELECT * FROM {table_name}"))
         print(f"[ALERT] {table_name} has been backed up to {backup_table}")
         # Delete records from target
         target_session.execute(
