@@ -85,6 +85,53 @@ def sync_table(table_name):
     except Exception as e:
         print(f"[CRITICAL] {table_name}: Session creation failed - {str(e)}")
 
+def sync_schema(source_engine, target_engine, table_name):
+    """Synchronize table schema from source to target database"""
+    source_meta = MetaData()
+    target_meta = MetaData()
+    
+    try:
+        with source_engine.connect() as source_conn, \
+             target_engine.connect() as target_conn:
+            
+            # Reflect table structures
+            source_table = Table(table_name, source_meta, autoload_with=source_engine)
+            target_table = Table(table_name, target_meta, autoload_with=target_engine)
+            
+            # Get column information
+            source_cols = {c.name: c for c in source_table.columns}
+            target_cols = {c.name: c for c in target_table.columns}
+            
+            # Find missing columns
+            missing_cols = set(source_cols.keys()) - set(target_cols.keys())
+            
+            if not missing_cols:
+                print(f"[ALERT] {table_name}: Schemas are already in sync")
+                return
+            
+            # Generate and execute ALTER TABLE statements
+            for col_name in missing_cols:
+                col = source_cols[col_name]
+                alter_stmt = f"ALTER TABLE {table_name} ADD COLUMN {col_name} {col.type}"
+                
+                if not col.nullable:
+                    alter_stmt += " NOT NULL"
+                if col.default is not None:
+                    alter_stmt += f" DEFAULT {col.default.arg}"
+                
+                try:
+                    target_conn.execute(alter_stmt)
+                    print(f"[SUCCESS] Added column {col_name} to {table_name}")
+                except SQLAlchemyError as e:
+                    print(f"[ERROR] Failed to add column {col_name}: {str(e)}")
+                    raise
+            
+            print(f"[SUCCESS] Synchronized schema for {table_name}")
+            
+    except SQLAlchemyError as e:
+        print(f"[ERROR] Schema synchronization failed for {table_name}: {str(e)}")
+        raise
+
 def two_way_sync(table_name):
     """Perform bidirectional synchronization for a table"""
     source_meta = MetaData()
@@ -138,7 +185,7 @@ def sync_direction(source_table, target_table, source_session, target_session, d
     # Find records deleted from source
     deleted_ids = target_ids - source_ids
     if deleted_ids:
-        print(f"[SYNC] Found {len(deleted_ids)} records deleted from source")
+        print(f"[SYNC ALERT] Found {len(deleted_ids)} records deleted from source")
         # Create a backup of the target table
         backup_table = f"{table_name}_backup_{datetime.now().strftime('%Y%m%d')}"
         target_session.execute(text(f"CREATE TABLE {backup_table} AS SELECT * FROM {table_name}"))
@@ -200,12 +247,14 @@ def run_sync():
     """Run full two-way sync with timestamp"""
     print(f"\n=== Starting two-way sync at {datetime.now().isoformat()} ===")
     for table in tables:
+        print(f"Syncing Schema: {table}")
+        sync_schema(source_engine, target_engine, table)
         print(f"Syncing table: {table}")
         two_way_sync(table)
     print(f"=== Completed sync at {datetime.now().isoformat()} ===\n")
 
 
-def schedule_sync(interval_minutes=30):
+def schedule_sync(interval_minutes=60):
     """Run sync on schedule"""
     while True:
         run_sync()
