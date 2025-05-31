@@ -631,12 +631,13 @@ if ($id) {
                                                             if(in_array($photographer['empid'], $photographers))
                                                                 if(!empty($disabledDigital))
                                                                     $all_members = array_diff($all_members, [$photographer['empid']]);
+                                                                    $all_members = array_diff($all_members, ['NOPHOTO']);
                                                         ?>
                                                         <option value="<?= htmlspecialchars($photographer['empid']) ?>" <?php  echo isset($photographers) && in_array($photographer['empid'], $photographers) ? 'selected' : '' ?>>
                                                             <?= htmlspecialchars($photographer['display_name']) ?> 
                                                         </option>
-                                                    <?php endforeach; else: ?>
-                                                        <option>No photographers available</option>
+                                                    <?php endforeach; ?>
+                                                        <option value="NOPHOTO" <?php  echo isset($photographers) && in_array('NOPHOTO', $photographers) ? 'selected' : '' ?>>No photographers available</option>
                                                     <?php endif; ?>
                                                 </select>
                                             </div>
@@ -673,12 +674,13 @@ if ($id) {
                                                             if(in_array($videographer['empid'], $videographers))
                                                                 if(!empty($disabledMedia))
                                                                     $all_members = array_diff($all_members, [$videographer['empid']]);
+                                                                    $all_members = array_diff($all_members, ['NOVIDEO']);
                                                         ?>
                                                         <option value="<?= htmlspecialchars($videographer['empid']) ?>" <?php  echo isset($videographers) && in_array($videographer['empid'], $videographers) ? 'selected' : '' ?>>
                                                             <?= htmlspecialchars($videographer['display_name']) ?> 
                                                         </option>
-                                                    <?php endforeach; else: ?>
-                                                        <option>No videographers available</option>
+                                                    <?php endforeach; ?>
+                                                        <option value="NOVIDEO" <?php  echo isset($videographers) && in_array('NOVIDEO', $videographers) ? 'selected' : '' ?>>No videographers available</option>
                                                     <?php endif; ?>
                                                 </select>
                                             </div>
@@ -715,12 +717,13 @@ if ($id) {
                                                             if(in_array($social['empid'], $socials))
                                                                 if(!empty($disabledMedia))
                                                                     $all_members = array_diff($all_members, [$social['empid']]);
+                                                                    $all_members = array_diff($all_members, ['NOSOCIAL']);
                                                         ?>
                                                         <option value="<?= htmlspecialchars($social['empid']) ?>" <?php  echo isset($socials) && in_array($social['empid'], $socials) ? 'selected' : '' ?>>
                                                             <?= htmlspecialchars($social['display_name']) ?> 
                                                         </option>
-                                                    <?php endforeach; else: ?>
-                                                        <option>No social media available</option>
+                                                    <?php endforeach; ?>
+                                                        <option value="NOSOCIAL" <?php  echo isset($socials) && in_array('NOSOCIAL', $socials) ? 'selected' : '' ?>>No social media available</option>
                                                     <?php endif; ?>
                                                 </select>
                                             </div>

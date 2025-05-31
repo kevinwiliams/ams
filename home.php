@@ -330,6 +330,24 @@ $options = [
                                     if (!empty($requestedTypes)) {
                                         echo '<span class="text-info">' . implode(', ', $requestedTypes) . ' Requested</span>';
                                     }
+
+                                    $notAvailable = [];
+                                    if (!empty($row['team_members'])) {
+                                        if (stripos($row['team_members'], 'NOSOCIAL') !== false) {
+                                            $notAvailable[] = 'Social Not Available';
+                                        }
+                                        if (stripos($row['team_members'], 'NOPHOTO') !== false) {
+                                            $notAvailable[] = 'Photo Not Available';
+                                        }
+                                        if (stripos($row['team_members'], 'NOVIDEO') !== false) {
+                                            $notAvailable[] = 'Video Not Available';
+                                        }
+                                    }
+                                    if (!empty($notAvailable)) {
+                                        foreach ($notAvailable as $na) {
+                                            echo '<br><span class="text-danger">' . htmlspecialchars($na) . '</span>';
+                                        }
+                                    }
                                 ?>
                                 </span>
                         

@@ -330,6 +330,7 @@ $conn->close();
                     <div class="card mb-4">
                         <div class="card-header bg-light">
                             <h6 class="text-bold mb-0">Team Members</h6>
+                            
                         </div>
                         <div class="card-body">
                             <?php if (empty($team_member_names) && empty($photo_requested) && empty($video_requested) && empty($social_requested) && empty($dj_requested)): ?>
@@ -381,6 +382,21 @@ $conn->close();
                                     <?php if (!empty($dj_requested) && $dj_requested == 1): ?>
                                         <span class="font-weight-normal badge badge-warning p-2 m-1" style="font-size: 0.9rem;">
                                             DJ Requested
+                                        </span>
+                                    <?php endif; ?>
+                                    <?php if(str_contains($team_members,'NOSOCIAL')): ?>
+                                        <span class="font-weight-normal badge badge-danger p-2 m-1"  style="font-size: 0.9rem;">
+                                            No Social Media available
+                                        </span>
+                                    <?php endif; ?>
+                                    <?php if(str_contains($team_members,'NOVIDEO')): ?>
+                                        <span class="font-weight-normal badge badge-danger p-2 m-1"  style="font-size: 0.9rem;">
+                                            No Videographer available
+                                        </span>
+                                    <?php endif; ?>
+                                    <?php if(str_contains($team_members,'NOPHOTO')): ?>
+                                        <span class="font-weight-normal badge badge-danger p-2 m-1"  style="font-size: 0.9rem;">
+                                            No Photographer available
                                         </span>
                                     <?php endif; ?>
                                 </div>
