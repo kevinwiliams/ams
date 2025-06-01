@@ -227,38 +227,53 @@ Class Action {
 		$ids = array_map('trim', $ids);
 		$ids = array_unique($ids); // Remove duplicates
 		$ids = array_filter($ids); // Remove empty values
-	
+		// Handle special placeholders
+		$specials = [
+			'NOSOCIAL' => 'No Social Media Available',
+			'NOPHOTO' => 'No Photographer Available',
+			'NOVIDEO' => 'No Videographer Available'
+		];
+		$real_ids = [];
+
+		foreach ($ids as $id) {
+			if (!isset($specials[$id])) {
+				$real_ids[] = $id;
+			}
+		}
+
 		// Sanitize the IDs to prevent SQL injection
 		$sanitized_ids = array_map(function($id) {
 			return "'" . $this->db->real_escape_string($id) . "'";
-		}, $ids);
-	
+		}, $real_ids);
+
 		// Create a comma-separated list of sanitized IDs
 		$ids_list = implode(',', $sanitized_ids);
 
-		if (empty($ids_list)) {
-			return '';
-		}
-	
-		$query = "SELECT empid, CONCAT(firstname, ' ', lastname) AS name FROM users WHERE empid IN ($ids_list)";
-		$result = $this->db->query($query);
-	
-		if (!$result) {
-			return 'Error fetching names.';
-		}
-	
 		$names = [];
-		while ($row = $result->fetch_assoc()) {
-			$names[$row['empid']] = $row['name'];
+		if (!empty($ids_list)) {
+			$query = "SELECT empid, CONCAT(firstname, ' ', lastname) AS name FROM users WHERE empid IN ($ids_list)";
+			$result = $this->db->query($query);
+
+			if ($result) {
+				while ($row = $result->fetch_assoc()) {
+					$names[$row['empid']] = $row['name'];
+				}
+			}
 		}
-	
+
 		$team_member_names = [];
 		foreach ($ids as $id) {
 			if (isset($names[$id])) {
 				$team_member_names[] = $names[$id];
 			}
 		}
-	
+		// Append all specials at the end (if present in the original list)
+		foreach ($specials as $key => $label) {
+			if (in_array($key, $ids)) {
+				$team_member_names[] = $label;
+			}
+		}
+
 		// Join the names into a single string
 		return implode(', ', $team_member_names);
 	}
