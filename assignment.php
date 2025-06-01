@@ -42,6 +42,7 @@ $disabledPersonality = '';
 $readonlyPersonality = '';
 $requiredPersonality = '';
 $required = '';
+$studio_engineer = '';
 
 // Check user role and set attributes
 switch (true) {
@@ -563,12 +564,13 @@ if ($id) {
                                                             if(in_array($social['empid'], $socials))
                                                                 if(!empty($disabledPersonality))
                                                                     $all_members = array_diff($all_members, [$social['empid']]);
+                                                                    $all_members = array_diff($all_members, ['NOSOCIAL']);
                                                         ?>
                                                         <option value="<?= htmlspecialchars($social['empid']) ?>" <?php  echo isset($socials) && in_array($social['empid'], $socials) ? 'selected' : '' ?>>
                                                             <?= htmlspecialchars($social['display_name']) ?> 
                                                         </option>
-                                                    <?php endforeach; else: ?>
-                                                        <option>No social media available</option>
+                                                    <?php endforeach; ?>
+                                                        <option value="NOSOCIAL" <?php  echo isset($socials) && in_array('NOSOCIAL', $socials) ? 'selected' : '' ?>>No social media available</option>
                                                     <?php endif; ?>
                                                 </select>
                                             </div>
