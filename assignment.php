@@ -498,7 +498,7 @@ if ($id) {
                                                 $engineer_qry = $admin->get_users_roles_station($conn, ['Engineer', 'Tech Op'], $station); ?>
                                                 <select id="engineer-select-in" name="studio_engineer" class="custom-select custom-select-sm" multiple="multiple" <?= $disabled.$disabledPersonality ?>>
                                                 <?php if($engineer_qry):
-                                                    foreach ($engineer_qry as $engineer): 
+                                                    foreach ($engineer_qry as $engineer):
                                                         if(in_array($studio_engineer, $engineers))
                                                                 if(!empty($disabledBroadcast) || in_array($user_role, $manager_roles))
                                                                     $all_members = array_diff($all_members, [$studio_engineer]); 
@@ -832,7 +832,6 @@ if ($id) {
                                     </div>
                                 </div>
                             </div>
-                            
                             <!-- Get team members if boxes disabled -->
                             <?php if(!empty($disabled.$disabledDispatch.$disabledEditors.$disabledBroadcast.$disabledPersonality)){
                                 $teamRem = implode(',', $all_members);   
@@ -994,9 +993,8 @@ $(document).ready(function(){
         $(this).summernote({
             height: 100,
             toolbar: [
-                ['style', ['bold', 'italic', 'underline']],
-                ['para', ['ul', 'ol', 'paragraph']],
-                // ['insert', ['link']]
+            ['style', ['bold', 'italic', 'underline']],
+            ['para', ['ul', 'ol', 'paragraph']],
             ],
             disableDragAndDrop: true,
         });
@@ -1004,6 +1002,20 @@ $(document).ready(function(){
         if (isReadonly == true) {
             $(this).summernote('disable');
         }
+    });
+
+    $('.summernote').on('summernote.paste', function(e, ne) {
+        // Prevent both Summernote's default handling and browser's default
+        e.preventDefault();
+        ne.preventDefault();
+        
+        // Get plain text from clipboard
+        let bufferText = ((e.originalEvent || ne.originalEvent).clipboardData || window.clipboardData).getData('text/plain');
+        
+        // Insert plain text at the cursor position
+        $(this).summernote('pasteHTML', $('<div>').text(bufferText).html());
+        
+        return false; // Prevent further propagation
     });
 
     // Show modal when checkbox is checked
