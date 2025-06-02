@@ -22,7 +22,8 @@ $login_role_id = $_SESSION['role_id']? $_SESSION['role_id'] : 0;
 $user_role = $_SESSION['role_name'] ?? '';
 
 //Declare user roles for filtering
-$editor_roles = ['Editor', 'Manager', 'Dept Admin', 'Op Manager'];
+$editor_roles = ['Editor', 'Manager', 'Dept Admin'];
+$manager_roles = ['Op Manager'];
 $media_roles = ['Multimedia'];
 $digital_roles = ['Photo Editor'];
 $dispatch_roles = ['Dispatcher'];
@@ -406,7 +407,7 @@ if ($id) {
                                                 <?php if($salesrep_qry):
                                                     foreach ($salesrep_qry as $salesrep): 
                                                             if(in_array($salesrep['empid'], $salesreps))
-                                                                if(!empty($disabledBroadcast))
+                                                                if(!empty($disabledBroadcast) || in_array($user_role, $manager_roles))
                                                                     $all_members = array_diff($all_members, [$salesrep['empid']]);
                                                         ?>
                                                         <option value="<?= htmlspecialchars($salesrep['empid']) ?>" <?php  echo isset($salesreps) && in_array($salesrep['empid'], $salesreps) ? 'selected' : '' ?>>
@@ -429,7 +430,7 @@ if ($id) {
                                                 <?php if($producer_qry):
                                                     foreach ($producer_qry as $producer): 
                                                             if(in_array($producer['empid'], $producers))
-                                                                if(!empty($disabledBroadcast))
+                                                                if(!empty($disabledBroadcast)|| in_array($user_role, $manager_roles))
                                                                     $all_members = array_diff($all_members, [$producer['empid']]);
                                                         ?>
                                                         <option value="<?= htmlspecialchars($producer['empid']) ?>" <?php  echo isset($producers) && in_array($producer['empid'], $producers) ? 'selected' : '' ?>>
@@ -453,7 +454,7 @@ if ($id) {
                                                 <?php if($personality_qry):
                                                     foreach ($personality_qry as $personality): 
                                                             if(in_array($personality['empid'], $personalities))
-                                                                if(!empty($disabledBroadcast))
+                                                                if(!empty($disabledBroadcast) || in_array($user_role, $manager_roles))
                                                                     $all_members = array_diff($all_members, [$personality['empid']]);
                                                         ?>
                                                         <option value="<?= htmlspecialchars($personality['empid']) ?>" <?php  echo isset($personalities) && in_array($personality['empid'], $personalities) ? 'selected' : '' ?>>
@@ -476,7 +477,7 @@ if ($id) {
                                                 <?php if($engineer_qry):
                                                     foreach ($engineer_qry as $engineer): 
                                                             if(in_array($engineer['empid'], $engineers))
-                                                                if(!empty($disabledBroadcast))
+                                                                if(!empty($disabledBroadcast) || in_array($user_role, $manager_roles))
                                                                     $all_members = array_diff($all_members, [$engineer['empid']]);
                                                         ?>
                                                         <option value="<?= htmlspecialchars($engineer['empid']) ?>" <?php  echo isset($engineers) && in_array($engineer['empid'], $engineers) ? 'selected' : '' ?>>
@@ -498,6 +499,9 @@ if ($id) {
                                                 <select id="engineer-select-in" name="studio_engineer" class="custom-select custom-select-sm" multiple="multiple" <?= $disabled.$disabledPersonality ?>>
                                                 <?php if($engineer_qry):
                                                     foreach ($engineer_qry as $engineer): 
+                                                        if(in_array($studio_engineer, $engineers))
+                                                                if(!empty($disabledBroadcast) || in_array($user_role, $manager_roles))
+                                                                    $all_members = array_diff($all_members, [$studio_engineer]); 
                                                         ?>
                                                         <option value="<?= htmlspecialchars($engineer['empid']) ?>" <?php  echo isset($engineers) && ($engineer['empid'] == $studio_engineer) ? 'selected' : '' ?>>
                                                             <?= htmlspecialchars($engineer['display_name']) ?> (<?= htmlspecialchars($engineer['role_name']) ?>)
@@ -519,7 +523,7 @@ if ($id) {
                                                 <?php if($dj_qry):
                                                     foreach ($dj_qry as $dj): 
                                                             if(in_array($dj['empid'], $djs))
-                                                                if(!empty($disabledPersonality))
+                                                                if(!empty($disabledPersonality) || in_array($user_role, $manager_roles))
                                                                     $all_members = array_diff($all_members, [$dj['empid']]);
                                                         ?>
                                                         <option value="<?= htmlspecialchars($dj['empid']) ?>" <?php  echo isset($djs) && in_array($dj['empid'], $djs) ? 'selected' : '' ?>>
@@ -562,9 +566,11 @@ if ($id) {
                                                 <?php if($social_qry):
                                                     foreach ($social_qry as $social): 
                                                             if(in_array($social['empid'], $socials))
-                                                                if(!empty($disabledPersonality))
+                                                                if(!empty($disabledPersonality)  || in_array($user_role, $manager_roles)){
                                                                     $all_members = array_diff($all_members, [$social['empid']]);
                                                                     $all_members = array_diff($all_members, ['NOSOCIAL']);
+                                                                }
+                                                                    
                                                         ?>
                                                         <option value="<?= htmlspecialchars($social['empid']) ?>" <?php  echo isset($socials) && in_array($social['empid'], $socials) ? 'selected' : '' ?>>
                                                             <?= htmlspecialchars($social['display_name']) ?> 
@@ -573,6 +579,7 @@ if ($id) {
                                                         <option value="NOSOCIAL" <?php  echo isset($socials) && in_array('NOSOCIAL', $socials) ? 'selected' : '' ?>>No social media available</option>
                                                     <?php endif; ?>
                                                 </select>
+                                                
                                             </div>
                                             <!-- Checkbox and Dropdown for Request -->
                                             <?php if (isset($disabledBroadcast)): ?>
@@ -631,9 +638,11 @@ if ($id) {
                                                 <?php if($photographer_qry):
                                                     foreach ($photographer_qry as $photographer): 
                                                             if(in_array($photographer['empid'], $photographers))
-                                                                if(!empty($disabledDigital))
+                                                                if(!empty($disabledDigital)){
                                                                     $all_members = array_diff($all_members, [$photographer['empid']]);
                                                                     $all_members = array_diff($all_members, ['NOPHOTO']);
+                                                                }
+                                                                    
                                                         ?>
                                                         <option value="<?= htmlspecialchars($photographer['empid']) ?>" <?php  echo isset($photographers) && in_array($photographer['empid'], $photographers) ? 'selected' : '' ?>>
                                                             <?= htmlspecialchars($photographer['display_name']) ?> 
@@ -674,9 +683,10 @@ if ($id) {
                                                 <?php if($videographer_qry):
                                                     foreach ($videographer_qry as $videographer): 
                                                             if(in_array($videographer['empid'], $videographers))
-                                                                if(!empty($disabledMedia))
+                                                                if(!empty($disabledMedia)){
                                                                     $all_members = array_diff($all_members, [$videographer['empid']]);
                                                                     $all_members = array_diff($all_members, ['NOVIDEO']);
+                                                                }
                                                         ?>
                                                         <option value="<?= htmlspecialchars($videographer['empid']) ?>" <?php  echo isset($videographers) && in_array($videographer['empid'], $videographers) ? 'selected' : '' ?>>
                                                             <?= htmlspecialchars($videographer['display_name']) ?> 
@@ -717,9 +727,11 @@ if ($id) {
                                                 <?php if($social_qry):
                                                     foreach ($social_qry as $social): 
                                                             if(in_array($social['empid'], $socials))
-                                                                if(!empty($disabledMedia))
+                                                                if(!empty($disabledMedia)){
                                                                     $all_members = array_diff($all_members, [$social['empid']]);
                                                                     $all_members = array_diff($all_members, ['NOSOCIAL']);
+                                                                }
+                                                                    
                                                         ?>
                                                         <option value="<?= htmlspecialchars($social['empid']) ?>" <?php  echo isset($socials) && in_array($social['empid'], $socials) ? 'selected' : '' ?>>
                                                             <?= htmlspecialchars($social['display_name']) ?> 
