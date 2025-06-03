@@ -35,7 +35,6 @@ Class Action {
 	public function getEnv() {
         return $this->env;
     }
-
 	// System login
 	function login(){
 		extract($_POST);
@@ -632,7 +631,7 @@ Class Action {
 		}
 	
 		// Update assigned_by if user is an admin
-		if (in_array($user_role, $admin_roles)) {
+		if (in_array($user_role, $admin_roles) && $user_role != 'ITAdmin') {
 			$data['assigned_by'] = "'" . $_SESSION['login_id'] . "'";
 		}
 	
@@ -726,7 +725,6 @@ Class Action {
 			]);
 		}
 	}
-	
 	// Get team members from POST data
 	function get_team_members_from_post($postData) {
 		$team_members = [];
