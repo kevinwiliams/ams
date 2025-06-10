@@ -50,16 +50,16 @@ $(document).ready(function(){
         editable: false, // Disable dragging
         events: 'calendar_list.php', // Load events dynamically from database
         eventClick: function(info) {
-            console.log(info.event);
+            // console.log(info.event);
             // Show event details in a popup
             Swal.fire({
                     title: info.event.title,
                     html: `<p>${info.event.extendedProps.description || 'No description available.'}</p>`,
                     icon: '',
-                    // showCancelButton: true,
+                    showCancelButton: true,
                     confirmButtonText: `View Details&nbsp;<i class="fa fa-arrow-right"></i>`,
                     showCloseButton: true,
-                    // cancelButtonText: 'Close'
+                    cancelButtonText: 'Close'
                 }).then((result) => {
                     if (result.isConfirmed) {
                         window.location.href = `index.php?page=view_assignment&id=${info.event.id}`;

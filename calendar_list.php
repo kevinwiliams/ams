@@ -61,6 +61,21 @@ while ($row = $result->fetch_assoc()) {
         $resourcesRequested = '<span class="text-info small">' . implode(', ', $requestedTypes) . ' Requested</span>';
     }
 
+    $notAvailable = [];
+    $teamMembersArr = array_map('trim', explode(',', $row['team_members'] ?? ''));
+    if (in_array('NOPHOTO', $teamMembersArr)) $notAvailable[] = 'Photo Not Available';
+    if (in_array('NOVIDEO', $teamMembersArr)) $notAvailable[] = 'Video Not Available';
+    if (in_array('NOSOCIAL', $teamMembersArr)) $notAvailable[] = 'Social Not Available';
+    if (in_array('NODJ', $teamMembersArr)) $notAvailable[] = 'No DJ Required';
+    $notAvailableText = '';
+    if (!empty($notAvailable)) {
+        $notAvailableText = '<span class="text-danger small">' . implode(', ', $notAvailable) . '</span>';
+    }
+    if (!empty($notAvailableText)) {
+        $resourcesRequested .= (!empty($resourcesRequested) ? '<br>' : '') . $notAvailableText;
+    }
+
+    // Check if studio engineer is set and append to the team members
     $inhouse_engineer = empty($row['studio_engineer']) ? '' :  ', '.($row['studio_engineer_name'].' (Studio Engineer)');
     // Combine date & time and convert to 24-hour ISO format for FullCalendar
     $full_datetime = date("Y-m-d H:i:s", strtotime("{$row['assignment_date']} {$row['start_time']}"));
