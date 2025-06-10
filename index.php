@@ -12,22 +12,7 @@ if (!isset($_SESSION['login_id'])) {
 
 include 'header.php';
 include 'db_connect.php';
-// include 'sidebar.php';
 
-// ob_start();
-
-// if (!isset($_SESSION['system'])) {
-//     $systemQuery = "SELECT * FROM system_settings";
-//     $systemResult = $conn->query($systemQuery);
-
-//     if ($systemResult) {
-//         $_SESSION['system'] = $systemResult->fetch_array(MYSQLI_ASSOC) ?? [];
-//     } else {
-//         $_SESSION['system'] = []; 
-//     }
-// }
-
-// ob_end_flush();
 ?>
 
 
@@ -74,75 +59,7 @@ include 'db_connect.php';
             </div>
         </section>
         <!-- /.content -->
-
-        <!-- Modals -->
-        <!-- Confirmation Modal -->
-        <div class="modal fade" id="confirm_modal" role='dialog'>
-            <div class="modal-dialog modal-md" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Confirmation</h5>
-                    </div>
-                    <div class="modal-body">
-                        <div id="delete_content"></div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-primary" id='confirm'>Continue</button>
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Other Modals -->
-        <div class="modal fade" id="uni_modal" role='dialog'>
-            <div class="modal-dialog modal-md" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title"></h5>
-                    </div>
-                    <div class="modal-body"></div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-primary" id='submit'>Save</button>
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="modal fade" id="uni_modal_right" role='dialog'>
-            <div class="modal-dialog modal-full-height modal-md" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title"></h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span class="fa fa-arrow-right"></span>
-                        </button>
-                    </div>
-                    <div class="modal-body"></div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="modal fade" id="viewer_modal" role='dialog'>
-            <div class="modal-dialog modal-md" role="document">
-                <div class="modal-content">
-                    <button type="button" class="btn-close" data-dismiss="modal">
-                        <span class="fa fa-times"></span>
-                    </button>
-                    <img src="" alt="">
-                </div>
-            </div>
-        </div>
     </div>
-    
-
-   
-    <aside class="control-sidebar control-sidebar-dark">
-        <!-- Control sidebar content goes here -->
-    </aside>
-    <!-- /.control-sidebar -->
-
     
     <footer class="main-footer">
         <strong>Copyright &copy; 2024 Jamaica Observer Limited.</strong> All rights reserved.
