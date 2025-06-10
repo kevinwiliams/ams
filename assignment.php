@@ -523,14 +523,16 @@ if ($id) {
                                                 <?php if($dj_qry):
                                                     foreach ($dj_qry as $dj): 
                                                             if(in_array($dj['empid'], $djs))
-                                                                if(!empty($disabledPersonality) || in_array($user_role, $manager_roles))
+                                                                if(!empty($disabledPersonality) || in_array($user_role, $manager_roles)){
                                                                     $all_members = array_diff($all_members, [$dj['empid']]);
+                                                                    $all_members = array_diff($all_members, ['NODJ']);
+                                                                }
                                                         ?>
                                                         <option value="<?= htmlspecialchars($dj['empid']) ?>" <?php  echo isset($djs) && in_array($dj['empid'], $djs) ? 'selected' : '' ?>>
                                                             <?= htmlspecialchars($dj['display_name']) ?> (<?= htmlspecialchars($dj['role_name']) ?>)
                                                         </option>
-                                                    <?php endforeach; else: ?>
-                                                        <option>No DJs available</option>
+                                                    <?php endforeach; ?>
+                                                        <option value="NODJ" <?php  echo isset($djs) && in_array('NODJ', $djs) ? 'selected' : '' ?>>No DJ Required</option>
                                                     <?php endif; ?>
                                                 </select>
                                             </div>

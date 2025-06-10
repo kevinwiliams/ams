@@ -342,6 +342,9 @@ $options = [
                                         if (stripos($row['team_members'], 'NOVIDEO') !== false) {
                                             $notAvailable[] = 'Video Not Available';
                                         }
+                                         if (stripos($row['team_members'], 'NODJ') !== false) {
+                                            $notAvailable[] = 'DJ Not Required';
+                                        }
                                     }
                                     if (!empty($notAvailable)) {
                                         foreach ($notAvailable as $na) {
