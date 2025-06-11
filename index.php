@@ -1,27 +1,23 @@
 <?php 
-if (session_status() === PHP_SESSION_NONE) {
-	session_start();
-}
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
 
-// Redirect to login if session is not set
-if (!isset($_SESSION['login_id'])) {
-    header("Location: login.php?returnUrl=" . urlencode($_SERVER['REQUEST_URI']));
-    //header('Location: login.php');
-    exit;
-}
+    // Redirect to login if session is not set
+    if (!isset($_SESSION['login_id'])) {
+        header("Location: login.php?returnUrl=" . urlencode($_SERVER['REQUEST_URI']));
+        exit;
+    }
 
-include 'header.php';
-include 'db_connect.php';
+    include 'header.php';
+    include 'db_connect.php';
 
 ?>
-
-
 <body class="hold-transition sidebar-mini layout-fixed layout-navbar-fixed layout-footer-fixed sidebar-collapse">
 <div class="wrapper">
     <?php 
-    // include 'header.php'; 
-    include 'topbar.php'; 
-    include 'sidebar.php'; 
+        include 'topbar.php'; 
+        include 'sidebar.php'; 
     ?>
 
     <!-- Content Wrapper. Contains page content -->
@@ -62,7 +58,7 @@ include 'db_connect.php';
     </div>
     
     <footer class="main-footer">
-        <strong>Copyright &copy; 2024 Jamaica Observer Limited.</strong> All rights reserved.
+        <strong>Copyright &copy; <?= date('Y') ?> Jamaica Observer Limited.</strong> All rights reserved.
         <div class="float-right d-none d-sm-inline-block">
             <b><?php echo htmlspecialchars($_SESSION['system']['name'] ?? 'Assignment Management System'); ?></b>
         </div>
@@ -70,14 +66,7 @@ include 'db_connect.php';
 </div>
 <!-- ./wrapper -->
 
-
-
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
 
 <?php include 'footer.php'; ?>
-
-<!-- 
-</body>
-</html>
--->
