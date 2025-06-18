@@ -644,10 +644,11 @@ if ($id) {
                                                 <?php if($photographer_qry):
                                                     foreach ($photographer_qry as $photographer): 
                                                             if(in_array($photographer['empid'], $photographers))
-                                                                if(!empty($disabledDigital)){
+                                                                if(!empty($disabledDigital))
                                                                     $all_members = array_diff($all_members, [$photographer['empid']]);
-                                                                    $all_members = array_diff($all_members, ['NOPHOTO']);
-                                                                }
+
+                                                            if(!empty($disabledDigital))
+                                                                $all_members = array_diff($all_members, ['NOPHOTO']);
                                                                     
                                                         ?>
                                                         <option value="<?= htmlspecialchars($photographer['empid']) ?>" <?php  echo isset($photographers) && in_array($photographer['empid'], $photographers) ? 'selected' : '' ?>>
@@ -689,10 +690,11 @@ if ($id) {
                                                 <?php if($videographer_qry):
                                                     foreach ($videographer_qry as $videographer): 
                                                             if(in_array($videographer['empid'], $videographers))
-                                                                if(!empty($disabledMedia)){
+                                                                if(!empty($disabledMedia))
                                                                     $all_members = array_diff($all_members, [$videographer['empid']]);
+
+                                                             if(!empty($disabledMedia))
                                                                     $all_members = array_diff($all_members, ['NOVIDEO']);
-                                                                }
                                                         ?>
                                                         <option value="<?= htmlspecialchars($videographer['empid']) ?>" <?php  echo isset($videographers) && in_array($videographer['empid'], $videographers) ? 'selected' : '' ?>>
                                                             <?= htmlspecialchars($videographer['display_name']) ?> 
