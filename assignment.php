@@ -450,11 +450,11 @@ if ($id) {
                                                
                                                 <?php 
                                                 $personality_qry = $admin->get_users_roles_station($conn, ['Personality', 'Programme Director'], $station); ?>
-                                                <select id="personality-select" name="assignee[personality][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabled.$disabledPersonality ?>>
+                                                <select id="personality-select" name="assignee[personality][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabled ?>>
                                                 <?php if($personality_qry):
                                                     foreach ($personality_qry as $personality): 
                                                             if(in_array($personality['empid'], $personalities))
-                                                                if(!empty($disabledBroadcast) || in_array($user_role, $manager_roles))
+                                                                if(!empty($disabledBroadcast) || in_array($user_role, $manager_roles) || !empty($disabledPersonality))
                                                                     $all_members = array_diff($all_members, [$personality['empid']]);
                                                         ?>
                                                         <option value="<?= htmlspecialchars($personality['empid']) ?>" <?php  echo isset($personalities) && in_array($personality['empid'], $personalities) ? 'selected' : '' ?>>
@@ -517,16 +517,19 @@ if ($id) {
                                         <div class="role-group">
                                             <label>DJ</label>
                                             <div class="assignee-wrapper">
-                                                <?php 
+                                                <?php
                                                 $dj_qry = $admin->get_users_roles_station($conn, 'DJ', $station); ?>
                                                 <select id="dj-select" name="assignee[dj][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabled.$disabledBroadcast.$requiredPersonality ?>>
                                                 <?php if($dj_qry):
                                                     foreach ($dj_qry as $dj): 
                                                             if(in_array($dj['empid'], $djs))
-                                                                if(!empty($disabledPersonality) || in_array($user_role, $manager_roles)){
+                                                                if(!empty($disabledPersonality) || in_array($user_role, $manager_roles))
                                                                     $all_members = array_diff($all_members, [$dj['empid']]);
-                                                                    $all_members = array_diff($all_members, ['NODJ']);
-                                                                }
+                                                                
+                                                            
+                                                            if(!empty($disabledPersonality) || in_array($user_role, $manager_roles))    
+                                                                $all_members = array_diff($all_members, ['NODJ']);
+
                                                         ?>
                                                         <option value="<?= htmlspecialchars($dj['empid']) ?>" <?php  echo isset($djs) && in_array($dj['empid'], $djs) ? 'selected' : '' ?>>
                                                             <?= htmlspecialchars($dj['display_name']) ?> (<?= htmlspecialchars($dj['role_name']) ?>)
@@ -564,14 +567,15 @@ if ($id) {
                                                 
                                                 <?php 
                                                 $social_qry = $admin->get_users_roles_station($conn, ['Multimedia','Social Media'], $station); ?>
-                                                <select name="assignee[social][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabledBroadcast.$requiredPersonality ?>>
+                                                <select name="assignee[social][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabledBroadcast.$disabledPersonality ?>>
                                                 <?php if($social_qry):
                                                     foreach ($social_qry as $social): 
                                                             if(in_array($social['empid'], $socials))
-                                                                if(!empty($disabledPersonality)  || in_array($user_role, $manager_roles)){
+                                                                if(!empty($disabledMedia)  || in_array($user_role, $manager_roles))
                                                                     $all_members = array_diff($all_members, [$social['empid']]);
-                                                                    $all_members = array_diff($all_members, ['NOSOCIAL']);
-                                                                }
+                                                            
+                                                            if(!empty($disabledMedia) || in_array($user_role, $manager_roles))
+                                                                $all_members = array_diff($all_members, ['NOSOCIAL']);
                                                                     
                                                         ?>
                                                         <option value="<?= htmlspecialchars($social['empid']) ?>" <?php  echo isset($socials) && in_array($social['empid'], $socials) ? 'selected' : '' ?>>
@@ -725,14 +729,15 @@ if ($id) {
                                                 
                                                 <?php 
                                                 $social_qry = $admin->get_users_roles_station($conn, ['Multimedia', 'Social Media']); ?>
-                                                <select name="assignee[social][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabledDispatch.$disabledEditors.$disabledDigital ?>>
+                                                <select name="assignee[social][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabledDispatch.$disabledEditors.$disabledDigital?>>
                                                 <?php if($social_qry):
                                                     foreach ($social_qry as $social): 
                                                             if(in_array($social['empid'], $socials))
-                                                                if(!empty($disabledMedia)){
+                                                                if(!empty($disabledMedia))
                                                                     $all_members = array_diff($all_members, [$social['empid']]);
-                                                                    $all_members = array_diff($all_members, ['NOSOCIAL']);
-                                                                }
+                                                                
+                                                            if(!empty($disabledMedia) || in_array($user_role, $manager_roles))
+                                                                $all_members = array_diff($all_members, ['NOSOCIAL']);
                                                                     
                                                         ?>
                                                         <option value="<?= htmlspecialchars($social['empid']) ?>" <?php  echo isset($socials) && in_array($social['empid'], $socials) ? 'selected' : '' ?>>
@@ -837,7 +842,7 @@ if ($id) {
                             <!-- Get team members if boxes disabled -->
                             <?php if(!empty($disabled.$disabledDispatch.$disabledEditors.$disabledBroadcast.$disabledPersonality)){
                                 $teamRem = implode(',', $all_members);   
-                                // print_r($teamRem);                             ?>
+                                //  print_r($teamRem); // Debug team_members going to the db                            ?>
                             <input type="hidden" name="team" value="<?= $teamRem ?>" />
                             <?php } ?>
                             <?php 
