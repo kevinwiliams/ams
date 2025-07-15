@@ -355,7 +355,7 @@ $options = [
                                 </span>
                         
                             </td>
-                            <td><?php echo htmlspecialchars($row['assigned_by_name']); ?></td>
+                            <td><?php echo htmlspecialchars($row['assigned_by_name'] ?? ''); ?></td>
                             <?php if(in_array($user_role,  ['Dispatcher', 'Security'])) :?>
                             <td><span class="<?php echo ($row['is_cancelled'] == 1) ? 'strike-through' : ''; ?>"><?php echo htmlspecialchars($row['status']); ?></span></td>
                             <td><span class="<?php echo ($row['is_cancelled'] == 1) ? 'strike-through' : ''; ?>"><?php echo htmlspecialchars($options[$row['drop_option']]) ?? 'N/A'; ?></span></td>

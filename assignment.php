@@ -426,7 +426,7 @@ if ($id) {
                                             <div class="assignee-wrapper">
                                                 <?php 
                                                 $producer_qry = $admin->get_users_roles_station($conn, ['Producer', 'Broadcast Coordinator'], $station); ?>
-                                                <select id="producer-select" name="assignee[producer][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabled.$disabledPersonality ?>>
+                                                <select id="producer-select" name="assignee[producer][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabled?>>
                                                 <?php if($producer_qry):
                                                     foreach ($producer_qry as $producer): 
                                                             if(in_array($producer['empid'], $producers))

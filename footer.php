@@ -135,6 +135,7 @@
 		}
 	};
 $(function () {
+	$('[data-toggle="tooltip"]').tooltip(); 
   bsCustomFileInput.init();
 
     $('.summernote').summernote({
@@ -166,6 +167,7 @@ $('.number').on('input keyup keypress',function(){
         $(this).val(val)
     })
 </script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
 <script src="assets/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
 <!-- overlayScrollbars -->
 <script src="assets/plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js"></script>
