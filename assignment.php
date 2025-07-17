@@ -289,32 +289,35 @@ if ($id) {
                                     <h4 class="mb-0"><i class="fas fa-car mr-2"></i>Transport <?= ($radio_staff) ? '/ Permit' : '' ?></h4>
                                 </div>
                                 <div class="card-body">
-                                    <div class="form-group d-none">
+                                    <div class="form-group">
                                         <label class="form-label">Transport Option</label>
                                             <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="drop_option" id="dropOffOnly" value="dropOffOnly" <?php echo isset($drop_option) && $drop_option == 'dropOffOnly' ? 'checked' : '' ?> <?= $disabled.$disabledDispatch ?>>
+                                                <input class="form-check-input" type="radio" name="drop_option" id="dropOffOnly" value="dropOffOnly" <?php echo isset($drop_option) && $drop_option == 'dropOffOnly' ? 'checked' : '' ?> <?= $disabled.$disabledPersonality ?>>
                                                 <label class="form-check-label" for="dropOffOnly">
                                                     Drop Off Only
                                                 </label>
                                             </div>
                                             <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="drop_option" id="dropOffReturn" value="dropOffReturn" <?php echo isset($drop_option) && $drop_option == 'dropOffReturn' ? 'checked' : '' ?> <?= $disabled.$disabledDispatch ?>>
+                                                <input class="form-check-input" type="radio" name="drop_option" id="dropOffReturn" value="dropOffReturn" <?php echo isset($drop_option) && $drop_option == 'dropOffReturn' ? 'checked' : '' ?> <?= $disabled.$disabledPersonality ?>>
                                                 <label class="form-check-label" for="dropOffReturn">
                                                     Drop Off/Return
                                                 </label>
                                             </div>
                                             <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="drop_option" id="pickupOnly" value="pickupOnly" <?php echo isset($drop_option) && $drop_option == 'pickupOnly' ? 'checked' : '' ?> <?= $disabled.$disabledDispatch ?>>
+                                                <input class="form-check-input" type="radio" name="drop_option" id="pickupOnly" value="pickupOnly" <?php echo isset($drop_option) && $drop_option == 'pickupOnly' ? 'checked' : '' ?> <?= $disabled.$disabledPersonality ?>>
                                                 <label class="form-check-label" for="pickupOnly">
                                                     Pick Up
                                                 </label>
                                             </div>
                                             <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="drop_option" id="noTransport" value="" <?php echo !isset($drop_option) || $drop_option == '' || (isset($drop_option) && $drop_option == NULL) ? 'checked' : '' ?> <?= $disabled.$disabledDispatch ?>>
+                                                <input class="form-check-input" type="radio" name="drop_option" id="noTransport" value="" <?php echo !isset($drop_option) || $drop_option == '' || (isset($drop_option) && $drop_option == NULL) ? 'checked' : '' ?> <?= $disabled.$disabledPersonality?>>
                                                 <label class="form-check-label" for="noTransport">
                                                     No Transport Required
                                                 </label>
                                             </div>
+                                             <?php if($disabled.$disabledPersonality){ ?>
+                                            <input type="hidden" name="drop_option" value="<?= $drop_option ?>" />
+                                            <?php } ?>
                                     </div>
                                     <?php if (isset($_GET['id']) && (in_array($user_role, $editor_roles) || in_array($user_role, $broadcast_roles))){ ?>
                                     <div class="form-group">
@@ -394,14 +397,14 @@ if ($id) {
                                 </div>
                                 <div class="card-body">
                                     <div class="form-group"> 
-                                        <?php if($radio_staff){?>
+                                        <?php if($radio_staff || !is_null($station_show)){?>
                                         <!-- Sales Rep -->
                                         <div class="role-group">
                                             <label>Sales Rep</label>
                                             <div class="assignee-wrapper">
                                                 <?php 
                                                 $salesrep_qry = $admin->get_users_roles_station($conn, 'Sales Rep', $station); ?>
-                                                <select id="salesrep-select" name="assignee[salesrep][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabled.$disabledPersonality.$required ?>>
+                                                <select id="salesrep-select" name="assignee[salesrep][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabled.$disabledPersonality.$required.$disabledDispatch ?>>
                                                     <!-- <option value="">Select a reporter</option> -->
 
                                                 <?php if($salesrep_qry):
@@ -426,7 +429,7 @@ if ($id) {
                                             <div class="assignee-wrapper">
                                                 <?php 
                                                 $producer_qry = $admin->get_users_roles_station($conn, ['Producer', 'Broadcast Coordinator'], $station); ?>
-                                                <select id="producer-select" name="assignee[producer][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabled?>>
+                                                <select id="producer-select" name="assignee[producer][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabled.$disabledDispatch?>>
                                                 <?php if($producer_qry):
                                                     foreach ($producer_qry as $producer): 
                                                             if(in_array($producer['empid'], $producers))
@@ -473,7 +476,7 @@ if ($id) {
                                             <div class="assignee-wrapper">
                                                 <?php 
                                                 $engineer_qry = $admin->get_users_roles_station($conn, ['Engineer', 'Tech Op'], $station); ?>
-                                                <select id="engineer-select-out" name="assignee[engineer][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabled.$disabledPersonality ?>>
+                                                <select id="engineer-select-out" name="assignee[engineer][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabled.$disabledPersonality.$disabledDispatch ?>>
                                                 <?php if($engineer_qry):
                                                     foreach ($engineer_qry as $engineer): 
                                                             if(in_array($engineer['empid'], $engineers))
@@ -496,7 +499,7 @@ if ($id) {
                                             <div class="assignee-wrapper">
                                                 <?php 
                                                 $engineer_qry = $admin->get_users_roles_station($conn, ['Engineer', 'Tech Op'], $station); ?>
-                                                <select id="engineer-select-in" name="studio_engineer" class="custom-select custom-select-sm" multiple="multiple" <?= $disabled.$disabledPersonality ?>>
+                                                <select id="engineer-select-in" name="studio_engineer" class="custom-select custom-select-sm" multiple="multiple" <?= $disabled.$disabledPersonality.$disabledDispatch ?>>
                                                 <?php if($engineer_qry):
                                                     foreach ($engineer_qry as $engineer):
                                                         if(in_array($studio_engineer, $engineers))
@@ -519,7 +522,7 @@ if ($id) {
                                             <div class="assignee-wrapper">
                                                 <?php
                                                 $dj_qry = $admin->get_users_roles_station($conn, 'DJ', $station); ?>
-                                                <select id="dj-select" name="assignee[dj][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabled.$disabledBroadcast.$requiredPersonality ?>>
+                                                <select id="dj-select" name="assignee[dj][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabled.$disabledBroadcast.$requiredPersonality.$disabledDispatch ?>>
                                                 <?php if($dj_qry):
                                                     foreach ($dj_qry as $dj): 
                                                             if(in_array($dj['empid'], $djs))
@@ -544,7 +547,7 @@ if ($id) {
                                             <?php //if (isset($disabledPersonality)): ?>
                                             <div class="request-wrapper">
                                                 <label>
-                                                    <input type="checkbox" name="request[dj]" class="request-checkbox" <?= $disabled.$disabledPersonality ?> <?php echo isset($dj_requested) && $dj_requested == 1 ? 'checked' : '' ?>><span class="font-weight-light small"> 
+                                                    <input type="checkbox" name="request[dj]" class="request-checkbox" <?= $disabled.$disabledPersonality.$disabledDispatch ?> <?php echo isset($dj_requested) && $dj_requested == 1 ? 'checked' : '' ?>><span class="font-weight-light small"> 
                                                     <?php echo (isset($dj_requested) && $dj_requested == 1) ? 'Requested' : 'Request DJ'; ?>
                                                     </span>
                                                 </label>
@@ -555,7 +558,7 @@ if ($id) {
                                                 </select>
                                             </div>
                                             <?php //endif; ?>
-                                            <?php if(!empty($disabled) && (isset($dj_requested)) && $dj_requested == 1): ?>
+                                            <?php if(!empty($disabled.$disabledDispatch.$disabledPersonality) && (isset($dj_requested)) && $dj_requested == 1): ?>
                                                 <input type="hidden" name="request[dj]" value="<?= $dj_requested?>">
                                             <?php endif; ?>
                                         </div>
@@ -567,7 +570,7 @@ if ($id) {
                                                 
                                                 <?php 
                                                 $social_qry = $admin->get_users_roles_station($conn, ['Multimedia','Social Media'], $station); ?>
-                                                <select name="assignee[social][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabledBroadcast.$disabledPersonality ?>>
+                                                <select name="assignee[social][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabledBroadcast.$disabledPersonality.$disabledDispatch ?>>
                                                 <?php if($social_qry):
                                                     foreach ($social_qry as $social): 
                                                             if(in_array($social['empid'], $socials))
@@ -591,7 +594,7 @@ if ($id) {
                                             <?php if (isset($disabledBroadcast)): ?>
                                             <div class="request-wrapper">
                                                 <label>
-                                                    <input type="checkbox" name="request[social]" class="request-checkbox" <?= $disabled ?> <?php echo isset($social_requested) && $social_requested == 1 ? 'checked' : '' ?>><span class="font-weight-light small"> 
+                                                    <input type="checkbox" name="request[social]" class="request-checkbox" <?= $disabled.$disabledDispatch ?> <?php echo isset($social_requested) && $social_requested == 1 ? 'checked' : '' ?>><span class="font-weight-light small"> 
                                                     <?php echo (isset($social_requested) && $social_requested == 1) ? 'Requested' : 'Request Social Media'; ?>
                                                         
                                                     </span>
@@ -603,7 +606,7 @@ if ($id) {
                                                 </select>
                                             </div>
                                             <?php endif; ?>
-                                            <?php if(!empty($disabledBroadcast || $disabledPersonality) && (isset($social_requested)) && $social_requested == 1): ?>
+                                            <?php if(!empty($disabledBroadcast || $disabledPersonality || $disabledDispatch) && (isset($social_requested)) && $social_requested == 1): ?>
                                                 <input type="hidden" name="request[social]" value="<?= $social_requested?>">
                                             <?php endif; ?>
                                         </div>
@@ -663,7 +666,7 @@ if ($id) {
                                             <?php if (isset($disabledEditors)): ?>
                                             <div class="request-wrapper">
                                                 <label>
-                                                    <input type="checkbox" name="request[photographer]" class="request-checkbox" <?= $disabled ?> <?php echo isset($photo_requested) && $photo_requested == 1 ? 'checked' : '' ?>><span class="font-weight-light small"> 
+                                                    <input type="checkbox" name="request[photographer]" class="request-checkbox" <?= $disabled.$disabledDispatch ?> <?php echo isset($photo_requested) && $photo_requested == 1 ? 'checked' : '' ?>><span class="font-weight-light small"> 
                                                     <?php echo (isset($photo_requested) && $photo_requested == 1) ? 'Requested' : 'Request Photographer'; ?>
                                                     </span>
                                                 </label>
@@ -674,7 +677,7 @@ if ($id) {
                                                 </select>
                                             </div>
                                             <?php endif; ?>
-                                            <?php if(!empty($disabledMedia) && (isset($photo_requested)) && $photo_requested == 1): ?>
+                                            <?php if(!empty($disabledMedia.$disabledDispatch) && (isset($photo_requested)) && $photo_requested == 1): ?>
                                                 <input type="hidden" name="request[photographer]" value="<?= $photo_requested?>">
                                             <?php endif; ?>
                                         </div>
@@ -708,7 +711,7 @@ if ($id) {
                                             <?php if (isset($disabledEditors)): ?>
                                             <div class="request-wrapper">
                                                 <label>
-                                                    <input type="checkbox" name="request[videographer]" class="request-checkbox" <?= $disabled ?> <?php echo isset($video_requested) && $video_requested == 1 ? 'checked' : '' ?>><span class="font-weight-light small"> 
+                                                    <input type="checkbox" name="request[videographer]" class="request-checkbox" <?= $disabled.$disabledDispatch ?> <?php echo isset($video_requested) && $video_requested == 1 ? 'checked' : '' ?>><span class="font-weight-light small"> 
                                                     <?php echo (isset($video_requested) && $video_requested == 1) ? 'Requested' : 'Request Videographer'; ?>
                                                     </span>
                                                 </label>
@@ -719,7 +722,7 @@ if ($id) {
                                                 </select>
                                             </div>
                                             <?php endif; ?>
-                                            <?php if(!empty($disabledDigital) && (isset($video_requested)) && $video_requested == 1): ?>
+                                            <?php if(!empty($disabledDigital.$disabledDispatch) && (isset($video_requested)) && $video_requested == 1): ?>
                                                 <input type="hidden" name="request[videographer]" value="<?= $video_requested?>">
                                             <?php endif; ?>
                                         </div>
@@ -754,7 +757,7 @@ if ($id) {
                                             <?php if (isset($disabledEditors)): ?>
                                             <div class="request-wrapper">
                                                 <label>
-                                                    <input type="checkbox" name="request[social]" class="request-checkbox" <?= $disabled ?> <?php echo isset($social_requested) && $social_requested == 1 ? 'checked' : '' ?>><span class="font-weight-light small"> 
+                                                    <input type="checkbox" name="request[social]" class="request-checkbox" <?= $disabled.$disabledDispatch ?> <?php echo isset($social_requested) && $social_requested == 1 ? 'checked' : '' ?>><span class="font-weight-light small"> 
                                                     <?php echo (isset($social_requested) && $social_requested == 1) ? 'Requested' : 'Request Social Media'; ?>
                                                         
                                                     </span>
@@ -766,7 +769,7 @@ if ($id) {
                                                 </select>
                                             </div>
                                             <?php endif; ?>
-                                            <?php if(!empty($disabledDigital) && (isset($social_requested)) && $social_requested == 1): ?>
+                                            <?php if(!empty($disabledDigital.$disabledDispatch) && (isset($social_requested)) && $social_requested == 1): ?>
                                                 <input type="hidden" name="request[social]" value="<?= $social_requested?>">
                                             <?php endif; ?>
                                         </div>
@@ -849,8 +852,9 @@ if ($id) {
                             <?php } ?>
                             <?php 
 
-                                $currentStatus = (in_array($user_role,['Dispatcher', 'Op Manager'])) ? 'Approved': 'Pending';
-                                $currentStatus = (isset($status) && $status == 'Approved') ? $status : $currentStatus;
+                                //$currentStatus = (in_array($user_role,['Dispatcher', 'Op Manager'])) ? 'Approved': 'Pending';
+                                $currentStatus = ($user_role === 'Op Manager') ? 'Endorsed' : (in_array($user_role, ['Dispatcher']) ? 'Approved' : 'Pending');
+                                $currentStatus = (isset($status) && in_array($status,['Approved'])) ? $status : $currentStatus;
                             ?>
                             <!-- Stub out Status -->
                             <input name="status" type="hidden" value="<?php echo htmlspecialchars($currentStatus); ?>">

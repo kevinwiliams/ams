@@ -38,15 +38,19 @@ if(!in_array($user_role,  $view_roles))
 if(in_array($user_role,  $digital_roles))
     $editorQry = " AND a.photo_requested = 1 ";
 
-if(in_array($user_role,  $multimedia_roles))
+if(in_array($user_role,  $multimedia_roles)){
     $editorQry = " AND (a.video_requested = 1 OR a.social_requested = 1) ";
+        $sbQry = ""; // Clear the SB query for Multimedia roles
+}
 
 if(in_array($user_role,  $multimedia_roles) && $radio_staff)
     $editorQry .= " AND station_show IS NOT NULL ";
 
 
-if($user_role =='Dispatcher')
-    $dispatchQry = " AND a.drop_option <> 'noTransport' AND a.status = 'Pending'";
+if($user_role =='Dispatcher'){
+    $dispatchQry = " AND a.drop_option <> 'noTransport' AND a.status = 'Pending' OR a.status = 'Endorsed'";
+    $sbQry = ""; // Clear the SB query for Dispatcher roles
+}
 
 if($user_role =='Security')
     $dispatchQry = " AND a.status = 'Approved' ";
@@ -124,7 +128,6 @@ $options = [
     }
     </style>
 <div class="content"><?php //echo $db_empid.' '.$login_role_id.' '.$user_role ?>
-    
     <?php
 
     function trimString($string, $limit = 55) {
@@ -287,7 +290,7 @@ $options = [
                                 ?>
                             </td>
                             <?php if(in_array($user_role,  ['Dispatcher', 'Security'])) :?>
-                            <td><span class="<?php echo ($row['is_cancelled'] == 1) ? 'strike-through' : ''; ?>"><?php echo htmlspecialchars($row['plate_number']).' '.htmlspecialchars($row['make_model']); ?></span></td>
+                            <td><span class="<?php echo ($row['is_cancelled'] == 1) ? 'strike-through' : ''; ?>"><?php echo htmlspecialchars($row['plate_number'] ?? '').' '.htmlspecialchars($row['make_model'] ?? ''); ?></span></td>
                             <?php endif ?>
                             <td style="width: 110px;"><span class="flex-nowrap <?php echo ($row['is_cancelled'] == 1) ? 'strike-through' : ''; ?>"><?= htmlspecialchars($row['start_time']).' - '.htmlspecialchars($row['end_time'] ?? 'N/A'); ?></span></td>
                             <!-- <td><span class="<?php echo ($row['is_cancelled'] == 1) ? 'strike-through' : ''; ?>"><?php echo htmlspecialchars($row['end_time']); ?></span></td> -->

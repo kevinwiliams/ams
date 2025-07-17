@@ -260,7 +260,15 @@ $conn->close();
                             <div class="card-text">
                                 <ul class="list-unstyled mb-0">
                                 <li class="mb-2">
-                                    <strong>Transport:</strong> 
+                                    <?php 
+                                    $options = [
+                                        'dropOffOnly' => 'Drop Off Only',
+                                        'dropOffReturn' => 'Drop Off/Return',
+                                        'pickupOnly' => 'Pick Up Only',
+                                        '' => 'N/A'
+                                    ];
+                                    ?>
+                                    <strong>Transport:</strong> <?= $options[$drop_option] ?>
                                     <?= $transport_confirmed ? '<span class="text-success">Confirmed</span>' : '<span class="text-warning">Pending</span>' ?>
                                 </li>
                                 <?php if (in_array($user_role, ['Dispatcher', 'Security'])): ?>
