@@ -8,7 +8,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 $user_role = $_SESSION['role_name'];
-$create_roles = ['Manager', 'ITAdmin', 'Editor', 'Dept Admin', 'Security','Op Manager', 'Broadcast Coordinator' ];
+$create_roles = ['Manager', 'ITAdmin', 'Editor', 'Dept Admin', 'Op Manager', 'Broadcast Coordinator' ];
 $report_roles = ['Manager', 'ITAdmin', 'Editor', 'Dept Admin','Op Manager' ];
 $show_roles = ['Op Manager','ITAdmin'];
 $it_roles = ['ITAdmin'];
