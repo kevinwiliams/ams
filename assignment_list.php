@@ -24,7 +24,7 @@ $assignment_list = null;
 
 // Fetch assignment data based on conditions
 $where = "WHERE (a.is_deleted = 0 OR a.is_deleted IS NULL)"; 
-$create_roles = ['Manager', 'ITAdmin', 'Editor', 'Dept Admin', 'Security','Op Manager', 'Broadcast Coordinator' ];
+$create_roles = ['Manager', 'ITAdmin', 'Editor', 'Dept Admin','Op Manager', 'Broadcast Coordinator' ];
 $edit_roles = ['Manager', 'ITAdmin', 'Editor', 'Multimedia', 'Dispatcher', 'Photo Editor', 'Dept Admin', 'Op Manager', 'Programme Director'];
 $delete_roles = ['Manager', 'ITAdmin', 'Editor', 'Dept Admin', 'Op Manager'];
 $digital_roles = ['Photo Editor'];
@@ -36,7 +36,7 @@ if(in_array($user_role,  $freelance_roles)){
 }
 
 $sbQry = ($radio_staff) ? " AND a.station_show <> '' " : " AND a.station_show IS NULL ";
-
+$sbQry = (in_array($user_role, ['Multimedia', 'Dispatcher'])) ? " " : $sbQry; // Exclude Multimedia and Dispatcher from station_show filter
 
 // if(!in_array($user_role,  $edit_roles)){
 //     $where .= " AND FIND_IN_SET('" . $sessionempid . "', a.team_members)";

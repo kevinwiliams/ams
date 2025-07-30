@@ -898,7 +898,7 @@ if ($id) {
                                     </label>
                                 </div>
                                 
-                                <?php if (isset($_GET['id']) && (!in_array($user_role, ['Broadcast Coordinator', 'Photo Editor', 'Multimedia', 'Programme Director']))): ?>
+                                <?php if (isset($_GET['id']) && (!in_array($user_role, ['Broadcast Coordinator', 'Photo Editor', 'Multimedia', 'Programme Director', 'Dispatcher']))): ?>
                                 <div class="custom-control custom-switch">
                                     <input type="checkbox" class="custom-control-input text-danger" id="is_cancelled" name="is_cancelled"  
                                            <?= (isset($is_cancelled) && $is_cancelled == 1) ? 'checked' : '' ?>>
