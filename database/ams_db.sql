@@ -261,6 +261,59 @@ MODIFY COLUMN approved_by VARCHAR(150) DEFAULT NULL;
 ALTER TABLE assignment_list
 ADD COLUMN studio_engineer VARCHAR(10) DEFAULT NULL;
 
+ALTER TABLE ob_inventory
+ADD COLUMN quantity_return INT DEFAULT 0, -- Quantity of items returned
+ADD COLUMN security_notes TEXT DEFAULT NULL;
 
+ALTER TABLE assignment_list
+ADD COLUMN security_notes TEXT DEFAULT NULL; -- Notes for security personnel unaccounted personnel or equipment
+
+CREATE TABLE gate_pass_logs (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `assignment_id` INT NOT NULL,
+  `security_out` VARCHAR(150) DEFAULT NULL, -- Capture security name
+  `security_in` VARCHAR(150) DEFAULT NULL, -- Capture security name
+  `security_out_time` DATETIME DEFAULT NULL, -- Capture time when security took the items out
+  `security_notes` TEXT DEFAULT NULL;
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (`assignment_id`) REFERENCES `assignment_list`(`id`) ON DELETE CASCADE
+);
+
+-- MSSQL equivalent: add a nullable column with a DEFAULT constraint
+ALTER TABLE dbo.messagequeue2
+ADD retry_count INT NULL CONSTRAINT DF_messagequeue2_retry_count DEFAULT (0);
+
+-- Optional: backfill existing rows to 0 if you want no NULLs
+UPDATE dbo.messagequeue2
+SET retry_count = 0
+WHERE retry_count IS NULL;
+ALTER TABLE messagequeue2
+ADD COLUMN retry_count INT DEFAULT 0;
+
+ALTER TABLE transport_vehicles
+-- plate_number, make_model
+ADD COLUMN model_year INT DEFAULT NULL,
+ADD COLUMN fitness_expiry DATETIME DEFAULT NULL,
+ADD COLUMN registration_expiry DATETIME DEFAULT NULL,
+ADD COLUMN insurance_expiry DATETIME DEFAULT NULL,
+ADD COLUMN last_maintenance DATETIME DEFAULT NULL,
+ADD COLUMN vehicle_category VARCHAR(15) DEFAULT NULL, -- Transport, Courier, Staff
+ADD COLUMN vehicle_location VARCHAR(15) DEFAULT NULL;
+
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+ALTER TABLE [dbo].[messagequeue] ADD 
+    [status] [varchar](50) NOT NULL,
+    [error_message] [varchar](max) NULL,
+    [retry_count] [int] NULL
+GO
+
+ALTER TABLE [dbo].[messagequeue] ADD CONSTRAINT [DF_messagequeue_status] DEFAULT ('pending') FOR [status]
+GO
+
+ALTER TABLE [dbo].[messagequeue] ADD CONSTRAINT [DF_messagequeue_retry_count] DEFAULT ((0)) FOR [retry_count]
+GO
 
 

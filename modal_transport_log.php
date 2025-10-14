@@ -16,7 +16,7 @@
                         <input type="number" class="form-control" id="mileage" name="mileage" required>
                     </div>
                     <div class="form-group">
-                        <label for="">Gas Level</label>
+                        <label for="">Fuel Level</label>
                         <div>
                             <div class="form-check form-check-inline">
                                 <input class="form-check-input" type="radio" name="gas_level" id="gas_level_empty" value="empty">

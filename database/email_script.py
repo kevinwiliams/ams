@@ -4,65 +4,94 @@ import smtplib
 import requests
 import os
 import re
+import logging
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
-from urllib.parse import unquote, parse_qs, quote
+from urllib.parse import unquote, parse_qs
+from email.utils import parseaddr
+from dotenv import load_dotenv
 
-DB_HOST = 'db_host'
-DB_NAME = 'db_name'
-DB_USER = 'db_user'
-DB_PASSWORD = 'db_password'
+# Load environment variables from .env
+load_dotenv()
 
-SMTP_SERVER = 'server_ip_or_hostname'
-SMTP_PORT = 25
+# ==============================
+# Configuration
+# ==============================
 
-TABLE_NAME = "table_name"
+# Database configuration
+DB_HOST = os.getenv("DB_HOST")
+DB_NAME = os.getenv("DB_NAME")
+DB_USER = os.getenv("DB_USER")
+DB_PASSWORD = os.getenv("DB_PASSWORD")
+TABLE_NAME = os.getenv("TABLE_NAME", "messagequeue2")  # default fallback
+
+# SMTP configuration
+SMTP_SERVER = os.getenv("SMTP_SERVER")
+SMTP_PORT = int(os.getenv("SMTP_PORT", 25))
+SMTP_USE_TLS = os.getenv("SMTP_USE_TLS", "False").lower() in ("true", "1", "yes")
+
+SITE_URL = os.getenv("SITE_URL")
+SHARED_FOLDER_PATH = os.getenv("SHARED_FOLDER_PATH", r"\\172.16.3.78\htdocs\ams")
+
+# Retry settings
+MAX_RETRIES = int(os.getenv("MAX_RETRIES", 3))
+
+# Logging setup
+logging.basicConfig(
+    filename="email_queue.log",
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s"
+)
+
+# ==============================
+# Utility Functions
+# ==============================
 
 def connect_to_db():
     conn_str = f'DRIVER={{SQL Server}};SERVER={DB_HOST};DATABASE={DB_NAME};UID={DB_USER};PWD={DB_PASSWORD}'
     return pyodbc.connect(conn_str)
 
+def is_valid_email(email):
+    """Check if an email address is valid."""
+    name, addr = parseaddr(email)
+    if not addr:
+        return False
+    regex = r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"
+    return re.match(regex, addr) is not None
+
 def fix_attachment_url(attachment_url):
-    if "https://server_ip_or_hostname:8080" in attachment_url:
-        attachment_url = attachment_url.replace("server_ip_or_hostname:8080", r"\\server_ip_or_hostname\folder")
-        #print(f"Attachment Replaced: {attachment_url}")
-        
+    """Fix UNC paths for local shared folders, or return as-is if already HTTP/HTTPS."""
+    if SITE_URL in attachment_url:
+        attachment_url = attachment_url.replace(SITE_URL, SHARED_FOLDER_PATH)
         attachment_url = attachment_url.replace("/", "\\")
-        #print(f"Attachment string replaced: {attachment_url}")
         return attachment_url
-        
+
     if attachment_url.startswith(('http://', 'https://')):
-        return attachment_url  # Return as-is
+        return attachment_url
+    return attachment_url
 
 def download_attachment(attachment_url):
-    
+    """Download attachment if remote; return local path if already on disk."""
     if os.path.exists(attachment_url):
-        # print(f"Attachment is a local file: {attachment_url}")
-        return attachment_url  
-
-    # If it's not a local file, assume it's a URL and try to download it
+        return attachment_url
     try:
-        response = requests.get(attachment_url, stream=True)
+        response = requests.get(attachment_url, stream=True, timeout=15)
         response.raise_for_status()
-
-        
         filename = os.path.basename(attachment_url)
         filepath = os.path.join('/tmp', filename)
-
-        # Save the downloaded file
         with open(filepath, 'wb') as file:
             for chunk in response.iter_content(chunk_size=8192):
                 file.write(chunk)
-
-        print(f"Attachment downloaded and saved to: {filepath}")
-        return filepath 
+        logging.info(f"Attachment downloaded to {filepath}")
+        return filepath
     except Exception as e:
-        print(f"Error downloading attachment: {e}")
+        logging.error(f"Error downloading attachment: {e}")
         return None
 
 def parse_email_components(mess):
+    """Decode and parse email fields from the queue message string."""
     components = {
         "to": "",
         "bcc": "",
@@ -72,54 +101,45 @@ def parse_email_components(mess):
         "msgbody": "",
         "attachment": ""
     }
-
     mess = unquote(mess.replace("encoding=UTF-8", ""))
-    
     parsed_data = parse_qs(mess)
-    
     for key in components.keys():
         if key in parsed_data:
             components[key] = parsed_data[key][0]
-
     if components['attachment']:
         components['attachment'] = fix_attachment_url(components['attachment'])
-
     return components
 
+# ==============================
+# Core Email Sending
+# ==============================
 
 def send_email(components, recid, cursor, conn):
+    # Validate recipients
+    to_emails = [e.strip() for e in components['to'].split(';') if is_valid_email(e.strip())]
+    cc_emails = [e.strip() for e in components['cc'].split(';') if is_valid_email(e.strip())]
+    bcc_emails = [e.strip() for e in components['bcc'].split(';') if is_valid_email(e.strip())]
+
+    if not (to_emails or cc_emails or bcc_emails):
+        logging.warning(f"Record {recid}: No valid recipients")
+        cursor.execute(f"UPDATE {TABLE_NAME} SET status = 'failed', error_message = 'No valid recipients' WHERE recid = ?", recid)
+        conn.commit()
+        return
+
     msg = MIMEMultipart()
     msg['From'] = components['from']
-    msg['To'] = ', '.join([email.strip() for email in components['to'].split(';') if email.strip()])
+    msg['To'] = ', '.join(to_emails)
     msg['Subject'] = components['subject']
- 
-    # Handle Cc separately
-    if components['cc']:
-        cc_emails = [email.strip() for email in components['cc'].split(';') if email.strip()]
+
+    if cc_emails:
         msg['Cc'] = ', '.join(cc_emails)
-    else:
-        cc_emails = []
 
-    # Bcc
-    if components['bcc']:
-        bcc_emails = [email.strip() for email in components['bcc'].split(';') if email.strip()]
-    else:
-        bcc_emails = []
-
-    recipients = msg['To'].split(', ') + cc_emails + bcc_emails  # All recipients for sendmail()
-    
+    recipients = to_emails + cc_emails + bcc_emails
     msg.attach(MIMEText(components['msgbody'], 'html'))
 
-    
+    # Handle attachment
     if components['attachment']:
-        attachment_url = components['attachment']
-        
-        
-        if attachment_url.startswith(('http://', 'https://')):
-            local_filepath = download_attachment(attachment_url)
-        else:
-            local_filepath = attachment_url  
-
+        local_filepath = download_attachment(components['attachment']) if components['attachment'].startswith(('http://', 'https://')) else components['attachment']
         if local_filepath and os.path.exists(local_filepath):
             try:
                 with open(local_filepath, 'rb') as attachment:
@@ -129,65 +149,58 @@ def send_email(components, recid, cursor, conn):
                     part.add_header('Content-Disposition', f'attachment; filename={os.path.basename(local_filepath)}')
                     msg.attach(part)
             except Exception as e:
-                print(f"Error attaching file: {e}")
-                # Update status to failed
-                cursor.execute(f"UPDATE {TABLE_NAME} SET status = 'failed', error_message = ? WHERE recid = ?", (e, recid))
+                logging.error(f"Error attaching file for record {recid}: {e}")
+                cursor.execute(f"UPDATE {TABLE_NAME} SET status = 'failed', error_message = ? WHERE recid = ?", (str(e), recid))
                 conn.commit()
                 return
 
-    # Send the email
+    # Send email
     try:
-        with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
-            server.sendmail(components['from'], recipients, msg.as_string())
-        print(f"Email sent to {components['to']}")
-        
-        # Delete the record on success
+        if SMTP_USE_TLS:
+            with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
+                server.starttls()
+                server.sendmail(components['from'], recipients, msg.as_string())
+        else:
+            with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
+                server.sendmail(components['from'], recipients, msg.as_string())
+
+        logging.info(f"Record {recid}: Email sent successfully to {', '.join(recipients)}")
         cursor.execute(f"DELETE FROM {TABLE_NAME} WHERE recid = ?", recid)
         conn.commit()
+
     except Exception as e:
-        print(f"Error sending email: {e}")
-        # Update status to failed
-        cursor.execute(f"UPDATE {TABLE_NAME} SET status = 'failed', error_message = ? WHERE recid = ?", (e, recid))
+        logging.error(f"Error sending email for record {recid}: {e}")
+        cursor.execute(f"""
+            UPDATE {TABLE_NAME}
+            SET status = CASE WHEN retry_count + 1 >= ? THEN 'failed' ELSE 'pending' END,
+                retry_count = retry_count + 1,
+                error_message = ?
+            WHERE recid = ?
+        """, (MAX_RETRIES, str(e), recid))
         conn.commit()
+
+# ==============================
+# Main Loop
+# ==============================
 
 def main():
     while True:
         try:
             conn = connect_to_db()
             cursor = conn.cursor()
-
             cursor.execute(f"SELECT recid, mess FROM {TABLE_NAME} WHERE status = 'pending' ORDER BY recid")
-            
             row = cursor.fetchone()
             while row:
                 recid, mess = row
-
                 components = parse_email_components(mess)
-                components['recid'] = recid
-
-                print(f"Processing record ID: {recid}")
-                print(f"To: {components['to']}")
-                print(f"Bcc: {components['bcc']}")
-                print(f"Cc: {components['cc']}")
-                print(f"From: {components['from']}")
-                print(f"Subject: {components['subject']}")
-                print(f"Message Body: {components['msgbody']}")
-                print(f"Attachment: {components['attachment']}")
-
-                # Send the email
+                logging.info(f"Processing record ID {recid}")
                 send_email(components, recid, cursor, conn)
-
                 row = cursor.fetchone()
-
             cursor.close()
             conn.close()
-
         except Exception as e:
-            print(f"Error: {e}")
-
-        # Wait for 15 seconds before checking again
+            logging.error(f"Main loop error: {e}")
         time.sleep(15)
 
-# Run the script
 if __name__ == "__main__":
     main()
