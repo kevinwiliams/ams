@@ -238,6 +238,14 @@ $options = [
             </div>
             </div>
             <div class="card-body">
+                <?php if (in_array($user_role, ['Dispatcher'])): ?>
+                <div class="mb-2">
+                    <label>
+                        <input type="checkbox" id="transportOnlyCheckbox" value="Transport">
+                        Transport Only
+                    </label>
+                </div>
+                <?php endif; ?>
             <?php if ($recentAssignments && $recentAssignments->num_rows > 0): ?>
             <table class="table table-striped table-hover small" id="recentTable">
                 <thead class="thead-dark">
@@ -276,9 +284,12 @@ $options = [
                             if(in_array($user_role, $dj_roles) && $row['dj_requested'] == 1){
                                 $hightlight = true;
                             }
+                            if(in_array($user_role, ['Dispatcher']) && $row['drop_option'] != 'noTransport' && $row['transport_id'] == null){
+                                $hightlight = true;
+                            }
                         
                         ?>
-                        <tr class="<?= ($hightlight) ?'table-warning': '' ?>">
+                        <tr class="<?= ($hightlight) ?'table-warning': '' ?>" data-atype="<?php echo $row['assignment_type']?>">
                             <!-- <td><?php echo htmlspecialchars($row['assignment_id']); ?></td> -->
                             <td style="width: 100px;">
                                 <span class="<?php echo ($row['is_cancelled'] == 1) ? 'strike-through' : ''; ?>">
@@ -389,9 +400,26 @@ $options = [
     $(document).ready(function(){
         $('#recentTable').dataTable({
             columnDefs: [
-                { type: 'date', targets: 0 } 
+            { type: 'date', targets: 0 }
             ],
-            order: [[0, 'desc']] 
+            order: [[0, 'desc']]
+        });
+
+        $('#transportOnlyCheckbox').on('change', function() {
+            alert('Checkbox changed');
+            var checked = $(this).is(':checked');
+            $('#recentTable tbody tr').each(function() {
+            var atype = $(this).data('atype');
+            if (checked) {
+                if (atype !== 'Transport') {
+                $(this).hide();
+                } else {
+                $(this).show();
+                }
+            } else {
+                $(this).show();
+            }
+            });
         });
        
     });

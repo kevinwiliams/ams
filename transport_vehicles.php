@@ -104,7 +104,7 @@ function daysAgo($date) {
 .row-expiry-danger  { border-left: 4px solid #ff6b6b; }
 </style>
 
-<div class="container">
+<div class="container-fluid">
     <div class="card card-outline card-primary">
         <div class="card-header d-flex">
             <h4 class="my-0 font-weight-normal flex-grow-1">Manage Transport Vehicles</h4>
@@ -115,7 +115,7 @@ function daysAgo($date) {
             </div>
         </div>
         <div class="card-body">
-            <table id="vehiclesTable" class="table table-hover small">
+            <table id="vehiclesTable" class="table table-hover ">
                 <thead class="bg-light">
                     <tr>
                         <th>Plate</th>
