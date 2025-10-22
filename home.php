@@ -22,13 +22,13 @@ $radio_staff = $_SESSION['login_sb_staff'] == 1 ? true : false;
 $editorQry = "";
 $dispatchQry = "";
 $securityQry = "";
-$sbQry = "";
+$sbQry = "AND a.assignment_type <> 'Transport'";
 
 $view_roles = ['Manager', 'ITAdmin', 'Editor', 'Multimedia', 'Dispatcher', 'Photo Editor', 'Dept Admin', 'Security', 'Op Manager', 'Broadcast Coordinator' ];
 $digital_roles = ['Photo Editor'];
 $multimedia_roles = ['Multimedia'];
 $dj_roles = ['Programme Director'];
-$create_roles = ['Manager', 'ITAdmin', 'Editor', 'Dept Admin', 'Security','Op Manager', 'Broadcast Coordinator' ];
+$create_roles = ['Manager', 'ITAdmin', 'Editor', 'Dept Admin', 'Security','Op Manager', 'Broadcast Coordinator', 'Dispatcher' ];
 
 $sbQry .= ($radio_staff) ? " AND a.station_show <> '' " : " AND a.station_show IS NULL ";
 
@@ -48,7 +48,7 @@ if(in_array($user_role,  $multimedia_roles) && $radio_staff)
 
 
 if($user_role =='Dispatcher'){
-    $dispatchQry = " AND a.drop_option <> 'noTransport' AND a.status = 'Pending' OR a.status = 'Endorsed'";
+    $dispatchQry = " AND a.drop_option <> 'noTransport' AND a.status = 'Pending' OR a.status = 'Endorsed' OR a.assignment_type = 'Transport' ";
     $sbQry = ""; // Clear the SB query for Dispatcher roles
 }
 
@@ -56,7 +56,7 @@ if($user_role =='Security')
     $dispatchQry = " AND a.status = 'Approved' ";
 
 if(in_array($user_role,  ['Photo Editor', 'Multimedia', 'Manager']))
-    $editorQry .= " OR FIND_IN_SET('".$db_empid."', REPLACE(a.team_members, ' ', '')) > 0 ";
+    $editorQry .= " OR FIND_IN_SET('".$db_empid."', REPLACE(a.team_members, ' ', '')) > 0 AND a.assignment_type <> 'Transport'";
 
 
 $recentQry = "SELECT a.*,t.*,v.*,
@@ -144,9 +144,12 @@ $options = [
     $editorQ = "";
 
     if(in_array($user_role,  ['Editor', 'Multimedia', 'Photo Editor']))
-        $editorQ .= " AND FIND_IN_SET('".$db_empid."', REPLACE(team_members, ' ', '')) > 0 ";
+        $editorQ .= " AND FIND_IN_SET('".$db_empid."', REPLACE(team_members, ' ', '')) > 0 AND assignment_type <> 'Transport'";
     
     if(!in_array($user_role, $view_roles))
+        $editorQ .= " AND FIND_IN_SET('".$db_empid."', REPLACE(team_members, ' ', '')) > 0 AND assignment_type <> 'Transport'";
+
+    if(!in_array($user_role, ['Dispatcher', 'Security']))
         $editorQ .= " AND FIND_IN_SET('".$db_empid."', REPLACE(team_members, ' ', '')) > 0 ";
 
     $query = "SELECT * FROM assignment_list WHERE is_cancelled <> 1 $editorQ ORDER BY assignment_date ";

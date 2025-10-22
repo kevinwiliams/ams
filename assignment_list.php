@@ -35,8 +35,9 @@ if(in_array($user_role,  $freelance_roles)){
     $where .= " AND FIND_IN_SET('" . $sessionempid . "', a.team_members)";
 }
 
-$sbQry = ($radio_staff) ? " AND a.station_show <> '' " : " AND a.station_show IS NULL ";
+$sbQry = ($radio_staff) ? " AND a.station_show <> '' AND a.assignment_type <> 'Transport'" : " AND a.station_show IS NULL AND a.assignment_type <> 'Transport'";
 $sbQry = (in_array($user_role, ['Multimedia', 'Dispatcher'])) ? " " : $sbQry; // Exclude Multimedia and Dispatcher from station_show filter
+$sbQry .= (in_array($user_role, ['Multimedia'])) ? " AND a.assignment_type <> 'Transport'" : $sbQry; // Exclude Multimedia and Dispatcher from station_show filter
 
 // if(!in_array($user_role,  $edit_roles)){
 //     $where .= " AND FIND_IN_SET('" . $sessionempid . "', a.team_members)";

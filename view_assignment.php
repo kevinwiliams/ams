@@ -271,13 +271,13 @@ $conn->close();
                                     <strong>Transport:</strong> <?= $options[$drop_option] ?>
                                     <?= $transport_confirmed ? '<span class="text-success">Confirmed</span>' : '<span class="text-warning">Pending</span>' ?>
                                 </li>
-                                <?php if (in_array($user_role, ['Dispatcher', 'Security'])): ?>
+                                <?php if (in_array($user_role, ['Dispatcher', 'Security', 'Driver'])): ?>
                                 <li class="mb-3">
                                     <div class="d-flex align-items-center">
                                         <strong class="me-2">Vehicle:</strong>&nbsp;
-                                        <span><?= htmlspecialchars($plate_number ?? 'N/A') ?></span>
+                                        <span class="lead text-primary"><?= htmlspecialchars($plate_number ?? 'N/A') ?></span>
                                     </div>
-                                    <div class="text-muted">
+                                    <div class="text-muted px-5">
                                         <em><?= htmlspecialchars($make_model ?? 'N/A') ?></em>
                                     </div>
                                     <div class="d-flex justify-content-between mt-2">
@@ -337,7 +337,14 @@ $conn->close();
                     <!-- Team Members -->
                     <div class="card mb-4">
                         <div class="card-header bg-light">
-                            <h6 class="text-bold mb-0">Team Members</h6>
+                            <h6 class="text-bold mb-0">Team Members 
+                                <?php 
+                                // Count team members including studio engineer if assigned
+                                if (!empty($studio_engineer))
+                                    $team_member_names .= !empty($team_member_names) ? ', ' . $studio_engineer_name : $studio_engineer_name;
+
+                                    echo '('.(count(explode(', ', $team_member_names))).' &#x00B1;)' ?>
+                            </h6> 
                             
                         </div>
                         <div class="card-body">

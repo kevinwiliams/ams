@@ -555,7 +555,7 @@ Class Action {
 		$confirmed_transport = isset($transport_confirmed) ? 1 : 0;
 		$uuid = !empty($uid) ? $uid : uniqid('event_', true);
 		$user_role = $_SESSION['role_name'];
-		$admin_roles = ['Manager', 'ITAdmin', 'Editor', 'Dept Admin', 'Op Manager', 'Broadcast Coordinator'];
+		$admin_roles = ['Manager', 'ITAdmin', 'Editor', 'Dept Admin', 'Op Manager', 'Broadcast Coordinator', 'Dispatcher'];
 		$team_members_str = "";
 
 		// Set default values
@@ -624,13 +624,6 @@ Class Action {
 			}
 		}
 	
-		// Log dispatch details
-		if (isset($_POST['transport_id']) && $status == 'Approved') {
-			$log['assignment_id'] = $id;
-			$log['transport_id'] = $_POST['transport_id'] ?? null;
-			$log['created_by'] = $_SESSION['login_id'];
-		}
-	
 		// Update assigned_by if user is an admin
 		if (in_array($user_role, $admin_roles) && $user_role != 'ITAdmin') {
 			$data['assigned_by'] = "'" . $_SESSION['login_id'] . "'";
@@ -650,12 +643,8 @@ Class Action {
 		$data['video_requested'] = isset($_POST['request']['videographer']) ? 1 : 0;
 		$data['social_requested'] = isset($_POST['request']['social']) ? 1 : 0;
 		$data['dj_requested'] = isset($_POST['request']['dj']) ? 1 : 0;
-	
-		// Handle transport log
-		if (!empty($_POST['transport_id'])) {
-			$data['transport_confirmed'] = 1;
-			$this->update_transport_logs($id, $log);
-		}
+		
+		
 	
 		// Check if notification was already sent
 		$notifyAlreadySent = $this->check_notification_sent($id);
@@ -679,6 +668,18 @@ Class Action {
 			$assigned_id = $id;
 			// If no ID is provided, use the last inserted ID
 			$id = !empty($id) ? $id : $lastInsertId;
+
+			// Log dispatch details
+			if (isset($_POST['transport_id']) && $status == 'Approved') {
+				$log['assignment_id'] = $id;
+				$log['transport_id'] = $_POST['transport_id'] ?? null;
+				$log['created_by'] = $_SESSION['login_id'];
+			}
+			// Handle transport log
+			if (!empty($_POST['transport_id'])) {
+				$data['transport_confirmed'] = 1;
+				$this->update_transport_logs($id, $log);
+			}
 			
 			// Prepare assignment info for notifications
 			$assignmentInfo = $this->prepare_assignment_info($id, $uuid, $assignmentDate, $team_members_str, $cancelled, $postponed, $confirmed_transport);

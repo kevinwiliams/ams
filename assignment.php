@@ -30,55 +30,178 @@ $dispatch_roles = ['Dispatcher'];
 $dj_roles = ['Programme Director'];
 $broadcast_roles = ['Broadcast Coordinator'];
 
-$readonly = '';
-$disabled = '';
-$disabledDispatch = '';
-$readonlyDispatch = '';
-$requiredDispatch = '';
-$disabledEditors = '';
-$disabledMedia = '';
-$disabledDigital = '';
-$disabledBroadcast = '';
-$disabledPersonality = '';
-$readonlyPersonality = '';
-$requiredPersonality = '';
-$required = '';
-$studio_engineer = '';
-
-// Check user role and set attributes
-switch (true) {
-    case in_array($user_role, $media_roles):
-        $readonly = 'readonly = readonly';
-        $disabled = 'disabled = disabled';
-        $disabledMedia = 'disabled = disabled'; 
-        break;
-    case in_array($user_role, $dispatch_roles):
-        $disabledDispatch = 'disabled = disabled';
-        $readonlyDispatch = 'readonly = readonly';
-        $requiredDispatch = 'required';
-        break;
-    case in_array($user_role, $editor_roles):
-        $disabledEditors = 'disabled = disabled';
-        break;
-    case in_array($user_role, $broadcast_roles):
-        $disabledBroadcast = 'disabled = disabled';
-        $required = 'required';
-        break;
-    case in_array($user_role, $digital_roles):
-        $readonly = 'readonly = readonly';
-        $disabled = 'disabled = disabled';
-        $disabledDigital = 'disabled = disabled';
-        $required = 'required';
-        break;
-    case in_array($user_role, $dj_roles):
-        $disabledPersonality = 'disabled = disabled';
-        $readonlyPersonality = 'readonly = readonly';
-        $requiredPersonality = 'required';
-        break;
-}
-
+// Define assignment types
+$assignment_types = ['Transport', 'Editorial', 'Radio'];
 // Retrieve the assignment ID from the URL
 $id = $_GET['id'] ?? '';
+
+// Replace the current switch statement with type-based logic
+$is_editing = !empty($id);
+$is_creating = empty($id);
+echo "User Role: $user_role <br>"; // Debugging line
+echo "Is Editing: " . ($is_editing ? 'Yes' : 'No') . "<br> Is Creating: " . ($is_creating ? 'Yes' : 'No') . "<br>"; // Debugging line
+
+// Reset all restrictions
+$readonly = $disabled = $readonlyDispatch = $disabledDispatch = $disabledMedia = $disabledEditors = $disabledDigital = $disabledBroadcast = $disabledPersonality = $readonlyPersonality = $requiredPersonality = $required = $studio_engineer = '';
+
+// Check user role and set attributes
+// switch (true) {
+//     case in_array($user_role, $media_roles):
+//         $readonly = 'readonly = readonly';
+//         $disabled = 'disabled = disabled';
+//         $disabledMedia = 'disabled = disabled'; 
+//         break;
+//     case in_array($user_role, $dispatch_roles):
+//         $disabledDispatch = 'disabled = disabled';
+//         $readonlyDispatch = 'readonly = readonly';
+//         $requiredDispatch = 'required';
+//         break;
+//     case in_array($user_role, $editor_roles):
+//         $disabledEditors = 'disabled = disabled';
+//         break;
+//     case in_array($user_role, $broadcast_roles):
+//         $disabledBroadcast = 'disabled = disabled';
+//         $required = 'required';
+//         break;
+//     case in_array($user_role, $digital_roles):
+//         $readonly = 'readonly = readonly';
+//         $disabled = 'disabled = disabled';
+//         $disabledDigital = 'disabled = disabled';
+//         $required = 'required';
+//         break;
+//     case in_array($user_role, $dj_roles):
+//         $disabledPersonality = 'disabled = disabled';
+//         $readonlyPersonality = 'readonly = readonly';
+//         $requiredPersonality = 'required';
+//         break;
+// }
+
+if ($is_editing) {
+    echo "Editing assignment ID: $id"; // Debugging line
+    // Fetch assignment with type info
+    $qry = $conn->query("SELECT *, assignment_type, status FROM assignment_list WHERE id = " . intval($id));
+    $assignment = $qry->fetch_assoc();
+    $assignment_type = $assignment['assignment_type'] ?? 'Editorial';
+    $current_status = $assignment['status'] ?? 'Pending';
+    
+    // Define editable statuses
+    $editable_statuses = ['Pending', 'Draft', 'Approved'];
+    $can_edit_status = in_array($current_status, $editable_statuses);
+    
+    // Apply restrictions based on assignment type AND user role
+    switch (true) {
+        case in_array($user_role, $dispatch_roles):
+            if ($assignment_type == 'Transport' && $can_edit_status) {
+                // Dispatchers have full access to Transport assignments
+                // Restricted access to Editorial assignments
+                $requiredDispatch = 'required';
+            } else if ($assignment_type == 'Radio' && $can_edit_status) {
+                // Limited access to Radio assignments
+                $disabledDispatch = 'disabled = disabled';
+                $readonlyDispatch = 'readonly = readonly';
+                $requiredDispatch = 'required';
+            } else {
+                $disabledDispatch = 'disabled = disabled';
+                $readonlyDispatch = 'readonly = readonly';
+                $requiredDispatch = 'required';
+            }
+            break;
+            
+        case in_array($user_role, $editor_roles):
+            if ($assignment_type == 'Editorial' && $can_edit_status) {
+                // Editors have full access to Editorial assignments
+                $required = 'required';
+                $disabledEditors = 'disabled = disabled';
+            } else {
+                $disabledEditors = 'disabled = disabled';
+            }
+            break;
+            
+        case in_array($user_role, $broadcast_roles):
+            if (in_array($assignment_type, ['Radio', 'Transport']) && $can_edit_status) {
+                // Broadcast roles access Radio and Transport
+                $required = 'required';
+                $disabledBroadcast = 'disabled = disabled';
+
+            } else {
+                $disabledBroadcast = 'disabled = disabled';
+                $required = 'required';
+            }
+            break;
+            
+        case in_array($user_role, $media_roles):
+            if ($assignment_type == 'Editorial' && $can_edit_status) {
+                // Media roles can edit media-related fields in Editorial
+                $required = 'required';
+                $readonly = 'readonly = readonly';
+                $disabled = 'disabled = disabled';
+                $disabledMedia = 'disabled = disabled';
+            } else {
+                $readonly = 'readonly = readonly';
+                $disabled = 'disabled = disabled';
+                $disabledMedia = 'disabled = disabled';
+            }
+            break;
+            
+        // ... other roles
+        case in_array($user_role, $digital_roles):
+            if ($assignment_type == 'Editorial' && $can_edit_status) {
+                // Media roles can edit media-related fields in Editorial
+                $required = 'required';
+                $readonly = 'readonly = readonly';
+                $disabled = 'disabled = disabled';
+                $disabledDigital = 'disabled = disabled';
+            } else {
+                $readonly = 'readonly = readonly';
+                $disabled = 'disabled = disabled';
+                $disabledDigital = 'disabled = disabled';
+            }
+            break;
+        case in_array($user_role, $dj_roles):
+            if ($assignment_type == 'Radio' && $can_edit_status) {
+                // Media roles can edit media-related fields in Editorial
+                $disabledPersonality = 'disabled = disabled';
+                $readonlyPersonality = 'readonly = readonly';
+                $requiredPersonality = 'required';
+            } else {
+                $disabledPersonality = 'disabled = disabled';
+                $readonlyPersonality = 'readonly = readonly';
+                $requiredPersonality = 'required';
+            }
+            break;
+    }
+} else {
+    echo "Creating new assignment"; // Debugging line
+    // Creation logic based on assignment type
+    $default_assignment_type = 'Editorial'; // or determine from context
+    
+    switch (true) {
+        case in_array($user_role, $dispatch_roles):
+            // Dispatchers can create Transport assignments
+            $requiredDispatch = 'required';
+            $default_assignment_type = 'Transport';
+            break;
+            
+        case in_array($user_role, $editor_roles):
+            // Editors can create Editorial assignments
+            $default_assignment_type = 'Editorial';
+            $disabledEditors = 'disabled = disabled';
+            break;
+            
+        case in_array($user_role, $broadcast_roles):
+        case in_array($user_role, $manager_roles):
+            // Broadcast roles can create Radio assignments
+            $default_assignment_type = 'Radio';
+            $required = 'required';
+            $disabledBroadcast = 'disabled = disabled';
+            
+            break;
+    }
+
+    $assignment_type = $default_assignment_type;
+}
+
+
 if ($id) {
     // Fetch assignment details from the database
     $qry = $conn->query("SELECT * FROM assignment_list WHERE id = " . intval($id));
@@ -276,6 +399,14 @@ if ($id) {
                                             data-readonly="<?= ($readonly || $readonlyDispatch || $readonlyPersonality) ? 'true' : 'false'; ?>"
                                         ><?php echo htmlspecialchars_decode($description ?? ''); ?></textarea>
                                     </div>
+                                    <div class="form-group  small">
+                                        <select name="assignment_type" id="assignment_type" class="small" 
+                                                <?= $is_editing ? 'disabled' : '' ?> <?= $required ?> readonly="readonly">
+                                            <option value="Editorial" <?= (isset($assignment_type) && $assignment_type == 'Editorial') ? 'selected' : '' ?>>Editorial</option>
+                                            <option value="Radio" <?= ($assignment_type == 'Radio') ? 'selected' : '' ?>>Radio</option>
+                                            <option value="Transport" <?= (isset($assignment_type) && $assignment_type == 'Transport') ? 'selected' : '' ?>>Transport</option>
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
 
@@ -283,7 +414,7 @@ if ($id) {
 
                         <div class="col-md-6 pl-3">
                             <!-- Transport Section -->
-                             <?php if (isset($_GET['id']) || $radio_staff){ ?>
+                             <?php //if (isset($_GET['id']) || $radio_staff){ ?>
                             <div class="card mb-4">
                                 <div class="card-header bg-light">
                                     <h4 class="mb-0"><i class="fas fa-car mr-2"></i>Transport <?= ($radio_staff) ? '/ Permit' : '' ?></h4>
@@ -319,7 +450,7 @@ if ($id) {
                                             <input type="hidden" name="drop_option" value="<?= $drop_option ?>" />
                                             <?php } ?>
                                     </div>
-                                    <?php if (isset($_GET['id']) && (in_array($user_role, $editor_roles) || in_array($user_role, $broadcast_roles))){ ?>
+                                    <?php if (isset($_GET['id']) && (in_array($user_role, $editor_roles) || in_array($user_role, $broadcast_roles) || in_array($user_role, $dispatch_roles) )){ ?>
                                     <div class="form-group">
                                         <div class="custom-control custom-switch my-2">
                                             <input type="checkbox" class="custom-control-input" id="transport_confirmed" name="transport_confirmed" <?php echo isset($transport_confirmed) && $transport_confirmed == 1 ? 'checked' : '' ?><?= $readonlyPersonality ?>>
@@ -353,7 +484,7 @@ if ($id) {
                                     <?php } ?>
                                 </div>
                             </div>
-                            <?php } ?>
+                            <?php //} ?>
                             <input type="hidden" name="id" value="<?php echo htmlspecialchars($id ?? ''); ?>">
                             <input type="hidden" name="assigned_by" value="<?php echo htmlspecialchars($assigned_by ?? ''); ?>">
                             <!-- Team Assignment Section -->
@@ -388,16 +519,21 @@ if ($id) {
                                 }
 
                                 // Vehicles                                                             
-                                $vehicle_qry = $conn->query("SELECT id, plate_number, make_model FROM transport_vehicles");
+                                $vehicle_qry = $conn->query("SELECT id, plate_number, make_model FROM transport_vehicles where vehicle_category IN ('Transport', 'Courier')");
+
+                                $station_show = isset($station_show) ? $station_show : null;
+
                             ?>
-                            <!-- Team Assignment Section -->
-                            <div class="card mb-4">
+                            
+
+                            <!-- Radio Section - Only show for Radio type -->
+                            <div class="card mb-4 radio-section" style="display: <?= (isset($assignment_type) && $assignment_type == 'Radio') ? 'block' : 'none' ?>;">
                                 <div class="card-header bg-light">
-                                    <h4 class="mb-0"><i class="fas fa-users mr-2"></i>Team Assignment</h4>
+                                    <h4 class="mb-0"><i class="fas fa-broadcast-tower mr-2"></i>Radio Team</h4>
                                 </div>
                                 <div class="card-body">
-                                    <div class="form-group"> 
-                                        <?php if($radio_staff || !is_null($station_show)){?>
+                                    <!-- Radio-specific team assignments -->
+                                    <?php if($radio_staff || !is_null($station_show)){ ?>
                                         <!-- Sales Rep -->
                                         <div class="role-group">
                                             <label>Sales Rep</label>
@@ -610,8 +746,18 @@ if ($id) {
                                                 <input type="hidden" name="request[social]" value="<?= $social_requested?>">
                                             <?php endif; ?>
                                         </div>
+                                    <?php } ?>
+                                </div>
+                            </div>
 
-                                        <?php } else { ?>
+                            <!-- Editorial Section - Only show for Editorial type -->
+                            <div class="card mb-4 editorial-section" style="display: <?= (!isset($assignment_type) || $assignment_type == 'Editorial') ? 'block' : 'none' ?>;">
+                                <div class="card-header bg-light">
+                                    <h4 class="mb-0"><i class="fas fa-newspaper mr-2"></i>Editorial Team</h4>
+                                </div>
+                                <div class="card-body">
+                                    <!-- Editorial-specific team assignments -->
+                                    <?php if(!$radio_staff || is_null($station_show)){ ?>
                                         <!-- Reporter -->
                                         <div class="role-group">
                                             <label>Reporters</label>
@@ -773,8 +919,18 @@ if ($id) {
                                                 <input type="hidden" name="request[social]" value="<?= $social_requested?>">
                                             <?php endif; ?>
                                         </div>
-                                        <?php } ?>
-                                        <!-- Drivers -->
+                                    <?php } ?>
+                                </div>
+                            </div>
+                            <!-- Transport Section - Only show for Transport or Dispatch -->
+                            <div class="card mb-4 transport-section" style="display: <?= ($user_role === 'Dispatcher') ? 'block' : 'none' ?>;">
+                                <div class="card-header bg-light">
+                                    <h4 class="mb-0"><i class="fas fa-newspaper mr-2"></i>Transport Team</h4>
+                                </div>
+                                <div class="card-body">
+                                    <!-- Editorial-specific team assignments -->
+                                    <?php //if(!$radio_staff || is_null($station_show)){ ?>
+                                         <!-- Drivers -->
                                         <div class="role-group <?= ($user_role == 'Dispatcher') ? '' : 'd-none' ?>" >
                                             <label>Drivers</label>
                                             <div class="assignee-wrapper">
@@ -830,7 +986,7 @@ if ($id) {
                                                         while ($user_row = $vehicle_qry->fetch_assoc()):
                                                     ?>
                                                     <option value="<?php echo htmlspecialchars($user_row['id']); ?>" <?php echo isset($transport_id) && $transport_id == $user_row['id'] ? 'selected' : '' ?>>
-                                                        <?php echo htmlspecialchars($user_row['make_model']) ; ?>
+                                                        <?php echo htmlspecialchars($user_row['make_model']).' ['.htmlspecialchars($user_row['plate_number']).']'  ; ?>
                                                     </option>
                                                     <?php 
                                                         endwhile;
@@ -841,9 +997,10 @@ if ($id) {
                                                 </select>
                                             </div>
                                         </div>
-                                    </div>
+                                    <?php //} ?>
                                 </div>
                             </div>
+                        
                             <!-- Get team members if boxes disabled -->
                             <?php if(!empty($disabled.$disabledDispatch.$disabledEditors.$disabledBroadcast.$disabledPersonality)){
                                 $teamRem = implode(',', $all_members);   
@@ -859,6 +1016,7 @@ if ($id) {
                             <!-- Stub out Status -->
                             <input name="status" type="hidden" value="<?php echo htmlspecialchars($currentStatus); ?>">
                             <input name="uid" type="hidden" value="<?php echo (isset($uid)? $uid : ''); ?>">
+                            <input id="user_role" type="hidden" value="<?php echo (isset($user_role)? $user_role : ''); ?>">
                             <!-- <input name="transport_confirmed" type="hidden" value="<?php //echo htmlspecialchars($transport_confirmed ?? ''); ?>"> -->
                             <?php if($login_role_id < 5){ ?>
                             <div class="form-group d-none">
@@ -984,7 +1142,30 @@ function loadUsersForStation(roles, station, targetSelectId) {
     });
 }
 
+
+
+
 $(document).ready(function(){
+
+    $('#assignment_type').on('change', function() {
+        const assignmentType = $(this).val();
+        const user_role = $('#user_role').val();
+        // alert(user_role);
+        // Show/hide sections based on type
+        $('.transport-section').toggle(assignmentType === 'Transport' || user_role === 'Dispatcher');
+        $('.radio-section').toggle(assignmentType === 'Radio' && user_role !== 'Dispatcher');
+        $('.editorial-section').toggle(assignmentType === 'Editorial' && user_role !== 'Dispatcher');
+        
+        // Enable/disable relevant fields
+        if (assignmentType === 'Transport') {
+            $('.transport-field').prop('disabled', false);
+            $('.radio-field').prop('disabled', true);
+        } else if (assignmentType === 'Radio') {
+            $('.transport-field').prop('disabled', true);
+            $('.radio-field').prop('disabled', false);
+        }
+    });
+    $('#assignment_type').trigger('change');
 
     $('#station_show').on('change', function() {
         const station = $(this).find('option:selected').data('station');

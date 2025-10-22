@@ -274,7 +274,7 @@ CREATE TABLE gate_pass_logs (
   `security_out` VARCHAR(150) DEFAULT NULL, -- Capture security name
   `security_in` VARCHAR(150) DEFAULT NULL, -- Capture security name
   `security_out_time` DATETIME DEFAULT NULL, -- Capture time when security took the items out
-  `security_notes` TEXT DEFAULT NULL;
+  `security_notes` TEXT DEFAULT NULL,
   `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (`assignment_id`) REFERENCES `assignment_list`(`id`) ON DELETE CASCADE
 );
@@ -316,4 +316,9 @@ GO
 ALTER TABLE [dbo].[messagequeue] ADD CONSTRAINT [DF_messagequeue_retry_count] DEFAULT ((0)) FOR [retry_count]
 GO
 
+ALTER TABLE assignment_list ADD COLUMN assignment_type ENUM('Transport', 'Editorial', 'Radio') DEFAULT 'Editorial';
+
+UPDATE assignment_list
+SET assignment_type = 'Radio'
+WHERE station_show IS NOT NULL;
 

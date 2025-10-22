@@ -78,6 +78,15 @@ $login_name = isset($_SESSION['login_name']) ? $_SESSION['login_name'] : 'User';
                     </a>
                 </li>
                 <?php endif; ?>
+                <?php if (in_array($user_role, ['Dispatcher'])): ?>
+
+                <li class="nav-item dropdown">
+                    <a href="./index.php?page=transport_vehicles" class="nav-link nav-transport_vehicles">
+                        <i class="nav-icon fas fa-car"></i>
+                        <p>Vehicles</p>
+                    </a>
+                </li>
+                <?php endif; ?>
 
                 <?php if (in_array($user_role, $it_roles)): ?>
 
