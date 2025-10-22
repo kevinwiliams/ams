@@ -644,7 +644,9 @@ Class Action {
 		$data['social_requested'] = isset($_POST['request']['social']) ? 1 : 0;
 		$data['dj_requested'] = isset($_POST['request']['dj']) ? 1 : 0;
 		
-		
+		if (!empty($_POST['transport_id']) || $assignment_type == 'Transport') {
+				$data['transport_confirmed'] = 1;
+			}
 	
 		// Check if notification was already sent
 		$notifyAlreadySent = $this->check_notification_sent($id);

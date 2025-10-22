@@ -77,10 +77,32 @@ function daysAgo($date) {
     $d1 = new DateTime($date);
     $d2 = new DateTime();
     $diff = $d2->diff($d1)->days;
-    return $d1->format("Y-m-d") . " (" . $diff . " days ago)";
+    return $d1->format("Y-m-d") . "<br> (" . $diff . " days ago)";
 }
 ?>
+<style>
+/* Row background accents */
+.row-expiry-warning { background-color: #fff7e6 !important; } /* soft amber */
+.row-expiry-danger  { background-color: #fff0f0 !important; } /* soft red/pink */
 
+/* Emphasize expiry columns (registration / fitness / insurance are cols 4/5/6) */
+.row-expiry-warning td:nth-child(4),
+.row-expiry-warning td:nth-child(5),
+.row-expiry-warning td:nth-child(6) {
+    color: #8a6d3b;
+    font-weight: 600;
+}
+.row-expiry-danger td:nth-child(4),
+.row-expiry-danger td:nth-child(5),
+.row-expiry-danger td:nth-child(6) {
+    color: #7a1f1f;
+    font-weight: 700;
+}
+
+/* Subtle left border to call attention */
+.row-expiry-warning { border-left: 4px solid #ffd166; }
+.row-expiry-danger  { border-left: 4px solid #ff6b6b; }
+</style>
 
 <div class="container">
     <div class="card card-outline card-primary">
@@ -105,59 +127,34 @@ function daysAgo($date) {
                         <th>Location</th>
                         <th>Last Maintenance</th>
                         <th>Category</th>
-                        <th>Actions</th>
+                        <th class="">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php foreach ($vehicles as $v): ?>
                         <?php
-                            // compute days until each expiry (signed days: negative = past due)
+                            // compute days until each expiry (negative = days remaining, positive = days overdue)
                             $now = new DateTime();
                             $threshold = 30; // days to consider "expiring soon"
 
-                            $regDays = $v['registration_expiry'] ? (int)((new DateTime($v['registration_expiry']))->diff($now)->format('%r%a')) : null;
-                            $fitDays = $v['fitness_expiry'] ? (int)((new DateTime($v['fitness_expiry']))->diff($now)->format('%r%a')) : null;
-                            $insDays = $v['insurance_expiry'] ? (int)((new DateTime($v['insurance_expiry']))->diff($now)->format('%r%a')) : null;
+                            $regDays = $v['registration_expiry'] ? $now->diff(new DateTime($v['registration_expiry']))->invert ? $now->diff(new DateTime($v['registration_expiry']))->days : -$now->diff(new DateTime($v['registration_expiry']))->days : null;
+                            $fitDays = $v['fitness_expiry'] ? $now->diff(new DateTime($v['fitness_expiry']))->invert ? $now->diff(new DateTime($v['fitness_expiry']))->days : -$now->diff(new DateTime($v['fitness_expiry']))->days : null;
+                            $insDays = $v['insurance_expiry'] ? $now->diff(new DateTime($v['insurance_expiry']))->invert ? $now->diff(new DateTime($v['insurance_expiry']))->days : -$now->diff(new DateTime($v['insurance_expiry']))->days : null;
 
                             // determine highest severity among expiry fields: danger > warning > normal
                             $severity = '';
                             foreach ([$regDays, $fitDays, $insDays] as $d) {
                                 if ($d === null) continue;
-                                if ($d < 0) { $severity = 'danger'; break; }
-                                if ($d <= $threshold && $severity !== 'danger') $severity = 'warning';
+                                if ($d >= 0) { $severity = 'danger'; break; }
+                                if (abs($d) <= $threshold && $severity !== 'danger') $severity = 'warning';
                             }
 
                             // map to a row class (Bootstrap + gentle custom accents)
                             $rowClass = $severity === 'danger' ? 'row-expiry-danger' : ($severity === 'warning' ? 'row-expiry-warning' : '');
                             // Print shared styles once to keep presentation professional and subtle
-                            if (!isset($GLOBALS['expiry_styles_printed'])) {
-                                echo '<style>
-                                    /* Row background accents */
-                                    .row-expiry-warning { background-color: #fff7e6 !important; } /* soft amber */
-                                    .row-expiry-danger  { background-color: #fff0f0 !important; } /* soft red/pink */
-
-                                    /* Emphasize expiry columns (registration / fitness / insurance are cols 4/5/6) */
-                                    .row-expiry-warning td:nth-child(4),
-                                    .row-expiry-warning td:nth-child(5),
-                                    .row-expiry-warning td:nth-child(6) {
-                                        color: #8a6d3b;
-                                        font-weight: 600;
-                                    }
-                                    .row-expiry-danger td:nth-child(4),
-                                    .row-expiry-danger td:nth-child(5),
-                                    .row-expiry-danger td:nth-child(6) {
-                                        color: #7a1f1f;
-                                        font-weight: 700;
-                                    }
-
-                                    /* Subtle left border to call attention */
-                                    .row-expiry-warning { border-left: 4px solid #ffd166; }
-                                    .row-expiry-danger  { border-left: 4px solid #ff6b6b; }
-                                    </style>';
-                                $GLOBALS['expiry_styles_printed'] = true;
-                            }
+                            
                         ?>
-                        <tr class="<?= $rowClass ?>">
+                        <tr class="<?= $rowClass ?>" >
                             <td><?= $v['plate_number'] ?></td>
                             <td><?= htmlspecialchars($v['make_model']) ?></td>
                             <td><?= $v['model_year'] ?></td>
@@ -167,7 +164,7 @@ function daysAgo($date) {
                             <td><?= $v['vehicle_location'] ?></td>
                             <td><?= daysAgo($v['last_maintenance']) ?></td>
                             <td><?= $v['vehicle_category'] ?></td>
-                            <td>
+                            <td class="text-center text-nowrap">
                                 <button class="btn btn-sm btn-warning editVehicle"
                                     data-id="<?= $v['id'] ?>"
                                     data-plate="<?= $v['plate_number'] ?>"
@@ -209,7 +206,15 @@ function daysAgo($date) {
             <div class="form-group"><label>Insurance Expiry</label><input type="date" class="form-control" name="insurance_expiry"></div>
             <div class="form-group"><label>Location</label><input class="form-control" name="vehicle_location"></div>
             <div class="form-group"><label>Last Maintenance</label><input type="date" class="form-control" name="last_maintenance"></div>
-            <div class="form-group"><label>Category</label><input class="form-control" name="vehicle_category"></div>
+            <div class="form-group">
+                <label>Category</label>
+                <select class="form-control" name="vehicle_category" required>
+                    <option value="">Select Category</option>
+                    <option value="Transport">Transport</option>
+                    <option value="Courier">Courier</option>
+                    <option value="Staff">Staff</option>
+                </select>
+            </div>
         </div>
         <div class="modal-footer"><button class="btn btn-primary">Save</button></div>
       </form>
@@ -234,7 +239,15 @@ function daysAgo($date) {
             <div class="form-group"><label>Insurance Expiry</label><input type="date" class="form-control" id="editIns" name="insurance_expiry"></div>
             <div class="form-group"><label>Location</label><input class="form-control" id="editLoc" name="vehicle_location"></div>
             <div class="form-group"><label>Last Maintenance</label><input type="date" class="form-control" id="editMaint" name="last_maintenance"></div>
-            <div class="form-group"><label>Category</label><input class="form-control" id="editCat" name="vehicle_category"></div>
+            <div class="form-group">
+                <label>Category</label>
+                <select class="form-control" id="editCat" name="vehicle_category" required>
+                    <option value="">Select Category</option>
+                    <option value="Transport">Transport</option>
+                    <option value="Courier">Courier</option>
+                    <option value="Staff">Staff</option>
+                </select>
+            </div>
         </div>
         <div class="modal-footer"><button class="btn btn-primary">Update</button></div>
       </form>
@@ -244,7 +257,41 @@ function daysAgo($date) {
 
 <script>
 $(function(){
-    $('#vehiclesTable').DataTable();
+    // Enable date sorting for expiry columns (4,5,6)
+    // Use DataTables date plugin if available, or specify type
+    $('#vehiclesTable').DataTable({
+        "columnDefs": [
+            { "type": "date", "targets": [3,4,5,7] } // 3:Reg, 4:Fit, 5:Ins, 7:Last Maint
+        ],
+        "rowCallback": function(row, data, index){
+            $(row).removeClass('row-expiry-danger row-expiry-warning');
+            var reg = data[3], fit = data[4], ins = data[5];
+            var now = new Date();
+            var threshold = 30;
+            function daysDiff(dateStr) {
+                if (!dateStr) return null;
+                var d = new Date(dateStr);
+                if (isNaN(d.getTime())) return null;
+                return Math.floor((now - d) / (1000*60*60*24));
+            }
+            var regDays = daysDiff(reg), fitDays = daysDiff(fit), insDays = daysDiff(ins);
+            var severity = '';
+            var daysArr = [regDays, fitDays, insDays];
+            for (var i = 0; i < daysArr.length; i++) {
+                var d = daysArr[i];
+                if (d === null) continue;
+                if (d > 0) {
+                    severity = 'danger';
+                    break;
+                }
+                if (d <= 0 && Math.abs(d) <= threshold && severity !== 'danger') {
+                    severity = 'warning';
+                }
+            }
+            if (severity === 'danger') $(row).addClass('row-expiry-danger');
+            else if (severity === 'warning') $(row).addClass('row-expiry-warning');
+        }
+    });
 
     // Add
     $('#addVehicleForm').on('submit', function(e){

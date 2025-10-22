@@ -399,7 +399,7 @@ if ($id) {
                                             data-readonly="<?= ($readonly || $readonlyDispatch || $readonlyPersonality) ? 'true' : 'false'; ?>"
                                         ><?php echo htmlspecialchars_decode($description ?? ''); ?></textarea>
                                     </div>
-                                    <div class="form-group  small">
+                                    <div class="form-group m-0 invisible small">
                                         <select name="assignment_type" id="assignment_type" class="small" 
                                                 <?= $is_editing ? 'disabled' : '' ?> <?= $required ?> readonly="readonly">
                                             <option value="Editorial" <?= (isset($assignment_type) && $assignment_type == 'Editorial') ? 'selected' : '' ?>>Editorial</option>
