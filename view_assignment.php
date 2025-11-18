@@ -269,7 +269,11 @@ $conn->close();
                                     ];
                                     ?>
                                     <strong>Transport:</strong> <?= $options[$drop_option] ?>
-                                    <?= $transport_confirmed ? '<span class="text-success">Confirmed</span>' : '<span class="text-warning">Pending</span>' ?>
+                                    <?php if ($transport_confirmed): ?>
+                                        <span class="badge bg-success">Confirmed</span>
+                                    <?php else: ?>
+                                        <span class="badge bg-warning text-dark">Pending</span>
+                                    <?php endif; ?>
                                 </li>
                                 <?php if (in_array($user_role, ['Dispatcher', 'Security', 'Driver'])): ?>
                                 <li class="mb-3">

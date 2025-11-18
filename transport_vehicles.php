@@ -115,7 +115,7 @@ function daysAgo($date) {
             </div>
         </div>
         <div class="card-body">
-            <table id="vehiclesTable" class="table table-hover ">
+            <table id="vehiclesTable" class="table table-hover small">
                 <thead class="bg-light">
                     <tr>
                         <th>Plate</th>
