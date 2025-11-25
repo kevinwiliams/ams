@@ -54,6 +54,7 @@ if ($id > 0) {
                             a.*,
                             a.id AS a_id,
                             t.*,
+                            t.updated_at AS transport_updated_at,
                             tv.*,
                             -- Get comma-separated team member names
                             (SELECT GROUP_CONCAT(
@@ -217,8 +218,10 @@ $conn->close();
         <!-- Card Body -->
         <div class="card-body">
             <!-- Main Assignment Info -->
+             <?php $secuirtyHide = (in_array($user_role, ['Security'])) ? 'd-none' : '';
+             ?>
             <div class="row mb-4">
-                <div class="col-md-8">
+                <div class="col-md-8 <?= $secuirtyHide ?>">
                     <h5 class="mb-3">
                         <?= $is_cancelled ? '<span class="text-danger">CANCELLED - </span>' : '' ?>
                         <?= htmlspecialchars_decode($title ?? 'No Title') ?>
@@ -279,10 +282,10 @@ $conn->close();
                                 <li class="mb-3">
                                     <div class="d-flex align-items-center">
                                         <strong class="me-2">Vehicle:</strong>&nbsp;
-                                        <span class="lead text-primary"><?= htmlspecialchars($plate_number ?? 'N/A') ?></span>
+                                        <span class="lead text-primary font-weight-bold"><?= htmlspecialchars($plate_number ?? 'N/A') ?></span>
                                     </div>
                                     <div class="text-muted px-5">
-                                        <em><?= htmlspecialchars($make_model ?? 'N/A') ?></em>
+                                        <em><?= htmlspecialchars($model_year ?? 'N/A') ?> <?= htmlspecialchars($make_model ?? 'N/A') ?></em>
                                     </div>
                                     <div class="d-flex justify-content-between mt-2">
                                         <span>
@@ -304,6 +307,11 @@ $conn->close();
                                     <?= htmlspecialchars($assigned_by_name ?? 'N/A') ?>
                                 </li>
                             </ul>
+                            </div>
+                            <div class="muted small py-4">
+                                <em>
+                                   <?= isset($transport_updated_at) ? 'Last Transport Update: ' . date("M j, Y h:i A", strtotime($transport_updated_at)) : '' ?>
+                                </em>   
                             </div>
                             
 
@@ -429,7 +437,7 @@ $conn->close();
                     </div>
                 </div>
                 
-                <div class="col-lg-4">
+                <div class="col-lg-4 <?= $secuirtyHide ?>">
                     <!-- Permits -->
                     <?php if ($radio_staff): ?>
                     <div class="card mb-4">
@@ -516,7 +524,7 @@ $conn->close();
                 <?php endif; ?>
                 
                 <?php if (in_array($user_role, ['Security'])): ?>
-                    <button class="btn btn-outline-warning edit-transport-log" data-assignment-id="<?= $a_id ?>">
+                    <button class="btn btn-outline-danger edit-transport-log" data-assignment-id="<?= $a_id ?>">
                         <i class="fas fa-car me-1"></i> Update Transport
                     </button>
                 <?php endif; ?>
@@ -723,7 +731,7 @@ $conn->close();
                         alert_toast('Transport log updated successfully!', 'success');
                         $('#updateTransportLogModal').modal('hide');
                         setTimeout(() => {
-                            location.href = 'index.php?page=home'; // Redirect after success
+                            location.reload(); // Reload the page after success
                         }, 2500);
                     } else {
                         alert_toast('Failed to update transport log.', 'error');
