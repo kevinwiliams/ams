@@ -239,7 +239,7 @@ $options = [
             </div>
             <div class="card-body">
                 <?php if (in_array($user_role, ['Dispatcher'])): ?>
-                <div class="mb-2">
+                <div class="mb-2 d-none">
                     <label>
                         <input type="checkbox" id="transportOnlyCheckbox" value="Transport">
                         Transport Only

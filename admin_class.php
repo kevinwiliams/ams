@@ -625,9 +625,13 @@ Class Action {
 		}
 	
 		// Update assigned_by if user is an admin
-		if (in_array($user_role, $admin_roles) && $user_role != 'ITAdmin') {
+		if (in_array($user_role, $admin_roles) && !in_array($user_role, ['ITAdmin','Dispatcher'])) {
 			$data['assigned_by'] = "'" . $_SESSION['login_id'] . "'";
 		}
+		if (empty($id)) {
+			$data['assigned_by'] = "'" . $_SESSION['login_id'] . "'";
+		}
+
 	
 		// Always capture last user to edit assignment
 		$data['edited_by'] = "'" . $_SESSION['login_id'] . "'";
