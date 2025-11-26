@@ -66,6 +66,9 @@ if ($action == 'login') {
 }elseif ($action == 'update_transport_log') {
     $get = $crud ->update_transport_log();
     if ($get) echo $get; 
+}elseif ($action == 'save_gate_pass_log') {
+    $get = $crud ->save_gate_pass_log();
+    if ($get) echo $get; 
 }
 // $conn->close(); 
 ob_end_flush();

@@ -282,11 +282,15 @@ $conn->close();
                                 <li class="mb-3">
                                     <div class="d-flex align-items-center">
                                         <strong class="me-2">Vehicle:</strong>&nbsp;
-                                        <span class="lead text-primary font-weight-bold"><?= htmlspecialchars($plate_number ?? 'N/A') ?></span>
+                                        <div class="d-flex justify-content-between w-100 ">
+                                        <span class="lead text-danger font-weight-bold"><?= htmlspecialchars($plate_number ?? 'N/A') ?></span>
+                                        <span class="text-muted pt-1"><em><?= htmlspecialchars($model_year ?? 'N/A') ?> <?= htmlspecialchars($make_model ?? 'N/A') ?></em></span>
+                                        </div>
+
                                     </div>
-                                    <div class="text-muted px-5">
+                                    <!-- <div class="text-muted px-5">
                                         <em><?= htmlspecialchars($model_year ?? 'N/A') ?> <?= htmlspecialchars($make_model ?? 'N/A') ?></em>
-                                    </div>
+                                    </div> -->
                                     <div class="d-flex justify-content-between mt-2">
                                         <span>
                                             <span class="badge bg-secondary">Mileage</span> 
@@ -308,7 +312,7 @@ $conn->close();
                                 </li>
                             </ul>
                             </div>
-                            <div class="muted small py-4">
+                            <div class="muted small pt-4">
                                 <em>
                                    <?= isset($transport_updated_at) ? 'Last Transport Update: ' . date("M j, Y h:i A", strtotime($transport_updated_at)) : '' ?>
                                 </em>   
@@ -524,8 +528,11 @@ $conn->close();
                 <?php endif; ?>
                 
                 <?php if (in_array($user_role, ['Security'])): ?>
-                    <button class="btn btn-outline-danger edit-transport-log" data-assignment-id="<?= $a_id ?>">
-                        <i class="fas fa-car me-1"></i> Update Transport
+                    <button class="btn btn-outline-danger edit-transport-log mx-1" data-assignment-id="<?= $a_id ?>">
+                        <i class="fas fa-car me-1"></i> Update Transport Log
+                    </button>
+                    <button class="btn btn-outline-info edit-gate-log mx-1" data-assignment-id="<?= $a_id ?>">
+                        <i class="fas fa-clipboard me-1"></i> Add Note
                     </button>
                 <?php endif; ?>
                 
@@ -718,6 +725,15 @@ $conn->close();
             $('#updateTransportLogModal').modal('show');
         });
 
+        $('.edit-gate-log').on('click', function() {
+            var assignment_id = $(this).data('assignment-id');
+            var gate_security_name = $('#gate_security_name').val();
+            $('#gate_assignment_id').val(assignment_id);
+            $('#security_out').val(gate_security_name);
+            $('#gatePassLogModal').modal('show');
+            $('#security_out_time').val(new Date().toISOString().slice(0,16));
+        });
+
         
         $('#updateTransportLogBtn').on('click', function() {
             var formData = $('#updateTransportLogForm').serialize();
@@ -743,7 +759,36 @@ $conn->close();
             });
         });
 
-       
+        $('#saveGatePassLogBtn').on('click', function() {
+            var formData = $('#gatePassLogForm').serialize();
+            
+            $.ajax({
+                url: 'ajax.php?action=save_gate_pass_log',
+                type: 'POST',
+                data: formData,
+                success: function(response) {
+                    let res;
+                    try {
+                        res = JSON.parse(response);
+                    } catch (e) {
+                        alert_toast('Invalid server response.', 'error');
+                        return;
+                    }
+                    if (res.status === 'success') {
+                        alert_toast(res.message, 'success');
+                        $('#gatePassLogModal').modal('hide');
+                        setTimeout(() => {
+                            location.reload(); // Reload the page after success
+                        }, 2500);
+                    } else {
+                        alert_toast(res.message || 'Failed to save gate pass log.', 'error');
+                    }
+                },
+                error: function() {
+                    alert_toast('An error occurred. Please try again.', 'error');
+                }
+            });
+        });
     });
 
     </script>

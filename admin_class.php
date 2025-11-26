@@ -2038,6 +2038,56 @@ Class Action {
 		
 		return $users;
 	}
+
+	// Save gate pass log for assignment
+	function save_gate_pass_log() {
+		$assignment_id = isset($_POST['assignment_id']) ? intval($_POST['assignment_id']) : null;
+		$security_out = isset($_POST['security_out']) ? $this->db->real_escape_string($_POST['security_out']) : null;
+		$security_in = isset($_POST['security_in']) ? $this->db->real_escape_string($_POST['security_in']) : null;
+		$security_out_time = isset($_POST['security_out_time']) ? $this->db->real_escape_string($_POST['security_out_time']) : null;
+		$security_notes = isset($_POST['security_notes']) ? $this->db->real_escape_string($_POST['security_notes']) : null;
+		$id = isset($_POST['id']) ? intval($_POST['id']) : null;
+
+		if (!$assignment_id) {
+			return json_encode(['status' => 'error', 'message' => 'Assignment ID is required']);
+		}
+
+		if ($id) {
+			$stmt = $this->db->prepare(
+				"UPDATE gate_pass_logs SET assignment_id = ?, security_out = ?, security_in = ?, security_out_time = ?, security_notes = ? WHERE id = ?"
+			);
+			$stmt->bind_param(
+				"issssi",
+				$assignment_id,
+				$security_out,
+				$security_in,
+				$security_out_time,
+				$security_notes,
+				$id
+			);
+		} else {
+			$stmt = $this->db->prepare(
+				"INSERT INTO gate_pass_logs (assignment_id, security_out, security_in, security_out_time, security_notes) VALUES (?, ?, ?, ?, ?)"
+			);
+			$stmt->bind_param(
+				"issss",
+				$assignment_id,
+				$security_out,
+				$security_in,
+				$security_out_time,
+				$security_notes
+			);
+		}
+
+		if ($stmt->execute()) {
+			$stmt->close();
+			return json_encode(['status' => 'success', 'message' => 'Gate pass log saved']);
+		} else {
+			$error = $stmt->error;
+			$stmt->close();
+			return json_encode(['status' => 'error', 'message' => $error]);
+		}
+	}
 	
 }
 
