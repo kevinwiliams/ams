@@ -69,6 +69,19 @@ if ($action == 'login') {
 }elseif ($action == 'save_gate_pass_log') {
     $get = $crud ->save_gate_pass_log();
     if ($get) echo $get; 
+}elseif ($action == 'save_closing_remark') {
+    $get = $crud ->save_closing_remark();
+    if ($get) echo $get; 
+}elseif ($action == 'get_closing_remarks') {
+    $assignment_id = intval($_POST['assignment_id']);
+    $get = $crud ->get_closing_remarks($assignment_id);
+    if ($get) echo $get; 
+} elseif ($action == 'get_transport_log') {
+    $get = $crud ->get_transport_log();
+    if ($get) echo $get; 
+} elseif ($action == 'get_gate_pass_logs') {
+    $get = $crud ->get_gate_pass_logs();
+    if ($get) echo $get; 
 }
 // $conn->close(); 
 ob_end_flush();

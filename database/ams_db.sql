@@ -322,3 +322,21 @@ UPDATE assignment_list
 SET assignment_type = 'Radio'
 WHERE station_show IS NOT NULL;
 
+CREATE TABLE closing_remarks (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    assignment_id INT NOT NULL,
+    user_id INT NOT NULL,
+    remark TEXT,
+    status ENUM('complete', 'incomplete') NOT NULL DEFAULT 'incomplete',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (assignment_id) REFERENCES assignment_list(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    
+    INDEX idx_assignment_id (assignment_id),
+    INDEX idx_user_id (user_id),
+    INDEX idx_status (status),
+    INDEX idx_created_at (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+

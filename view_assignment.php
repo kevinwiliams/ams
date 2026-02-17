@@ -48,6 +48,37 @@ if ($id > 0) {
        
         $stmt->close();
     }
+
+    // Check if there is a closing remark for this assignment
+    $existing_remark = '';
+    $existing_status = '';
+    $existing_user = '';
+    $stmt = $conn->prepare("SELECT * FROM closing_remarks WHERE assignment_id = ?");
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    // Get the count of rows
+    $remarks_count = $result->num_rows; 
+    $closing_remark = $result->fetch_assoc();
+    // $remarks_count = $closing_remark ? 1 : 0;
+
+    if ($closing_remark) {
+        $existing_remark = $closing_remark['remark'];
+        $existing_status = $closing_remark['status'];
+        // Get the user who added the closing remark
+        $user_stmt = $conn->prepare("SELECT CONCAT(firstname, ' ', lastname) AS name FROM users WHERE id = ?");
+        $user_stmt->bind_param("i", $closing_remark['user_id']);
+        $user_stmt->execute();
+        $user_result = $user_stmt->get_result();
+        if ($user_result && $user_row = $user_result->fetch_assoc()) {
+            $existing_user = $user_row['name'];
+        }
+        $user_stmt->close();
+
+    }
+
+    $isClosed = !empty($existing_remark);
+
     
     // Prepare and execute the query to fetch assignment details
     $stmt = $conn->prepare("SELECT 
@@ -199,7 +230,7 @@ $conn->close();
 <div class="container mt-4">
     <div class="card widget-assignment shadow">
         <!-- Header with Assignment Date and Status -->
-        <div class="card-header d-flex justify-content-between align-items-center <?= $is_cancelled ? 'bg-danger' : 'bg-primary' ?> text-white">
+        <div class="card-header d-flex justify-content-between align-items-center <?= $is_cancelled ? 'bg-danger' : ($isClosed ? 'bg-success' : 'bg-primary') ?> text-white">
             <div>
                 <h4 class="mb-0">
                     <?= date("l, M j, Y", strtotime($assignment_date)) ?>
@@ -209,6 +240,9 @@ $conn->close();
                 </h4>
                 <?php if ($is_cancelled): ?>
                     <span class="badge bg-white text-danger mt-1">CANCELLED</span>
+                <?php endif; ?>
+                <?php if ($isClosed): ?>
+                    <span class="badge bg-white text-danger mt-1">COMPLETED</span>
                 <?php endif; ?>
             </div>
             <!-- <img src="assets/uploads/<?= str_contains($assignment['station_show'], 'FYAH') ? 'fyah':'edge' ?>_logo.png" 
@@ -489,6 +523,29 @@ $conn->close();
                             <?php endif; ?>
                         </div>
                     </div>
+                    <?php
+                    // show closing remark button if assignment date has passed and change to "View Closing Remark" if there is already a remark
+                    $showClosingRemarkButton = (strtotime($assignment_date) < strtotime(date('Y-m-d'))) && !$isClosed;
+                    $showViewRemarkButton = (strtotime($assignment_date) < strtotime(date('Y-m-d'))) && $isClosed;
+                    ?>
+                    <?php if ($showClosingRemarkButton): ?>
+                    <button class="btn btn-sm btn-outline-secondary mt-3" id="add_closing_remarks" 
+                    data-assignment-id="<?= $a_id ?>"  
+                    onclick="openClosingRemarksModal(<?= $a_id ?>,'<?= addslashes($title) ?>','<?= date('Y-m-d', strtotime($assignment_date)); ?>')">
+                        <i class="fas fa-clipboard me-1"></i>&nbsp; Add Closing Remark
+                    </button>
+                    <?php endif; ?>
+                    <?php if ($showViewRemarkButton): ?>
+                    <button class="btn btn-sm btn-outline-secondary mt-3" id="add_closing_remarks" 
+                    data-assignment-id="<?= $a_id ?>"  
+                    onclick="openClosingRemarksModal(<?= $a_id ?>,'<?= addslashes($title) ?>','<?= date('Y-m-d', strtotime($assignment_date)); ?>')">
+                        <i class="fas fa-clipboard me-1"></i>&nbsp; Add Closing Remark
+                    </button>
+                    <?php endif; ?>
+                   <!-- Show count if remarks exist -->
+                    <?php if ($remarks_count > 0): ?>
+                        <span class="badge badge-info"><?php echo $remarks_count; ?></span>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -557,8 +614,119 @@ $conn->close();
 <!-- Include Modals -->
 <?php include('modal_equipment_request.php'); ?>
 <?php include('modal_transport_log.php'); ?>
+<?php include('modal_closing_remarks.php'); ?>
 
 <script>
+    // Function to open modal and load remarks
+    function openClosingRemarksModal(assignmentId, assignmentTitle, assignmentDate) {
+        // Set assignment info
+        $('input[name="assignment_id"]').val(assignmentId);
+        $('#assignment_title').val(assignmentTitle);
+        $('#assignment_date').val(assignmentDate);
+        
+        // Show assignment summary in view tab
+        $('#viewAssignmentTitle').text(assignmentTitle);
+        $('#viewAssignmentDate').text(assignmentDate);
+        $('#assignmentSummary').show();
+        
+        // Reset tabs to view tab
+        $('#view-tab').tab('show');
+        
+        // Reset form
+        $('#closingRemarksForm')[0].reset();
+        // Load existing remarks
+        loadClosingRemarks(assignmentId);
+        
+        // Show modal
+        $('#closingRemarksModal').modal('show');
+    }
+
+    // Function to load closing remarks
+    function loadClosingRemarks(assignmentId) {
+        // Show loading, hide containers
+        $('#remarksLoading').show();
+        $('#remarksContainer').html('').hide();
+        $('#noRemarksMessage').hide();
+        
+        $.ajax({
+            url: 'ajax.php?action=get_closing_remarks',
+            type: 'POST',
+            data: {
+                action: 'get_closing_remarks',
+                assignment_id: assignmentId
+            },
+            dataType: 'json',
+            success: function(response) {
+                var response = JSON.parse(JSON.stringify(response));
+                console.log(response);
+
+                $('#remarksLoading').hide();
+                
+                if (response.status === 'success' && response.count > 0) {
+                    let html = '';
+                    
+                    // Loop through remarks
+                    response.data.forEach(function(remark) {
+                        let statusClass = remark.status === 'complete' ? 'success' : 'danger';
+                        let statusIcon = remark.status === 'complete' ? 'check-circle' : 'times-circle';
+                        let formattedDate = new Date(remark.created_at).toLocaleString();
+                        
+                        html += `
+                            <div class="card mb-3 remark-card" style="cursor: pointer;" onclick="viewRemarkDetails(${JSON.stringify(remark).replace(/"/g, '&quot;')})">
+                                <div class="card-header bg-${statusClass} text-white">
+                                    <i class="fas fa-${statusIcon}"></i> ${remark.status.toUpperCase()}
+                                    <small class="float-right">${formattedDate}</small>
+                                </div>
+                                <div class="card-body">
+                                    <h6 class="card-subtitle mb-2">
+                                        <i class="fas fa-user"></i> ${remark.user_name || 'Unknown User'}
+                                    </h6>
+                                    <p class="card-text">${remark.remark.substring(0, 150)}${remark.remark.length > 150 ? '...' : ''}</p>
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock"></i> Updated: ${new Date(remark.updated_at).toLocaleString()}
+                                    </small>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    $('#remarksContainer').html(html).show();
+                } else {
+                    $('#noRemarksMessage').show();
+                }
+            },
+            error: function() {
+                $('#remarksLoading').hide();
+                $('#remarksContainer').html('<div class="alert alert-danger">Error loading remarks.</div>').show();
+            }
+        });
+    }
+
+    // Function to view individual remark details
+    function viewRemarkDetails(remark) {
+        let statusClass = remark.status === 'complete' ? 'success' : 'danger';
+        let statusIcon = remark.status === 'complete' ? 'check-circle' : 'times-circle';
+        
+        $('#remarkDetailStatus').html(`
+            <span class="badge badge-${statusClass}">
+                <i class="fas fa-${statusIcon}"></i> ${remark.status.toUpperCase()}
+            </span>
+        `);
+        
+        $('#remarkDetailUser').html(`
+            <i class="fas fa-user"></i> ${remark.user_name || 'Unknown User'}
+            ${remark.user_email ? `<br><small>${remark.user_email}</small>` : ''}
+        `);
+        
+        $('#remarkDetailText').text(remark.remark);
+        
+        $('#remarkDetailDate').html(`
+            <i class="fas fa-calendar-alt"></i> Created: ${new Date(remark.created_at).toLocaleString()}<br>
+            <i class="fas fa-edit"></i> Updated: ${new Date(remark.updated_at).toLocaleString()}
+        `);
+        
+        $('#viewRemarkModal').modal('show');
+    }
 
     $(document).ready(function(){
 
@@ -786,6 +954,78 @@ $conn->close();
                 },
                 error: function() {
                     alert_toast('An error occurred. Please try again.', 'error');
+                }
+            });
+        });
+
+        $('#closingRemarksForm').on('submit', function(e) {
+            e.preventDefault();
+            
+            // Show loading on button
+            $('#saveClosingRemark')
+                .prop('disabled', true)
+                .html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...');
+            
+            // var formData = $(this).serialize();
+            var formData = {
+                action: 'save_closing_remark',
+                assignment_id: $('#assignment_id').val(),
+                assignment_date: $('#assignment_date').val(),
+                assignment_title: $('#assignment_title').val(),
+                remark: $('#closing_remark').val(),
+                status: $('#remark_status').val()
+            };
+            
+            $.ajax({
+                url: 'ajax.php?action=save_closing_remark',
+                type: 'POST',
+                data: formData,
+                // dataType: 'json',
+                success: function(response) {
+                    console.log(response);
+                    var res = JSON.parse(response);
+                    if (res.status === 'success') {
+                        // Show success message
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success!',
+                            text: res.message,
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+                        
+                        // Switch to view tab and reload remarks
+                        $('#view-tab').tab('show');
+                        loadClosingRemarks($('#assignment_id').val());
+                        
+                        // Close modal and reset form
+                        $('#closingRemarksForm')[0].reset();
+
+                        setTimeout(() => {
+                            location.reload(); // Reload the page to reflect changes
+                            
+                        }, 4000);
+
+                    } else {
+                        var errorMsg = res.message || 'Failed to save remark.';
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error!',
+                            text: errorMsg
+                        });
+                    }
+                },
+                error: function() {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: 'An error occurred while saving.'
+                    });
+                },
+                complete: function() {
+                    $('#saveClosingRemark')
+                        .prop('disabled', false)
+                        .html('<i class="fas fa-save"></i> Save Remarks');
                 }
             });
         });

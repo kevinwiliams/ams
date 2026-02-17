@@ -53,46 +53,78 @@ $sbQry .= (in_array($user_role, ['Multimedia'])) ? " AND a.assignment_type <> 'T
 
 
 $query = "SELECT a.*, 
-                (SELECT GROUP_CONCAT(
-                    CONCAT(
-                        CASE 
-                            WHEN u.alias IS NOT NULL AND u.alias <> '' THEN u.alias
-                            ELSE CONCAT(u.firstname, ' ', u.lastname)
-                        END, 
-                        ' (', r.role_name, ')', 
-                        CASE 
-                            WHEN EXISTS (
-                                SELECT 1 
-                                FROM confirmed_logs cl 
-                                WHERE cl.assignment_id = a.id AND cl.empid = u.empid
-                            ) THEN ' /' 
-                            ELSE ' |' 
-                        END
-                    ) SEPARATOR ', ') 
-                FROM users u 
-                LEFT JOIN roles r ON u.role_id = r.role_id
-                 WHERE FIND_IN_SET(u.empid, a.team_members)) AS team_members_names_with_roles,
-                (SELECT CONCAT(u.firstname, ' ', u.lastname) 
-                 FROM users u 
-                 WHERE u.id = a.assigned_by) AS assigned_by_name,
-                (SELECT CONCAT(u.firstname, ' ', u.lastname) 
-                 FROM users u 
-                 WHERE u.id = a.approved_by) AS approved_by_name,
-                 (SELECT CONCAT(
-                    u.firstname, ' ', u.lastname, 
-                    CASE 
-                        WHEN EXISTS (
-                            SELECT 1 
-                            FROM confirmed_logs cl 
-                            WHERE cl.assignment_id = a.id AND cl.empid = studio_engineer_user.empid
-                        ) THEN ' /' 
-                        ELSE ' |' 
-                    END
-                ) 
-                FROM users u 
-                WHERE u.empid = a.studio_engineer) AS studio_engineer_name
-            FROM assignment_list a 
-            LEFT JOIN users studio_engineer_user ON a.studio_engineer = studio_engineer_user.empid
+    (SELECT GROUP_CONCAT(
+        CONCAT(
+            CASE 
+                WHEN u.alias IS NOT NULL AND u.alias <> '' THEN u.alias
+                ELSE CONCAT(u.firstname, ' ', u.lastname)
+            END, 
+            ' (', r.role_name, ')', 
+            CASE 
+                WHEN EXISTS (
+                    SELECT 1 
+                    FROM confirmed_logs cl 
+                    WHERE cl.assignment_id = a.id AND cl.empid = u.empid
+                ) THEN ' /' 
+                ELSE ' |' 
+            END
+        ) SEPARATOR ', ') 
+    FROM users u 
+    LEFT JOIN roles r ON u.role_id = r.role_id
+    WHERE FIND_IN_SET(u.empid, a.team_members)) AS team_members_names_with_roles,
+    
+    (SELECT CONCAT(u.firstname, ' ', u.lastname) 
+     FROM users u 
+     WHERE u.id = a.assigned_by) AS assigned_by_name,
+     
+    (SELECT CONCAT(u.firstname, ' ', u.lastname) 
+     FROM users u 
+     WHERE u.id = a.approved_by) AS approved_by_name,
+     
+    (SELECT CONCAT(
+        u.firstname, ' ', u.lastname, 
+        CASE 
+            WHEN EXISTS (
+                SELECT 1 
+                FROM confirmed_logs cl 
+                WHERE cl.assignment_id = a.id AND cl.empid = studio_engineer_user.empid
+            ) THEN ' /' 
+            ELSE ' |' 
+        END
+    ) 
+    FROM users u 
+    WHERE u.empid = a.studio_engineer) AS studio_engineer_name,
+    
+    -- Closing Remarks Indicators
+    (SELECT COUNT(*) FROM closing_remarks cr WHERE cr.assignment_id = a.id) AS closing_remarks_count,
+    
+    CASE 
+        WHEN EXISTS (SELECT 1 FROM closing_remarks cr WHERE cr.assignment_id = a.id) 
+        THEN 'Yes' 
+        ELSE 'No' 
+    END AS has_closing_remarks,
+    
+    (SELECT cr.status 
+     FROM closing_remarks cr 
+     WHERE cr.assignment_id = a.id 
+     ORDER BY cr.created_at DESC 
+     LIMIT 1) AS latest_closing_remark_status,
+     
+    (SELECT CONCAT(
+        cr.status,
+        ' by ',
+        CONCAT(u.firstname, ' ', u.lastname),
+        ' on ',
+        DATE_FORMAT(cr.created_at, '%Y-%m-%d')
+     )
+     FROM closing_remarks cr
+     LEFT JOIN users u ON cr.user_id = u.id
+     WHERE cr.assignment_id = a.id 
+     ORDER BY cr.created_at DESC 
+     LIMIT 1) AS latest_closing_remark_info
+
+FROM assignment_list a 
+LEFT JOIN users studio_engineer_user ON a.studio_engineer = studio_engineer_user.empid
             $where $sbQry
             ORDER BY a.assignment_date DESC";
 $assignment_list = $conn->query($query);
@@ -202,8 +234,11 @@ if (!$assignment_list) {
                         if(in_array($user_role, $multimedia_roles) && ($row['video_requested'] == 1 ||  $row['social_requested'] == 1)){
                             $hightlight = true;
                         }
+
+                        $hasRemarks = $row['closing_remarks_count'] > 0;
+                        
                     ?>
-                    <tr class="<?= ($hightlight) ?'table-warning': '' ?>">
+                    <tr class="<?= ($hightlight) ?'table-warning': '' ?> <?= ($hasRemarks) ? 'table-success' : '' ?>">
                  
                     <td style="width: 100px;">
                         <a href="index.php?page=view_assignment&id=<?php echo $row['id']; ?>" class="text-decoration-none">    

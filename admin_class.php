@@ -1869,7 +1869,7 @@ Class Action {
 						$details .= '<tr>';
 						$details .= '<td style="border: 1px solid #ddd; padding: 8px;">' . $item_name . '</td>';
 						$details .= '<td style="border: 1px solid #ddd; padding: 8px;">' . $quantity . '</td>';
-						$details .= '<td style="border: 1px solid #ddd; padding: 8px;">&nbsp;</td>';
+						$details .= '<td style="border: 1px solid #ddd; padding: 8px;">' . urlencode('&nbsp;') .'</td>';
 						$details .= '</tr>';
 					}
 				}
@@ -2088,7 +2088,265 @@ Class Action {
 			return json_encode(['status' => 'error', 'message' => $error]);
 		}
 	}
-	
+
+	// Save closing remarks
+	function save_closing_remark() {
+		try {
+			// Get POST data
+			$assignment_id = intval($_POST['assignment_id']) ?? null;
+			$remark = $_POST['remark'] ?? '';
+			$status = $_POST['status'] ?? 'incomplete'; // complete/incomplete
+			
+			if (!$assignment_id || empty($remark)) {
+				return json_encode(["status" => "error", "message" => "Missing required fields"]);
+			}
+			
+			// Get environment variables
+			$env = $this->getEnv();
+			
+			// Get user info from session
+			$user_id = $_SESSION['login_id'] ?? 0;
+			$user_name = $_SESSION['login_firstname'] . ' ' . $_SESSION['login_lastname'];
+			$user_role = $_SESSION['role_name'] ?? '';
+			$current_datetime = date('Y-m-d H:i:s');
+			
+			// Prepare closing remarks details for email
+			$remarkDetails = [
+				'assignment_id' => $assignment_id,
+				'assignment_date' => $_POST['assignment_date'] ?? '',
+				'assignment_title' => $_POST['assignment_title'] ?? '',
+				'remark' => $remark,
+				'status' => $status,
+				'submitted_by' => $user_name,
+				'submitted_by_role' => $user_role,
+				'submitted_at' => date('D, M d, Y H:i:s')
+			];
+			
+			// Insert into MySQL database (your main DB)
+			$stmt = $this->db->prepare("
+				INSERT INTO closing_remarks 
+				(assignment_id, user_id, remark, status, created_at, updated_at) 
+				VALUES (?, ?, ?, ?, ?, ?)
+			");
+			
+			$stmt->bind_param("iissss", 
+				$assignment_id, 
+				$user_id, 
+				$remark, 
+				$status, 
+				$current_datetime, 
+				$current_datetime
+			);
+			
+			$insert_success = $stmt->execute();
+			$remark_id = $stmt->insert_id;
+			$stmt->close();
+			
+			// If insert successful, send notification email
+			if ($insert_success) {
+				// Determine who should receive the email (similar to your equipment request logic)
+				$is_radio_staff = $_SESSION['login_sb_staff'] == 1 ? true : false;
+				
+				// You can define email recipients in your env
+				$emailTo = $is_radio_staff 
+					? str_replace(',', ';', $env->get('EMAIL_CLOSING_REMARKS_SB')) 
+					: str_replace(',', ';', $env->get('EMAIL_CLOSING_REMARKS'));
+				
+				$message = json_encode($remarkDetails);
+				$mail_result = $this->send_closing_remark_mail($emailTo, $message, $remark_id);
+				
+				return json_encode([
+					"status" => "success", 
+					"message" => "Closing remarks saved successfully.",
+					"mail_status" => $mail_result,
+					"remark_id" => $remark_id
+				]);
+			} else {
+				return json_encode([
+					"status" => "error", 
+					"message" => "Database insert failed"
+				]);
+			}
+			
+		} catch (Exception $e) {
+			return json_encode([
+				"status" => "error", 
+				"message" => "Error: " . $e->getMessage()
+			]);
+		}
+
+
+	}
+
+	// Send closing remark notification email
+	function send_closing_remark_mail($email, $message, $remark_id = null) {
+		
+		if (!$this->adhocDb) {
+			throw new Exception("SQL Server connection is not valid.");
+		}
+		
+		try {
+			// Get ENV Variables
+			$env = $this->getEnv();
+			$emailFrom = $env->get('EMAIL_FROM');
+			$emailTable = $env->get('MSSQL_TABLE_NAME'); // Same email queue table
+			$user_name = $_SESSION['login_firstname'] . ' ' . $_SESSION['login_lastname'];
+			$user_role = $_SESSION['role_name'];
+			
+			$email = trim($email);
+			$bccEmails = "";
+			$ccEmails = trim($_SESSION['login_email']);      
+			$fromEmail = $emailFrom;
+			
+			// Decode the message details
+			$remarkDetails = json_decode($message, true);
+			
+			// Create subject line
+			$subjectTxt = urlencode("Closing Remarks - Assignment #" . 
+				$remarkDetails['assignment_id'] . 
+				" - " . 
+				date("D, M d, Y", strtotime($remarkDetails['submitted_at'])) .
+				" (" . ucfirst($remarkDetails['status']) . ")"
+			);
+			
+			// Create HTML email content
+			$htmlContent = '<h3>Closing Remarks Submitted</h3>';
+			$htmlContent .= '<table style="width: 100%; border-collapse: collapse; border: 1px solid #ddd;">';
+			
+			// Assignment Information Section
+			$htmlContent .= '<tr style="background-color: #f2f2f2;">';
+			$htmlContent .= '<th colspan="2" style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd;">Assignment Information</th>';
+			$htmlContent .= '</tr>';
+			
+			$htmlContent .= '<tr>';
+			$htmlContent .= '<td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Assignment ID</strong></td>';
+			$htmlContent .= '<td style="padding: 8px; border-bottom: 1px solid #ddd;">' . htmlspecialchars($remarkDetails['assignment_id']) . '</td>';
+			$htmlContent .= '</tr>';
+			
+			$htmlContent .= '<tr>';
+			$htmlContent .= '<td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Assignment Title</strong></td>';
+			$htmlContent .= '<td style="padding: 8px; border-bottom: 1px solid #ddd;">' . htmlspecialchars($remarkDetails['assignment_title']) . '</td>';
+			$htmlContent .= '</tr>';
+			
+			$htmlContent .= '<tr>';
+			$htmlContent .= '<td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Assignment Date</strong></td>';
+			$htmlContent .= '<td style="padding: 8px; border-bottom: 1px solid #ddd;">' . htmlspecialchars($remarkDetails['assignment_date']) . '</td>';
+			$htmlContent .= '</tr>';
+			
+			// Status Section
+			$htmlContent .= '<tr style="background-color: #f2f2f2;">';
+			$htmlContent .= '<th colspan="2" style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd;">Status Information</th>';
+			$htmlContent .= '</tr>';
+			
+			$statusColor = ($remarkDetails['status'] == 'complete') ? '#28a745' : '#dc3545';
+			$htmlContent .= '<tr>';
+			$htmlContent .= '<td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Status</strong></td>';
+			$htmlContent .= '<td style="padding: 8px; border-bottom: 1px solid #ddd;"><span style="color: ' . $statusColor . '; font-weight: bold;">' . ucfirst(htmlspecialchars($remarkDetails['status'])) . '</span></td>';
+			$htmlContent .= '</tr>';
+			
+			// Closing Remarks Section
+			$htmlContent .= '<tr style="background-color: #f2f2f2;">';
+			$htmlContent .= '<th colspan="2" style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd;">Closing Remarks</th>';
+			$htmlContent .= '</tr>';
+			
+			$htmlContent .= '<tr>';
+			$htmlContent .= '<td colspan="2" style="padding: 15px; border-bottom: 1px solid #ddd; background-color: #f9f9f9;">';
+			$htmlContent .= nl2br(htmlspecialchars($remarkDetails['remark']));
+			$htmlContent .= '</td>';
+			$htmlContent .= '</tr>';
+			
+			// Submission Information
+			$htmlContent .= '<tr style="background-color: #f2f2f2;">';
+			$htmlContent .= '<th colspan="2" style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd;">Submission Information</th>';
+			$htmlContent .= '</tr>';
+			
+			$htmlContent .= '<tr>';
+			$htmlContent .= '<td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Submitted By</strong></td>';
+			$htmlContent .= '<td style="padding: 8px; border-bottom: 1px solid #ddd;">' . htmlspecialchars($remarkDetails['submitted_by']) . '</td>';
+			$htmlContent .= '</tr>';
+			
+			$htmlContent .= '<tr>';
+			$htmlContent .= '<td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Role</strong></td>';
+			$htmlContent .= '<td style="padding: 8px; border-bottom: 1px solid #ddd;">' . htmlspecialchars($remarkDetails['submitted_by_role']) . '</td>';
+			$htmlContent .= '</tr>';
+			
+			$htmlContent .= '<tr>';
+			$htmlContent .= '<td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Submitted At</strong></td>';
+			$htmlContent .= '<td style="padding: 8px; border-bottom: 1px solid #ddd;">' . htmlspecialchars($remarkDetails['submitted_at']) . '</td>';
+			$htmlContent .= '</tr>';
+			
+			$htmlContent .= '</table>';
+			
+			// Add remark ID if available
+			if ($remark_id) {
+				$htmlContent .= '<p style="margin-top: 20px; font-size: 12px; color: #666;">Remark ID: ' . $remark_id . '</p>';
+			}
+			
+			// URL encode the email body
+			$emailBody = urlencode($htmlContent);
+			
+			// Construct the email string (same format as your equipment request)
+			$mail = "encoding=UTF-8&to=$email&bcc=$bccEmails&cc=$ccEmails&from=$fromEmail&subject=$subjectTxt&msgbody=$emailBody";
+			
+			// Insert into MSSQL email table
+			$sql = "INSERT INTO " . $emailTable . " (mess) VALUES (?)";
+			$stmt = sqlsrv_prepare($this->adhocDb, $sql, [$mail]);
+			
+			if (!$stmt) {
+				throw new Exception("SQLSRV Prepare Error: " . print_r(sqlsrv_errors(), true));
+			}
+			
+			if (sqlsrv_execute($stmt)) {
+				return "Closing remark notification sent successfully.";
+			} else {
+				throw new Exception("SQLSRV Execution Error: " . print_r(sqlsrv_errors(), true));
+			}
+			
+		} catch (Exception $e) {
+			return "Error sending closing remark notification: " . $e->getMessage();
+		}
+	}
+
+	// Get closing remarks for viewing
+	function get_closing_remarks($assignment_id) {
+		try {
+			$conn = $this->db; // Your MySQL connection
+			
+			$stmt = $conn->prepare("
+				SELECT cr.*, 
+					CONCAT(u.firstname, ' ', u.lastname) AS user_name,
+					u.email AS user_email
+				FROM closing_remarks cr
+				LEFT JOIN users u ON cr.user_id = u.id
+				WHERE cr.assignment_id = ?
+				ORDER BY cr.created_at DESC
+			");
+			
+			$stmt->bind_param("i", $assignment_id);
+			$stmt->execute();
+			$result = $stmt->get_result();
+			
+			$remarks = [];
+			while ($row = $result->fetch_assoc()) {
+				$remarks[] = $row;
+			}
+			
+			$stmt->close();
+			
+			return json_encode([
+				"status" => "success",
+				"data" => $remarks,
+				"count" => count($remarks)
+			]);
+			
+		} catch (Exception $e) {
+			return json_encode([
+				"status" => "error",
+				"message" => $e->getMessage()
+			]);
+		}
+	}
+		
 }
 
 	
