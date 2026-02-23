@@ -38,8 +38,8 @@ $id = $_GET['id'] ?? '';
 // Replace the current switch statement with type-based logic
 $is_editing = !empty($id);
 $is_creating = empty($id);
-echo "User Role: $user_role <br>"; // Debugging line
-echo "Is Editing: " . ($is_editing ? 'Yes' : 'No') . "<br> Is Creating: " . ($is_creating ? 'Yes' : 'No') . "<br>"; // Debugging line
+// echo "User Role: $user_role <br>"; // Debugging line
+// echo "Is Editing: " . ($is_editing ? 'Yes' : 'No') . "<br> Is Creating: " . ($is_creating ? 'Yes' : 'No') . "<br>"; // Debugging line
 
 // Reset all restrictions
 $readonly = $disabled = $readonlyDispatch = $disabledDispatch = $disabledMedia = $disabledEditors = $disabledDigital = $disabledBroadcast = $disabledPersonality = $readonlyPersonality = $requiredPersonality = $required = $studio_engineer = '';
@@ -77,7 +77,7 @@ $readonly = $disabled = $readonlyDispatch = $disabledDispatch = $disabledMedia =
 // }
 
 if ($is_editing) {
-    echo "Editing assignment ID: $id"; // Debugging line
+    // echo "Editing assignment ID: $id"; // Debugging line
     // Fetch assignment with type info
     $qry = $conn->query("SELECT *, assignment_type, status FROM assignment_list WHERE id = " . intval($id));
     $assignment = $qry->fetch_assoc();
@@ -171,7 +171,7 @@ if ($is_editing) {
             break;
     }
 } else {
-    echo "Creating new assignment"; // Debugging line
+    // echo "Creating new assignment"; // Debugging line
     // Creation logic based on assignment type
     $default_assignment_type = 'Editorial'; // or determine from context
     
@@ -250,12 +250,49 @@ if ($id) {
         <div class="card shadow-sm">
             <div class="card-header bg-primary text-white">
                 <h3 class="card-title mb-0">
-                    <i class="fas fa-calendar-check mr-2"></i>
-                    Assignment Details
+
+                <?php
+                $iconType = '';
+                $iconColor = '';
+                if (isset($assignment_type)) {
+                    // Determine icon type based on assignment type
+                    switch ($assignment_type) {
+                        case 'Radio':
+                            $iconType = 'fas fa-broadcast-tower';
+                            break;  
+                        case 'Editorial':
+                            $iconType = 'fas fa-newspaper';
+                            break;
+                        case 'Transport':
+                            $iconType = 'fas fa-traffic-light';
+                            break;
+                        default:
+                            $iconType = 'fas fa-calendar-check';
+                    }
+                    // Determine icon color based on editing state
+                    switch ($is_editing) {
+                        case true:
+                            $iconColor = 'text-warning';
+                            break;
+                        case false:
+                            $iconColor = 'text-light';
+                            break;
+                        default:
+                            $iconColor = 'text-info';
+                    }
+                }
+                    ?>
+
+                     <i class="<?= $iconType ?> mr-2 fs-4 <?= $iconColor ?>"></i>
+                    Assignment Details 
                 </h3>
+                <br>
+                                        
             </div>
             <div class="card-body">
                 <form action="" id="manage_assignment" method="POST">
+                <input type="hidden" name="assignment_type" value="<?= htmlspecialchars($assignment_type ?? '') ?>">
+
                     <div class="row">
                         <div class="col-md-6 pr-3">
                             <!-- Schedule Section -->
@@ -400,8 +437,11 @@ if ($id) {
                                         ><?php echo htmlspecialchars_decode($description ?? ''); ?></textarea>
                                     </div>
                                     <div class="form-group m-0  small">
-                                        <select name="assignment_type" id="assignment_type" class="small" 
-                                                <?= $is_editing ? 'disabled' : '' ?> <?= $required ?> readonly="readonly">
+                                        <span class="text-muted">* Please provide as much detail as possible in the description to ensure proper assignment and execution of the task.</span>
+                                        <select name="assignment_type" 
+                                                id="assignment_type" class="small d-none" 
+                                                <?php //$is_editing ? 'disabled' : '' ?> 
+                                                <?= $required ?> readonly="readonly">
                                             <option value="Editorial" <?= (isset($assignment_type) && $assignment_type == 'Editorial') ? 'selected' : '' ?>>Editorial</option>
                                             <option value="Radio" <?= ($assignment_type == 'Radio') ? 'selected' : '' ?>>Radio</option>
                                             <option value="Transport" <?= (isset($assignment_type) && $assignment_type == 'Transport') ? 'selected' : '' ?>>Transport</option>
@@ -925,7 +965,7 @@ if ($id) {
                             <!-- Transport Section - Only show for Transport or Dispatch -->
                             <div class="card mb-4 transport-section" style="display: <?= ($user_role === 'Dispatcher') ? 'block' : 'none' ?>;">
                                 <div class="card-header bg-light">
-                                    <h4 class="mb-0"><i class="fas fa-newspaper mr-2"></i>Transport Team</h4>
+                                    <h4 class="mb-0"><i class="fas fa-traffic-light mr-2"></i>Transport Team</h4>
                                 </div>
                                 <div class="card-body">
                                     <!-- Editorial-specific team assignments -->

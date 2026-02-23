@@ -181,7 +181,7 @@ $options = [
                     <span class="info-box-text small">NEXT ASSIGNMENT</span>
                     <span class="info-box-number"><?= date('D M d, Y', strtotime($next_assignment['assignment_date'])) ?> - <?= htmlspecialchars($next_assignment['start_time']) ?></span>
                     <span class="info-box-number"><a href="index.php?page=view_assignment&id=<?= $next_assignment['id']; ?>" class="text-white"><?= trimString(htmlspecialchars_decode($next_assignment['title'])) ?></a></span>
-                    <span class="progress-description">
+                    <span class="progress-description small">
                     <i class="fas fa-map-marker-alt mr-1"></i> <?= htmlspecialchars_decode($next_assignment['location']) ?>
                     </span>
                 </div>
@@ -198,7 +198,7 @@ $options = [
                     <span class="info-box-text small">LAST ASSIGNMENT</span>
                     <span class="info-box-number"><?= date('D M d, Y', strtotime($last_assignment['assignment_date'])) ?> - <?= htmlspecialchars($last_assignment['start_time']) ?></span>
                     <span class="info-box-number"><a href="index.php?page=view_assignment&id=<?= $last_assignment['id']; ?>" class="text-white"><?= trimString(htmlspecialchars_decode($last_assignment['title'])) ?></a></span>
-                    <span class="progress-description">
+                    <span class="progress-description small">
                     <i class="fas fa-map-marker-alt mr-1"></i> <?= htmlspecialchars_decode($last_assignment['location']) ?>
                     </span>
                 </div>
@@ -215,7 +215,7 @@ $options = [
                     <span class="info-box-text small">FUTURE ASSIGNMENT</span>
                     <span class="info-box-number"><?= date('D M d, Y', strtotime($future_assignments[0]['assignment_date'])) ?> - <?= htmlspecialchars($future_assignments[0]['start_time']) ?></span>
                     <span class="info-box-number"><a href="index.php?page=view_assignment&id=<?= $future_assignments[0]['id']; ?>" class="text-dark"><?= trimString(htmlspecialchars_decode($future_assignments[0]['title'])) ?></a></span>
-                    <span class="progress-description">
+                    <span class="progress-description small">
                     <i class="fas fa-map-marker-alt mr-1"></i> <?= htmlspecialchars_decode($future_assignments[0]['location']) ?>
                     </span>
                 </div>
