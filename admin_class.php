@@ -1025,8 +1025,8 @@ Class Action {
 							$value = date("l, M j, Y", strtotime($value));
 							break;
 						case 'url':
-							$value = '<a href="'.urlencode($value).'">Confirm Assignment</a>'; // urlencode for python mailer
-							$key = urlencode('&nbsp;'); // urlencode for python mailer
+							$value = '<a href="'.($value).'">Confirm Assignment</a>'; // urlencode for python mailer
+							$key = ('&nbsp;'); // urlencode for python mailer
 							break;
 						case 'updated_by':
 							$value = (str_contains($subject, "Updated")) ? $value : '';
@@ -1184,7 +1184,7 @@ Class Action {
 		if(empty($permit)){ // Add URL for resource requests only
 		$body .= '<tr>
 				  <td colspan="2" style="padding: 8px; border-bottom: 1px solid #ddd;">
-					<a href="' . urlencode($assignmentInfo["url"]) . '">Add Resource to Assignment</a>
+					<a href="' . ($assignmentInfo["url"]) . '">Add Resource to Assignment</a>
 				  </td>
 				  </tr>';
 		}
