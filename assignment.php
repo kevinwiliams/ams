@@ -42,7 +42,7 @@ $is_creating = empty($id);
 // echo "Is Editing: " . ($is_editing ? 'Yes' : 'No') . "<br> Is Creating: " . ($is_creating ? 'Yes' : 'No') . "<br>"; // Debugging line
 
 // Reset all restrictions
-$readonly = $disabled = $readonlyDispatch = $disabledDispatch = $disabledMedia = $disabledEditors = $disabledDigital = $disabledBroadcast = $disabledPersonality = $readonlyPersonality = $requiredPersonality = $required = $studio_engineer = '';
+$readonly = $disabled = $readonlyDispatch = $disabledDispatch = $disabledMedia = $disabledEditors = $disabledDigital = $disabledBroadcast = $disabledPersonality = $readonlyPersonality = $requiredPersonality = $requiredPhoto = $required = $studio_engineer = '';
 
 // Check user role and set attributes
 // switch (true) {
@@ -829,7 +829,7 @@ if ($id) {
                                                 
                                                 <?php 
                                                 $photographer_qry = $admin->get_users_roles_station($conn, ['Photographer','Photo Editor']); ?>
-                                                <select name="assignee[photographer][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabledDispatch.$disabledEditors.$disabledMedia ?><?= $required?>>
+                                                <select name="assignee[photographer][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabledDispatch.$disabledEditors.$disabledMedia ?><?= $requiredPhoto?>>
                                                 <?php if($photographer_qry):
                                                     foreach ($photographer_qry as $photographer): 
                                                             if(in_array($photographer['empid'], $photographers))
