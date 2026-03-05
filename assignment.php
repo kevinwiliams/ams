@@ -148,6 +148,7 @@ if ($is_editing) {
             if ($assignment_type == 'Editorial' && $can_edit_status) {
                 // Media roles can edit media-related fields in Editorial
                 $required = 'required';
+                $requiredPhoto = 'required';
                 $readonly = 'readonly = readonly';
                 $disabled = 'disabled = disabled';
                 $disabledDigital = 'disabled = disabled';
