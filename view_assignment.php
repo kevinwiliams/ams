@@ -393,7 +393,8 @@ $conn->close();
                                 if (!empty($studio_engineer))
                                     $team_member_names .= !empty($team_member_names) ? ', ' . $studio_engineer_name : $studio_engineer_name;
 
-                                    echo '('.(count(explode(', ', $team_member_names))).' &#x00B1;)' ?>
+                                    $count = !empty($team_member_names) ? count(explode(', ', $team_member_names)) : 0;
+                                    echo '('.$count.' &#x00B1;)' ?>
                             </h6> 
                             
                         </div>
