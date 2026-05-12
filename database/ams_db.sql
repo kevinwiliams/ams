@@ -340,3 +340,21 @@ CREATE TABLE closing_remarks (
     INDEX idx_created_at (created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+
+
+TRUNCATE TABLE `transport_vehicles`;
+INSERT INTO `transport_vehicles` (`plate_number`, `make_model`, `is_deleted`, `model_year`, `fitness_expiry`, `registration_expiry`, `insurance_expiry`, `last_maintenance`, `vehicle_category`, `vehicle_location`) VALUES
+('8656FG', 'Honda Accord', 0, 2008, '2026-01-29', '2026-03-31', NULL, NULL, 'Transport', 'Montego Bay'),
+('1276JE', 'Audi Q5', 0, 2019, '2026-01-16', '2026-03-26', NULL, NULL, 'Staff', 'Kingston'),
+('0623GE', 'VW Amarok', 0, 2012, '2028-01-29', '2026-04-25', NULL, NULL, 'Transport', 'Kingston'),
+('9381KT', 'VW Polo', 0, 2019, '2029-01-16', '2026-07-25', NULL, NULL, 'Staff', 'Kingston'),
+('8658FG', 'Honda CRV', 0, 2008, '2026-09-19', '2025-03-26', NULL, NULL, 'Staff', 'Kingston'),
+('6722JY', 'VW Amarok', 0, 2021, '2026-01-22', '2026-05-26', NULL, NULL, 'Transport', 'Kingston'),
+('0132JY', 'Toyota Probox', 0, 2018, '2026-01-07', '2026-05-26', NULL, NULL, 'Transport', 'Kingston'),
+('9272CQ', 'VW Transporter', 0, 2019, NULL, '2026-06-26', NULL, NULL, 'Transport', 'Kingston'),
+('4988CQ', 'Mini Cooper Countryman', 0, 2020, '2025-10-14', '2026-10-25', NULL, NULL, 'Transport', 'Kingston'),
+('9269JX', 'Toyota Hiace', 0, 2021, '2025-11-21', '2026-04-26', NULL, NULL, 'Transport', 'Kingston'),
+('8659FG', 'Honda CRV', 0, 2008, '2025-07-14', '2026-03-26', NULL, NULL, 'Staff', 'Kingston'),
+('9468LP', 'Foton truck', 0, 2026, '2026-11-15', '2026-04-25', NULL, NULL, 'Transport', 'Kingston'),
+('9469LP', 'Foton truck', 0, 2026, '2026-11-16', '2026-04-26', NULL, NULL, 'Transport', 'Kingston'),
+('3369HD', 'BWM X4', 0, 2016, '2028-07-28', '2026-05-31', NULL, NULL, 'Staff', 'Kingston');
