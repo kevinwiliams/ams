@@ -47,6 +47,12 @@ $login_name = isset($_SESSION['login_name']) ? $_SESSION['login_name'] : 'User';
                         <p>Assignments</p>
                     </a>
                 </li>
+                <li class="nav-item dropdown">
+                    <a href="./index.php?page=driver_assignments" class="nav-link nav-driver_assignments nav-calendar">
+                        <i class="nav-icon fas fa-route"></i>
+                        <p>Driver Assignments</p>
+                    </a>
+                </li>
                 <?php if (in_array($user_role, $req_roles)): ?>
                     <li class="nav-item dropdown">
                         <a href="./index.php?page=site_reports" class="nav-link nav-site_reports">

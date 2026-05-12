@@ -1,0 +1,50 @@
+services:
+  web:
+    build: .
+    ports:
+      - "8080:80"
+    depends_on:
+      - mysql
+      - mssql
+    volumes:
+      - .:/var/www/html:cached
+      - ./php.ini:/usr/local/etc/php/conf.d/custom.ini:ro
+    environment:
+      - APACHE_RUN_USER=www-data
+      - APACHE_RUN_GROUP=www-data
+    networks:
+      - ams-net
+
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: ams
+      MYSQL_USER: ams_user
+      MYSQL_PASSWORD: ams_pass
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database/ams_db.sql:/docker-entrypoint-initdb.d/ams_db.sql:ro
+    networks:
+      - ams-net
+
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    restart: unless-stopped
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "Strong!Passw0rd"
+    ports:
+      - "1433:1433"
+    networks:
+      - ams-net
+
+volumes:
+  mysql_data:
+
+networks:
+  ams-net:
+    driver: bridge

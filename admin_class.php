@@ -831,7 +831,7 @@ Class Action {
 			if ($cancelled) {
 				$subjectTxt .= " (Cancelled)";
 			} else {
-				$subjectTxt .= $postponed ? " (Postponed)" : " (Updated)";
+				$subjectTxt .= $postponed ? " (Rescheduled)" : " (Updated)";
 			}
 		}
 		return $subjectTxt;

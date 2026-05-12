@@ -455,13 +455,13 @@ if ($id) {
 
                         <div class="col-md-6 pl-3">
                             <!-- Transport Section -->
-                             <?php if (isset($_GET['id']) || $radio_staff){ ?>
+                             <?php //if (isset($_GET['id']) || $radio_staff){ ?>
                             <div class="card mb-4">
                                 <div class="card-header bg-light">
                                     <h4 class="mb-0"><i class="fas fa-car mr-2"></i>Transport <?= ($radio_staff) ? '/ Permit' : '' ?></h4>
                                 </div>
                                 <div class="card-body">
-                                    <div class="form-group d-none">
+                                    <div class="form-group">
                                         <label class="form-label">Transport Option</label>
                                             <div class="form-check">
                                                 <input class="form-check-input" type="radio" name="drop_option" id="dropOffOnly" value="dropOffOnly" <?php echo isset($drop_option) && $drop_option == 'dropOffOnly' ? 'checked' : '' ?> <?= $disabled.$disabledPersonality ?>>
@@ -525,7 +525,7 @@ if ($id) {
                                     <?php } ?>
                                 </div>
                             </div>
-                            <?php } ?>
+                            <?php //} ?>
                             <input type="hidden" name="id" value="<?php echo htmlspecialchars($id ?? ''); ?>">
                             <input type="hidden" name="assigned_by" value="<?php echo htmlspecialchars($assigned_by ?? ''); ?>">
                             <!-- Team Assignment Section -->
