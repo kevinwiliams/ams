@@ -406,7 +406,7 @@ $conn->close();
                                 <?php if (!empty($team_member_names)): ?>
                                     <?php 
                                     $charactersToRemove = ["/", "|"];
-                                    foreach (explode(', ', $team_member_names) as $member): 
+                                    foreach (array_unique(explode(', ', $team_member_names)) as $member): 
                                         $statusClass = strpos($member, '/') !== false ? 'badge-success' : 'badge-secondary';
                                         $member = str_replace($charactersToRemove, "", $member);
                                     ?>

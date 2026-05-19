@@ -33,7 +33,7 @@ $create_roles = ['Manager', 'ITAdmin', 'Editor', 'Dept Admin', 'Security','Op Ma
 
 $sbQry .= ($radio_staff) ? " AND a.station_show <> '' " : " AND a.station_show IS NULL ";
 
-if(!in_array($user_role,  $view_roles))
+if(!in_array($user_role,  $view_roles) && !in_array($user_role, $driver_roles))
     $editorQry = " AND FIND_IN_SET('".$db_empid."', REPLACE(a.team_members, ' ', '')) > 0 OR studio_engineer = '".$db_empid."' ";
 
 if(in_array($user_role,  $digital_roles))
@@ -147,11 +147,11 @@ $options = [
     if(in_array($user_role,  ['Editor', 'Multimedia', 'Photo Editor']))
         $editorQ .= " AND FIND_IN_SET('".$db_empid."', REPLACE(team_members, ' ', '')) > 0 AND assignment_type <> 'Transport'";
     
-    if(!in_array($user_role, $view_roles))
+    if(!in_array($user_role, $view_roles) && !in_array($user_role, $driver_roles))
         $editorQ .= " AND FIND_IN_SET('".$db_empid."', REPLACE(team_members, ' ', '')) > 0 AND assignment_type <> 'Transport'";
 
     if(in_array($user_role, $driver_roles))
-        $editorQ .= " AND drop_option <> 'noTransport'  OR assignment_type = 'Transport' ";
+        $editorQ .= " AND (drop_option <> 'noTransport' OR assignment_type = 'Transport') ";
 
     if(!in_array($user_role, ['Dispatcher', 'Security', 'Driver']))
         $editorQ .= " AND FIND_IN_SET('".$db_empid."', REPLACE(team_members, ' ', '')) > 0 ";

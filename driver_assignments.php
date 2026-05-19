@@ -81,7 +81,14 @@ if ($userResult) {
                                     $teamNames[] = $userMap[$memberId];
                                 }
                             }
-                            $teamCount = count($teamNames) - 1; // Exclude the driver themselves from the team count
+                            // Base team count excludes the driver themselves
+                            $teamCount = max(0, count($teamNames) - 1);
+                            // If a studio engineer is assigned, include them in the count and display
+                            if (!empty($row['studio_engineer'])) {
+                                $teamCount += 1;
+                                $studioName = $userMap[$row['studio_engineer']] ?? $row['studio_engineer'];
+                                $teamNames[] = $studioName . ' (Studio Engineer)';
+                            }
                             $teamNameString = !empty($teamNames) ? implode(', ', $teamNames) : '—';
 
                         ?>
