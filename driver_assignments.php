@@ -36,7 +36,9 @@ if ($userResult) {
 <div class="col-lg-12">
     <div class="card card-outline card-success">
         <div class="card-header">
-            <h3 class="card-title">Driver Assignments</h3>
+            <a href="index.php?page=calendar" class="py-2 flex-grow-1">
+                <i class="fa fa-list" aria-hidden="true"></i> Calendar View
+            </a>
         </div>
         <div class="card-body">
             <div class="row mb-4">

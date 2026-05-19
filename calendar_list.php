@@ -11,12 +11,22 @@ $user_role = $_SESSION['role_name'];
 $freelance_roles = ['Freelancer'];
 $radio_staff = $_SESSION['login_sb_staff'] == 1 ? true : false;
 
+$selectedDriver = isset($_GET['driver']) ? preg_replace('/[^A-Za-z0-9]/', '', $_GET['driver']) : '';
 $where = " WHERE (a.is_deleted = 0 OR a.is_deleted IS NULL)"; 
 
 $sbQry = ($radio_staff) ? " AND a.station_show <> '' " : " AND a.station_show IS NULL ";
 
-if(in_array($user_role,  $freelance_roles)){
-    $where .= "  AND FIND_IN_SET('".$db_empid."', REPLACE(a.team_members, ' ', '')) > 0 ";
+if(in_array($user_role, ['Driver'])){
+    if (!empty($selectedDriver)) {
+        $where .= " AND (FIND_IN_SET('" . $selectedDriver . "', REPLACE(a.team_members, ' ', '')) > 0 OR (a.assignment_type = 'Transport' AND FIND_IN_SET('" . $selectedDriver . "', REPLACE(a.team_members, ' ', '')) > 0)) ";
+        $sbQry = "";
+    } elseif (in_array($user_role, ['Driver'])) {
+        $where .= " AND (drop_option <> 'noTransport' OR a.assignment_type = 'Transport') ";
+        $sbQry = "";
+    }
+}
+if (in_array($user_role, $freelance_roles)) {
+    $where .= " AND FIND_IN_SET('" . $db_empid . "', REPLACE(a.team_members, ' ', '')) > 0 ";
 }
 
 $query = "SELECT a.*,  
