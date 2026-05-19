@@ -677,13 +677,14 @@ Class Action {
 			$id = !empty($id) ? $id : $lastInsertId;
 
 			// Log dispatch details
+			$log = [];
 			if (isset($_POST['transport_id']) && $status == 'Approved') {
 				$log['assignment_id'] = $id;
-				$log['transport_id'] = $_POST['transport_id'] ?? null;
+				$log['transport_id'] = $_POST['transport_id'];
 				$log['created_by'] = $_SESSION['login_id'];
 			}
 			// Handle transport log
-			if (!empty($_POST['transport_id'])) {
+			if (!empty($_POST['transport_id']) && !empty($log)) {
 				$data['transport_confirmed'] = 1;
 				$this->update_transport_logs($id, $log);
 			}
