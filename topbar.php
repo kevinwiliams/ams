@@ -27,6 +27,11 @@ include('./db_connect.php');
                 <i class="fas fa-expand-arrows-alt"></i>
             </a>
         </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#" role="button" onclick="location.reload();">
+                <i class="fas fa-sync-alt"></i>
+            </a>
+        </li>
         <li class="nav-item dropdown">
             <a class="nav-link" data-toggle="dropdown" aria-expanded="false" href="javascript:void(0)">
             <?php $login_firstname = isset($_SESSION['login_firstname']) ? htmlspecialchars($_SESSION['login_firstname'], ENT_QUOTES, 'UTF-8') : 'Guest';
