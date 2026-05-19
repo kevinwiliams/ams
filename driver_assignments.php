@@ -1,6 +1,9 @@
 <?php
 include 'db_connect.php';
 
+$db_empid = $_SESSION['empid'] ?? '';
+$user_role = $_SESSION['role_name'] ?? '';
+
 // Fetch driver list from users table using role name matching Driver
 $driverQuery = "SELECT u.empid, CONCAT(u.firstname, ' ', u.lastname) AS name
     FROM users u
@@ -38,7 +41,7 @@ if ($userResult) {
         <div class="card-body">
             <div class="row mb-4">
                 <div class="col-md-6">
-                    <div class="form-group">
+            <div class="form-group">
                         <label for="driver-select">Filter by Driver</label>
                         <select id="driver-select" class="form-control form-control-sm">
                             <option value="">-- Select a driver --</option>

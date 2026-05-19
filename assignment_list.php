@@ -15,7 +15,7 @@ include('db_connect.php');
 $login_role_id = $_SESSION['role_id'] ?? 5; // Default to 5 (Reporter)
 $login_empid = $_SESSION['login_id'] ?? 0;
 $login_empid = intval($login_empid);
-$sessionempid = $_SESSION['login_empid'];
+$sessionempid = $_SESSION['login_empid'] ?? '';
 $user_role = $_SESSION['role_name'];
 $radio_staff = $_SESSION['login_sb_staff'] == 1 ? true : false;
 

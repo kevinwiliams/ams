@@ -6,7 +6,7 @@ include 'db_connect.php';
 
 
 $db_empid = $_SESSION['empid'] ?? '';
-$sessionempid = $_SESSION['login_empid'];
+$sessionempid = $_SESSION['login_empid'] ?? '';
 $user_role = $_SESSION['role_name'];
 $freelance_roles = ['Freelancer'];
 $radio_staff = $_SESSION['login_sb_staff'] == 1 ? true : false;

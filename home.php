@@ -28,6 +28,7 @@ $view_roles = ['Manager', 'ITAdmin', 'Editor', 'Multimedia', 'Dispatcher', 'Phot
 $digital_roles = ['Photo Editor'];
 $multimedia_roles = ['Multimedia'];
 $dj_roles = ['Programme Director'];
+$driver_roles = ['Driver'];
 $create_roles = ['Manager', 'ITAdmin', 'Editor', 'Dept Admin', 'Security','Op Manager', 'Broadcast Coordinator', 'Dispatcher' ];
 
 $sbQry .= ($radio_staff) ? " AND a.station_show <> '' " : " AND a.station_show IS NULL ";
@@ -47,13 +48,13 @@ if(in_array($user_role,  $multimedia_roles) && $radio_staff)
     $editorQry .= " AND station_show IS NOT NULL ";
 
 
-if($user_role =='Dispatcher'){
+if(in_array($user_role, ['Dispatcher', 'Driver'])){
     $dispatchQry = " AND a.drop_option <> 'noTransport'  OR a.assignment_type = 'Transport' "; //AND a.status = 'Pending' OR a.status = 'Endorsed'
     $sbQry = ""; // Clear the SB query for Dispatcher roles
 }
 
-if($user_role =='Security')
-    $dispatchQry = " AND a.status = 'Approved' ";
+if(in_array($user_role, ['Security']))
+    $dispatchQry = " AND a.status = 'Approved' OR a.status = 'Endorsed' ";
 
 if(in_array($user_role,  ['Photo Editor', 'Multimedia', 'Manager']))
     $editorQry .= " OR FIND_IN_SET('".$db_empid."', REPLACE(a.team_members, ' ', '')) > 0 AND a.assignment_type <> 'Transport'";
@@ -149,7 +150,10 @@ $options = [
     if(!in_array($user_role, $view_roles))
         $editorQ .= " AND FIND_IN_SET('".$db_empid."', REPLACE(team_members, ' ', '')) > 0 AND assignment_type <> 'Transport'";
 
-    if(!in_array($user_role, ['Dispatcher', 'Security']))
+    // if(in_array($user_role, $driver_roles))
+    //     $editorQ .= " AND FIND_IN_SET('".$db_empid."', REPLACE(team_members, ' ', '')) > 0 ";
+
+    if(!in_array($user_role, ['Dispatcher', 'Security', 'Driver']))
         $editorQ .= " AND FIND_IN_SET('".$db_empid."', REPLACE(team_members, ' ', '')) > 0 ";
 
     $query = "SELECT * FROM assignment_list WHERE is_cancelled <> 1 $editorQ ORDER BY assignment_date ";
