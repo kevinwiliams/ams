@@ -496,7 +496,7 @@ $conn->close();
                         </div>
                     </div>
                     <?php endif; ?>
-                    
+                    <?php if(!in_array($user_role, ['Driver','Security'])): ?>
                     <!-- Equipment Request -->
                     <div class="card">
                         <div class="card-header bg-light">
@@ -516,6 +516,7 @@ $conn->close();
                             <?php endif; ?>
                         </div>
                     </div>
+                    <?php endif; ?>
                     <?php
                     // show closing remark button if assignment date has passed and change to "View Closing Remark" if there is already a remark
                     $showClosingRemarkButton = (strtotime($assignment_date) < strtotime(date('Y-m-d'))) && !$isClosed;
