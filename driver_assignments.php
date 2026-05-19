@@ -2,7 +2,7 @@
 include 'db_connect.php';
 
 // Fetch driver list from users table using role name matching Driver
-$driverQuery = "SELECT u.id, CONCAT(u.firstname, ' ', u.lastname) AS name
+$driverQuery = "SELECT u.empid, CONCAT(u.firstname, ' ', u.lastname) AS name
     FROM users u
     LEFT JOIN roles r ON u.role_id = r.role_id
     WHERE u.is_deleted = 0
@@ -22,10 +22,10 @@ if (!$assignments) {
 
 // Fetch user map for team member names
 $userMap = [];
-$userResult = $conn->query("SELECT id, CONCAT(firstname, ' ', lastname) AS name FROM users WHERE is_deleted = 0");
+$userResult = $conn->query("SELECT empid, CONCAT(firstname, ' ', lastname) AS name FROM users WHERE is_deleted = 0");
 if ($userResult) {
     while ($userRow = $userResult->fetch_assoc()) {
-        $userMap[$userRow['id']] = $userRow['name'];
+        $userMap[$userRow['empid']] = $userRow['name'];
     }
 }
 ?>
@@ -43,7 +43,7 @@ if ($userResult) {
                         <select id="driver-select" class="form-control form-control-sm">
                             <option value="">-- Select a driver --</option>
                             <?php while ($driver = $drivers->fetch_assoc()): ?>
-                                <option value="<?php echo htmlspecialchars($driver['id']); ?>"><?php echo htmlspecialchars($driver['name']); ?></option>
+                                <option value="<?php echo $driver['empid']; ?>"><?php echo htmlspecialchars($driver['name']); ?></option>
                             <?php endwhile; ?>
                         </select>
                     </div>
@@ -61,12 +61,12 @@ if ($userResult) {
                     <thead class="bg-light">
                         <tr>
                             <th>Assignment Date</th>
-                            <th>Start Time</th>
-                            <th>End Time</th>
+                            <th>Time</th>
                             <th>Assignment</th>
                             <th>Location</th>
                             <th>Status</th>
                             <th>Team</th>
+                            <th>Team Count</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -78,17 +78,18 @@ if ($userResult) {
                                     $teamNames[] = $userMap[$memberId];
                                 }
                             }
+                            $teamCount = count($teamNames) - 1; // Exclude the driver themselves from the team count
                             $teamNameString = !empty($teamNames) ? implode(', ', $teamNames) : '—';
+
                         ?>
                         <tr data-team-members="<?php echo htmlspecialchars(implode(',', $teamMemberIds)); ?>">
                             <td><?php echo htmlspecialchars(date('M d, Y', strtotime($row['assignment_date']))); ?></td>
-                            <td><?php echo htmlspecialchars($row['start_time']); ?></td>
-                            <td><?php echo htmlspecialchars($row['end_time'] ?? '—'); ?></td>
+                            <td><?php echo htmlspecialchars($row['start_time'] . ' - ' . ($row['end_time'] ?? '—')) ; ?></td>
                             <td><a href="index.php?page=view_assignment&id=<?php echo $row['id']; ?>"><?php echo htmlspecialchars_decode($row['title']); ?></a></td>
                             <td><?php echo htmlspecialchars($row['location']); ?></td>
                             <td><?php echo htmlspecialchars($row['status']); ?></td>
-                            <!-- <td><?php //echo htmlspecialchars($teamNameString); ?></td> -->
                             <td><?php echo htmlspecialchars($row['assignment_type']); ?></td>
+                            <td><?php echo htmlspecialchars($teamCount); ?></td>
                         </tr>
                         <?php endwhile; ?>
                     </tbody>

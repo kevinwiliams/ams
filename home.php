@@ -48,7 +48,7 @@ if(in_array($user_role,  $multimedia_roles) && $radio_staff)
 
 
 if($user_role =='Dispatcher'){
-    $dispatchQry = " AND a.drop_option <> 'noTransport' AND a.status = 'Pending' OR a.status = 'Endorsed' OR a.assignment_type = 'Transport' ";
+    $dispatchQry = " AND a.drop_option <> 'noTransport'  OR a.assignment_type = 'Transport' "; //AND a.status = 'Pending' OR a.status = 'Endorsed'
     $sbQry = ""; // Clear the SB query for Dispatcher roles
 }
 

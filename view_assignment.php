@@ -264,12 +264,12 @@ $conn->close();
                         <?php endif; ?>
                     </h5>
                     
-                    <div class="d-flex flex-wrap gap-3 mb-3">
-                        <div class="d-flex align-items-center mx-1">
+                    <div class="d-flex flex-column gap-3 mb-3">
+                        <div class="d-flex align-items-center mx-1 mb-1">
                             <i class="fas fa-clock me-2 text-primary"></i>&nbsp;
                             <?= htmlspecialchars($start_time ?? 'N/A') ?> - <?= htmlspecialchars($end_time ?? 'N/A') ?>
                         </div>
-                        <div class="d-flex align-items-center">
+                        <div class="d-flex align-items-center mb-1">
                             <i class="fas fa-map-marker-alt mx-2 text-danger"></i>
                             <?= htmlspecialchars_decode($location ?? 'N/A') ?>
                         </div>
