@@ -42,12 +42,14 @@ $login_name = isset($_SESSION['login_name']) ? $_SESSION['login_name'] : 'User';
                         <p>Dashboard</p>
                     </a>
                 </li>
+                <?php if (!in_array($user_role,['Driver', 'Security'])): ?>
                 <li class="nav-item dropdown">
                     <a href="./index.php?page=assignment_list" class="nav-link nav-assignment_list nav-calendar">
                         <i class="nav-icon fas fa-tasks"></i>
                         <p>Assignments</p>
                     </a>
                 </li>
+                <?php endif; ?>
                 <?php if (in_array($user_role, $transport_roles)): ?>
                 <li class="nav-item dropdown">
                     <a href="./index.php?page=driver_assignments" class="nav-link nav-driver_assignments nav-calendar">

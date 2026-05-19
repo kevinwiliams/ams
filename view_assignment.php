@@ -415,15 +415,7 @@ $conn->close();
                                         </span>
                                     <?php endforeach; ?>
                                 <?php endif; ?>
-                                <?php if (!empty($studio_engineer)): 
-                                    $statusClass = strpos($studio_engineer_name, '/') !== false ? 'badge-success' : 'badge-secondary';
-                                    $studio_engineer_name = str_replace($charactersToRemove, "", $studio_engineer_name);
-                                    ?>
-                                    
-                                    <span class="font-weight-normal badge <?= $statusClass ?> p-2 m-1" style="font-size: 0.9rem;">
-                                        <?= $studio_engineer_name ?> 
-                                    </span>
-                                <?php endif; ?>
+                                
                                       <!-- Add badges for requested fields -->
                                     <?php if (!empty($photo_requested) && $photo_requested == 1): ?>
                                         <span class="font-weight-normal badge badge-warning p-2 m-1" style="font-size: 0.9rem;">
