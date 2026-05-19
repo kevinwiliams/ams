@@ -605,9 +605,10 @@ Class Action {
 			}
 		}
 	
-		// Combine assignees into a comma-separated string
-		$team_members = $this->get_team_members_from_post($_POST);
-		if (!empty($team_members) && count($team_members) > 0) {
+// Combine assignees into a comma-separated string and dedupe any repeated empids
+	$team_members = $this->get_team_members_from_post($_POST);
+	if (!empty($team_members) && count($team_members) > 0) {
+		$team_members = array_values(array_unique($team_members));
 			$team_members_str = implode(',', $team_members);
 			$data['team_members'] = "'$team_members_str'";
 		}
@@ -709,11 +710,7 @@ Class Action {
 				$subjectTxt = $this->build_email_subject($assignmentDate, $notifyAlreadySent, $cancelled, $postponed);
 				// Check for additional team members
 				if (isset($_POST['studio_engineer'])) {
-					$team_members = array_merge($team_members, array_filter(explode(',', $_POST['studio_engineer'])));
-				}
-
-				if (!empty($team_members)) {
-					$this->send_notifications($team_members, $data_json, $subjectTxt);
+				$team_members = array_values(array_unique(array_merge($team_members, array_filter(explode(',', $_POST['studio_engineer'])))));
 				}
 			}
 
@@ -744,8 +741,11 @@ Class Action {
 		if (isset($postData['team'])) {
 			$team_members = array_merge($team_members, array_filter(explode(',', $postData['team'])));
 		}
-		
-		return $team_members;
+
+		$team_members = array_filter(array_map('trim', $team_members), function ($member) {
+			return $member !== '';
+		});
+		return array_values(array_unique($team_members));
 	}
 	// Check for double booking
 	function check_double_booking($team_members, $assignmentDate, $startTime) {
