@@ -24,7 +24,7 @@ $dispatchQry = "";
 $securityQry = "";
 $sbQry = "AND a.assignment_type <> 'Transport'";
 
-$view_roles = ['Manager', 'ITAdmin', 'Editor', 'Multimedia', 'Dispatcher', 'Photo Editor', 'Dept Admin', 'Security', 'Op Manager', 'Broadcast Coordinator' ];
+$view_roles = ['Manager', 'ITAdmin', 'Editor', 'Multimedia', 'Dispatcher', 'Driver', 'Photo Editor', 'Dept Admin', 'Security', 'Op Manager', 'Broadcast Coordinator' ];
 $digital_roles = ['Photo Editor'];
 $multimedia_roles = ['Multimedia'];
 $dj_roles = ['Programme Director'];
@@ -150,8 +150,8 @@ $options = [
     if(!in_array($user_role, $view_roles))
         $editorQ .= " AND FIND_IN_SET('".$db_empid."', REPLACE(team_members, ' ', '')) > 0 AND assignment_type <> 'Transport'";
 
-    // if(in_array($user_role, $driver_roles))
-    //     $editorQ .= " AND FIND_IN_SET('".$db_empid."', REPLACE(team_members, ' ', '')) > 0 ";
+    if(in_array($user_role, $driver_roles))
+        $editorQ .= " AND drop_option <> 'noTransport'  OR assignment_type = 'Transport' ";
 
     if(!in_array($user_role, ['Dispatcher', 'Security', 'Driver']))
         $editorQ .= " AND FIND_IN_SET('".$db_empid."', REPLACE(team_members, ' ', '')) > 0 ";
