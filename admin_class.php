@@ -764,6 +764,9 @@ Class Action {
 	}
 	// Update transport log
 	function update_transport_logs($assignmentId, $logData) {
+		if (empty($assignmentId) || !is_array($logData) || empty($logData)) {
+			return;
+		}
 		$logged = $this->check_transport_log($assignmentId);
 		$logQuery = $logged ? "UPDATE transport_log SET " . $this->build_query($logData) . " WHERE assignment_id=$assignmentId"
 							: "INSERT INTO transport_log SET " . $this->build_query($logData);
