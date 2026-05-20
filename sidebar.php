@@ -97,6 +97,12 @@ $login_name = isset($_SESSION['login_name']) ? $_SESSION['login_name'] : 'User';
                         <p>Vehicles</p>
                     </a>
                 </li>
+                <li class="nav-item dropdown">
+                    <a href="./index.php?page=transport_log" class="nav-link nav-transport_log">
+                        <i class="nav-icon fas fa-log"></i>
+                        <p>Transport Logs</p>
+                    </a>
+                </li>
                 <?php endif; ?>
 
                 <?php if (in_array($user_role, $it_roles)): ?>
