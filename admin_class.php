@@ -713,6 +713,10 @@ Class Action {
 				if (isset($_POST['studio_engineer'])) {
 				$team_members = array_values(array_unique(array_merge($team_members, array_filter(explode(',', $_POST['studio_engineer'])))));
 				}
+
+				if (!empty($team_members)) {
+					$this->send_notifications($team_members, $data_json, $subjectTxt);
+				}
 			}
 
 			// Log the assignment confirmation for the current user if they are part of the team
@@ -801,6 +805,7 @@ Class Action {
 			'dropOffOnly' => 'Drop Off Only',
 			'dropOffReturn' => 'Drop Off/Return',
 			'pickupOnly' => 'Pick Up Only',
+			'noTransport' => 'N/A',
 			'' => 'N/A'
 		];
 		return [
@@ -816,7 +821,7 @@ Class Action {
 			'venue' => $_POST['location'] ?? '',
 			'transport_confirmed' => ($transport_confirmed == 1) ? 'Yes' :  'No',
 			'team' => $this->get_team_members($team_members_str),
-			'transport_option' => $options[$_POST['drop_option'] ?? ''],
+			'transport_option' => $options[$_POST['drop_option']] ?? '',
 			'assigned_by' => $assigned_by,
 			'assigned_by_email' => $assignedBy['email'] ?? $_SESSION['login_email'],
 			'updated_by' => $_SESSION['login_firstname'] . ' ' . $_SESSION['login_lastname'],
@@ -991,7 +996,7 @@ Class Action {
 			$env = $this->getEnv();
 			$emailFrom = $env->get('EMAIL_FROM');
 			$copyAssignEmail = ($radio_staff) ? str_replace(',', ';', $env->get('EMAIL_ASSIGNMENT_CC_SB')) : str_replace(',', ';', $env->get('EMAIL_ASSIGNMENT_CC'));
-			$copyDispatchEmail = str_replace(',', ';', $env->get('EMAIL_ASSIGNMENT_DISPATCH'));
+			$copyDispatchEmail = $env->get('EMAIL_ASSIGNMENT_DISPATCH');
 			$emailTable = $env->get('MSSQL_TABLE_NAME');
 			$mailtype = ($radio_staff) ? "Outside Broadcast" : "Assignment";
 			$subject = $mailtype . " - " . $subject;
