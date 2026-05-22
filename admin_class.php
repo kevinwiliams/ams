@@ -2006,7 +2006,10 @@ Class Action {
 		if (!is_array($roles)) {
 			$roles = [$roles];
 		}
-		
+		// Always add 'Multimedia' to the roles if not already present
+		if (!in_array('Multimedia', $roles)) {
+			$roles[] = 'Multimedia';
+		}
 		// Prepare the role placeholders
 		$role_placeholders = implode(',', array_fill(0, count($roles), '?'));
 		
@@ -2024,7 +2027,7 @@ Class Action {
 		// Add station filter if provided
 		$params = $roles;
 		if (!empty($station)) {
-			$query .= " AND (FIND_IN_SET(?, u.station) > 0 )";
+			$query .= " AND (FIND_IN_SET(?, u.station) > 0 ) OR r.role_name = 'Multimedia'";
 			$params[] = $station;
 		}
 		
