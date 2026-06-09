@@ -2054,38 +2054,80 @@ Class Action {
 		$security_out = isset($_POST['security_out']) ? $this->db->real_escape_string($_POST['security_out']) : null;
 		$security_in = isset($_POST['security_in']) ? $this->db->real_escape_string($_POST['security_in']) : null;
 		$security_out_time = isset($_POST['security_out_time']) ? $this->db->real_escape_string($_POST['security_out_time']) : null;
+		$security_in_time = isset($_POST['security_in_time']) && $_POST['security_in_time'] !== '' ? $this->db->real_escape_string($_POST['security_in_time']) : null;
 		$security_notes = isset($_POST['security_notes']) ? $this->db->real_escape_string($_POST['security_notes']) : null;
+		$security_in_notes = isset($_POST['security_in_notes']) ? $this->db->real_escape_string($_POST['security_in_notes']) : null;
 		$id = isset($_POST['id']) ? intval($_POST['id']) : null;
+		$has_security_in_notes = false;
+		$column_result = $this->db->query("SHOW COLUMNS FROM gate_pass_logs LIKE 'security_in_notes'");
+		if ($column_result && $column_result->num_rows > 0) {
+			$has_security_in_notes = true;
+		}
 
 		if (!$assignment_id) {
 			return json_encode(['status' => 'error', 'message' => 'Assignment ID is required']);
 		}
 
 		if ($id) {
-			$stmt = $this->db->prepare(
-				"UPDATE gate_pass_logs SET assignment_id = ?, security_out = ?, security_in = ?, security_out_time = ?, security_notes = ? WHERE id = ?"
-			);
-			$stmt->bind_param(
-				"issssi",
-				$assignment_id,
-				$security_out,
-				$security_in,
-				$security_out_time,
-				$security_notes,
-				$id
-			);
+			if ($has_security_in_notes) {
+				$stmt = $this->db->prepare(
+					"UPDATE gate_pass_logs SET assignment_id = ?, security_out = ?, security_in = ?, security_out_time = ?, security_in_time = ?, security_notes = ?, security_in_notes = ? WHERE id = ?"
+				);
+				$stmt->bind_param(
+					"issssssi",
+					$assignment_id,
+					$security_out,
+					$security_in,
+					$security_out_time,
+					$security_in_time,
+					$security_notes,
+					$security_in_notes,
+					$id
+				);
+			} else {
+				$stmt = $this->db->prepare(
+					"UPDATE gate_pass_logs SET assignment_id = ?, security_out = ?, security_in = ?, security_out_time = ?, security_in_time = ?, security_notes = ? WHERE id = ?"
+				);
+				$stmt->bind_param(
+					"isssssi",
+					$assignment_id,
+					$security_out,
+					$security_in,
+					$security_out_time,
+					$security_in_time,
+					$security_notes,
+					$id
+				);
+			}
 		} else {
-			$stmt = $this->db->prepare(
-				"INSERT INTO gate_pass_logs (assignment_id, security_out, security_in, security_out_time, security_notes) VALUES (?, ?, ?, ?, ?)"
-			);
-			$stmt->bind_param(
-				"issss",
-				$assignment_id,
-				$security_out,
-				$security_in,
-				$security_out_time,
-				$security_notes
-			);
+			if ($has_security_in_notes) {
+				$stmt = $this->db->prepare(
+					"INSERT INTO gate_pass_logs (assignment_id, security_out, security_in, security_out_time, security_in_time, security_notes, security_in_notes) VALUES (?, ?, ?, ?, ?, ?, ?)"
+				);
+				$stmt->bind_param(
+					"issssss",
+					$assignment_id,
+					$security_out,
+					$security_in,
+					$security_out_time,
+					$security_in_time,
+					$security_notes,
+					$security_in_notes
+				);
+			} else {
+				$stmt = $this->db->prepare(
+					"INSERT INTO gate_pass_logs (assignment_id, security_out, security_in, security_out_time, security_in_time, security_notes) VALUES (?, ?, ?, ?, ?, ?)"
+				);
+				$stmt->bind_param(
+					"isssss",
+					$assignment_id,
+					$security_out,
+					$security_in,
+					$security_out_time,
+					$security_in_time,
+					$security_notes
+				);
+			}
 		}
 
 		if ($stmt->execute()) {

@@ -30,6 +30,25 @@ $db_empid = $_SESSION['empid'] ?? '';
 // Check if ID is provided and valid
 $id = isset($_GET['id']) ? intval($_GET['id']) : 0; // Ensure ID is an integer
 
+$gate_pass_logs = [];
+$has_security_in_notes = false;
+$column_result = $conn->query("SHOW COLUMNS FROM gate_pass_logs LIKE 'security_in_notes'");
+if ($column_result && $column_result->num_rows > 0) {
+    $has_security_in_notes = true;
+}
+
+$security_in_notes_select = $has_security_in_notes ? "security_in_notes" : "'' AS security_in_notes";
+$stmt = $conn->prepare("SELECT id, security_out, security_in, security_out_time, security_in_time, security_notes, $security_in_notes_select, created_at FROM gate_pass_logs WHERE assignment_id = ? ORDER BY created_at DESC");
+if ($stmt) {
+    $stmt->bind_param('i', $id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    while ($row = $result->fetch_assoc()) {
+        $gate_pass_logs[] = $row;
+    }
+    $stmt->close();
+}
+
 if ($id > 0) {
     // Get permits
     $permits = [];
@@ -168,6 +187,8 @@ if ($id > 0) {
     }
 
     $stmt->close();
+
+    
 } else {
     die('Invalid assignment ID.');
 }
@@ -468,7 +489,59 @@ $conn->close();
                     </div>
                 </div>
                 
-                <div class="col-lg-4 <?= $secuirtyHide ?>">
+                <div class="col-lg-4">
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <h6 class="text-bold mb-0">Security Notes</h6>
+                        </div>
+                        <div class="card-body">
+                            <?php if (!empty($gate_pass_logs)): ?>
+                                <?php foreach ($gate_pass_logs as $gate_log): ?>
+                                    <div class="border-bottom pb-3 mb-3">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <strong>Gate Pass</strong>
+                                            <?php if (!empty($gate_log['created_at'])): ?>
+                                                <small class="text-muted"><?= date("M j, h:i A", strtotime($gate_log['created_at'])) ?></small>
+                                            <?php endif; ?>
+                                        </div>
+                                        <div class="small mt-1">
+                                            <?php if (!empty($gate_log['security_out'])): ?>
+                                                <div><span class="text-muted">Out by:</span> <?= htmlspecialchars($gate_log['security_out']) ?></div>
+                                            <?php endif; ?>
+                                            <?php if (!empty($gate_log['security_in'])): ?>
+                                                <div><span class="text-muted">In by:</span> <?= htmlspecialchars($gate_log['security_in']) ?></div>
+                                            <?php endif; ?>
+                                        </div>
+                                        <div class="small text-muted mt-1">
+                                            <?php if (!empty($gate_log['security_out_time'])): ?>
+                                                <div>Out: <?= date("M j, Y h:i A", strtotime($gate_log['security_out_time'])) ?></div>
+                                            <?php endif; ?>
+                                            <?php if (!empty($gate_log['security_in_time'])): ?>
+                                                <div>In: <?= date("M j, Y h:i A", strtotime($gate_log['security_in_time'])) ?></div>
+                                            <?php endif; ?>
+                                        </div>
+                                        <?php if (!empty(trim($gate_log['security_notes'] ?? ''))): ?>
+                                            <div class="mt-2">
+                                                <span class="badge bg-secondary">Out Note</span>
+                                                <div><?= nl2br(htmlspecialchars($gate_log['security_notes'])) ?></div>
+                                            </div>
+                                        <?php endif; ?>
+                                        <?php if (!empty(trim($gate_log['security_in_notes'] ?? ''))): ?>
+                                            <div class="mt-2">
+                                                <span class="badge bg-secondary">In Note</span>
+                                                <div><?= nl2br(htmlspecialchars($gate_log['security_in_notes'])) ?></div>
+                                            </div>
+                                        <?php endif; ?>
+                                        <?php if (empty(trim($gate_log['security_notes'] ?? '')) && empty(trim($gate_log['security_in_notes'] ?? ''))): ?>
+                                            <div class="mt-2 text-muted">No notes provided</div>
+                                        <?php endif; ?>
+                                    </div>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <p class="text-muted mb-0">No security notes recorded</p>
+                            <?php endif; ?>
+                        </div>
+                    </div>
                     <!-- Permits -->
                     <?php if ($radio_staff): ?>
                     <div class="card mb-4">
@@ -522,9 +595,10 @@ $conn->close();
                     $showClosingRemarkButton = (strtotime($assignment_date) < strtotime(date('Y-m-d'))) && !$isClosed;
                     $showViewRemarkButton = (strtotime($assignment_date) < strtotime(date('Y-m-d'))) && $isClosed;
                     ?>
+                    <?php if (!in_array($user_role, ['Security'])): ?>
                     <?php if ($showClosingRemarkButton): ?>
-                    <button class="btn btn-sm btn-outline-secondary mt-3" id="add_closing_remarks" 
-                    data-assignment-id="<?= $a_id ?>"  
+                    <button class="btn btn-sm btn-outline-secondary mt-3" id="add_closing_remarks"
+                    data-assignment-id="<?= $a_id ?>"
                     onclick="openClosingRemarksModal(<?= $a_id ?>,'<?= addslashes($title) ?>','<?= date('Y-m-d', strtotime($assignment_date)); ?>')">
                         <i class="fas fa-clipboard me-1"></i>&nbsp; Add Closing Remark
                     </button>
@@ -536,9 +610,10 @@ $conn->close();
                         <i class="fas fa-clipboard me-1"></i>&nbsp; Add Closing Remark
                     </button>
                     <?php endif; ?>
-                   <!-- Show count if remarks exist -->
+                    <!-- Show count if remarks exist -->
                     <?php if ($remarks_count > 0): ?>
                         <span class="badge badge-info"><?php echo $remarks_count; ?></span>
+                    <?php endif; ?>
                     <?php endif; ?>
                 </div>
             </div>
@@ -739,6 +814,7 @@ $conn->close();
         var current_team = <?php echo json_encode($current_team); ?>;
         var user_id = <?php echo json_encode($user_id); ?>;
         var assignment_id = <?php echo json_encode($a_id); ?>;
+        var gatePassLogs = <?php echo json_encode($gate_pass_logs); ?>;
         // alert(seen + db_empid + current_team);
 
         if (!seen && current_team.includes(db_empid) && confirm) {
@@ -887,13 +963,46 @@ $conn->close();
             $('#updateTransportLogModal').modal('show');
         });
 
+        function toDatetimeLocal(value) {
+            if (!value) {
+                return '';
+            }
+
+            return value.replace(' ', 'T').slice(0, 16);
+        }
+
+        function setOutFieldsReadonly(isReadonly) {
+            $('#security_out, #security_out_time, #security_notes').prop('readonly', isReadonly);
+        }
+
         $('.edit-gate-log').on('click', function() {
             var assignment_id = $(this).data('assignment-id');
             var gate_security_name = $('#gate_security_name').val();
+            var latestGateLog = gatePassLogs.length ? gatePassLogs[0] : null;
+
+            $('#gatePassLogForm')[0].reset();
             $('#gate_assignment_id').val(assignment_id);
-            $('#security_out').val(gate_security_name);
+            $('#security_in').val(gate_security_name);
+            $('#gate_pass_log_id').val('');
+            setOutFieldsReadonly(false);
+
+            if (latestGateLog) {
+                $('#gatePassLogModalLabel').text('Update Gate Pass Log');
+                $('#gate_pass_log_id').val(latestGateLog.id || '');
+                $('#security_out').val(latestGateLog.security_out || gate_security_name);
+                $('#security_out_time').val(toDatetimeLocal(latestGateLog.security_out_time));
+                $('#security_notes').val(latestGateLog.security_notes || '');
+                $('#security_in').val(latestGateLog.security_in || gate_security_name);
+                $('#security_in_time').val(toDatetimeLocal(latestGateLog.security_in_time));
+                $('#security_in_notes').val(latestGateLog.security_in_notes || '');
+                setOutFieldsReadonly(true);
+            } else {
+                $('#gatePassLogModalLabel').text('Add Gate Pass Log');
+                $('#security_out').val(gate_security_name);
+                $('#security_out_time').val(new Date().toISOString().slice(0,16));
+            }
+
             $('#gatePassLogModal').modal('show');
-            $('#security_out_time').val(new Date().toISOString().slice(0,16));
         });
 
         

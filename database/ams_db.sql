@@ -358,3 +358,10 @@ INSERT INTO `transport_vehicles` (`plate_number`, `make_model`, `is_deleted`, `m
 ('9468LP', 'Foton truck', 0, 2026, '2026-11-15', '2026-04-25', NULL, NULL, 'Transport', 'Kingston'),
 ('9469LP', 'Foton truck', 0, 2026, '2026-11-16', '2026-04-26', NULL, NULL, 'Transport', 'Kingston'),
 ('3369HD', 'BWM X4', 0, 2016, '2028-07-28', '2026-05-31', NULL, NULL, 'Staff', 'Kingston');
+
+
+ALTER TABLE gate_pass_logs
+ADD COLUMN `security_in_time` DATETIME DEFAULT NULL;
+
+ALTER TABLE gate_pass_logs
+ADD COLUMN `security_in_notes` TEXT DEFAULT NULL;

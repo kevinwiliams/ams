@@ -29,7 +29,7 @@ $digital_roles = ['Photo Editor'];
 $multimedia_roles = ['Multimedia'];
 $dj_roles = ['Programme Director'];
 $driver_roles = ['Driver'];
-$create_roles = ['Manager', 'ITAdmin', 'Editor', 'Dept Admin', 'Security','Op Manager', 'Broadcast Coordinator', 'Dispatcher' ];
+$create_roles = ['Manager', 'ITAdmin', 'Editor', 'Dept Admin','Op Manager', 'Broadcast Coordinator', 'Dispatcher', 'Multimedia' ];
 
 $sbQry .= ($radio_staff) ? " AND a.station_show <> '' " : " AND a.station_show IS NULL ";
 

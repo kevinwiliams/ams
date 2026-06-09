@@ -133,8 +133,8 @@ if ($is_editing) {
             if ($assignment_type == 'Editorial' && $can_edit_status) {
                 // Media roles can edit media-related fields in Editorial
                 $required = 'required';
-                $readonly = 'readonly = readonly';
-                $disabled = 'disabled = disabled';
+                // $readonly = 'readonly = readonly';
+                // $disabled = 'disabled = disabled';
                 $disabledMedia = 'disabled = disabled';
             } else {
                 // $readonly = 'readonly = readonly';
@@ -195,6 +195,13 @@ if ($is_editing) {
             $default_assignment_type = 'Radio';
             $required = 'required';
             $disabledBroadcast = 'disabled = disabled';
+            
+            break;
+        case in_array($user_role, $media_roles):
+            // Media roles can create Editorial assignments
+            $default_assignment_type = 'Editorial';
+            $required = 'required';
+            $disabledMedia = 'disabled = disabled';
             
             break;
     }
@@ -805,8 +812,9 @@ if ($id) {
                                             <div class="assignee-wrapper">
                                                 
                                                 <?php 
-                                                $reporter_qry = $admin->get_users_roles_station($conn, ['Reporter', 'Editor', 'Freelancer']); ?>
-                                                <select name="assignee[reporter][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabled.$disabledDispatch ?>>
+                                                $reporter_qry = $admin->get_users_roles_station($conn, ['Reporter', 'Editor', 'Freelancer']);?>
+                                                
+                                                <select name="assignee[reporter][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabled.$disabledDispatch.$disabledMedia ?>>
                                                 <?php if($reporter_qry):
                                                     foreach ($reporter_qry as $reporter): 
                                                             if(in_array($reporter['empid'], $reporters))
@@ -876,7 +884,7 @@ if ($id) {
     
                                                 <?php 
                                                 $videographer_qry = $admin->get_users_roles_station($conn, ['Videographer']); ?>
-                                                <select name="assignee[videographer][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabledDispatch.$disabledEditors.$disabledDigital ?>>
+                                                <select name="assignee[videographer][]" class="custom-select custom-select-sm" multiple="multiple" <?= $disabledDispatch.$disabledEditors.$disabledDigital.$disabledMedia ?>>
                                                 <?php if($videographer_qry):
                                                     foreach ($videographer_qry as $videographer): 
                                                             if(in_array($videographer['empid'], $videographers))
