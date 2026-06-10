@@ -193,6 +193,15 @@ if ($id > 0) {
     die('Invalid assignment ID.');
 }
 
+$latest_gate_pass_log = !empty($gate_pass_logs) ? $gate_pass_logs[0] : null;
+$latest_gate_pass_has_out = $latest_gate_pass_log
+    && !empty($latest_gate_pass_log['security_out'])
+    && !empty($latest_gate_pass_log['security_out_time']);
+$latest_gate_pass_has_in = $latest_gate_pass_log
+    && !empty($latest_gate_pass_log['security_in'])
+    && !empty($latest_gate_pass_log['security_in_time']);
+$transport_log_complete = !empty($mileage) && !empty($gas_level);
+
 $confirm = isset($_GET['confirm']) ? boolval($_GET['confirm']) : false; // Ensure confirm is bool
 
 $seen = true;
@@ -311,7 +320,7 @@ $conn->close();
                     <?php endif; ?>
                 </div>
                 
-                <div class="col-md-4">
+                <div class="col-md-4 col-lg-6">
                     <div class="card bg-light">
                         <div class="card-body">
                             <!-- <h6 class="card-title small">Quick Info</h6> -->
@@ -339,7 +348,9 @@ $conn->close();
                                         <strong class="me-2">Vehicle:</strong>&nbsp;
                                         <div class="d-flex justify-content-between w-100 ">
                                         <span class="lead text-danger font-weight-bold"><?= htmlspecialchars($plate_number ?? 'N/A') ?></span>
-                                        <span class="text-muted pt-1"><em><?= htmlspecialchars($model_year ?? 'N/A') ?> <?= htmlspecialchars($make_model ?? 'N/A') ?></em></span>
+                                        <span class="text-muted pt-1">
+                                            <?= htmlspecialchars($model_year ?? 'N/A') ?> <?= htmlspecialchars($make_model ?? 'N/A') ?>
+                                        </span>
                                         </div>
 
                                     </div>
@@ -504,36 +515,40 @@ $conn->close();
                                                 <small class="text-muted"><?= date("M j, h:i A", strtotime($gate_log['created_at'])) ?></small>
                                             <?php endif; ?>
                                         </div>
-                                        <div class="small mt-1">
-                                            <?php if (!empty($gate_log['security_out'])): ?>
-                                                <div><span class="text-muted">Out by:</span> <?= htmlspecialchars($gate_log['security_out']) ?></div>
-                                            <?php endif; ?>
-                                            <?php if (!empty($gate_log['security_in'])): ?>
-                                                <div><span class="text-muted">In by:</span> <?= htmlspecialchars($gate_log['security_in']) ?></div>
-                                            <?php endif; ?>
-                                        </div>
-                                        <div class="small text-muted mt-1">
-                                            <?php if (!empty($gate_log['security_out_time'])): ?>
-                                                <div>Out: <?= date("M j, Y h:i A", strtotime($gate_log['security_out_time'])) ?></div>
-                                            <?php endif; ?>
-                                            <?php if (!empty($gate_log['security_in_time'])): ?>
-                                                <div>In: <?= date("M j, Y h:i A", strtotime($gate_log['security_in_time'])) ?></div>
-                                            <?php endif; ?>
-                                        </div>
-                                        <?php if (!empty(trim($gate_log['security_notes'] ?? ''))): ?>
-                                            <div class="mt-2">
-                                                <span class="badge bg-secondary">Out Note</span>
-                                                <div><?= nl2br(htmlspecialchars($gate_log['security_notes'])) ?></div>
+                                        <?php
+                                        $gate_log_has_out = !empty($gate_log['security_out']) || !empty($gate_log['security_out_time']) || !empty(trim($gate_log['security_notes'] ?? ''));
+                                        $gate_log_has_in = !empty($gate_log['security_in']) || !empty($gate_log['security_in_time']) || !empty(trim($gate_log['security_in_notes'] ?? ''));
+                                        ?>
+                                        <?php if ($gate_log_has_out): ?>
+                                            <div class="small mt-2">
+                                                <span class="badge bg-secondary">Out</span>
+                                                <?php if (!empty($gate_log['security_out'])): ?>
+                                                    <div><span class="text-muted">By:</span> <?= htmlspecialchars($gate_log['security_out']) ?></div>
+                                                <?php endif; ?>
+                                                <?php if (!empty($gate_log['security_out_time'])): ?>
+                                                    <div class="text-muted">Time: <?= date("M j, Y h:i A", strtotime($gate_log['security_out_time'])) ?></div>
+                                                <?php endif; ?>
+                                                <?php if (!empty(trim($gate_log['security_notes'] ?? ''))): ?>
+                                                    <div class="mt-1"><?= nl2br(htmlspecialchars($gate_log['security_notes'])) ?></div>
+                                                <?php endif; ?>
                                             </div>
                                         <?php endif; ?>
-                                        <?php if (!empty(trim($gate_log['security_in_notes'] ?? ''))): ?>
-                                            <div class="mt-2">
-                                                <span class="badge bg-secondary">In Note</span>
-                                                <div><?= nl2br(htmlspecialchars($gate_log['security_in_notes'])) ?></div>
+                                        <?php if ($gate_log_has_in): ?>
+                                            <div class="small mt-2">
+                                                <span class="badge bg-secondary">In</span>
+                                                <?php if (!empty($gate_log['security_in'])): ?>
+                                                    <div><span class="text-muted">By:</span> <?= htmlspecialchars($gate_log['security_in']) ?></div>
+                                                <?php endif; ?>
+                                                <?php if (!empty($gate_log['security_in_time'])): ?>
+                                                    <div class="text-muted">Time: <?= date("M j, Y h:i A", strtotime($gate_log['security_in_time'])) ?></div>
+                                                <?php endif; ?>
+                                                <?php if (!empty(trim($gate_log['security_in_notes'] ?? ''))): ?>
+                                                    <div class="mt-1"><?= nl2br(htmlspecialchars($gate_log['security_in_notes'])) ?></div>
+                                                <?php endif; ?>
                                             </div>
                                         <?php endif; ?>
-                                        <?php if (empty(trim($gate_log['security_notes'] ?? '')) && empty(trim($gate_log['security_in_notes'] ?? ''))): ?>
-                                            <div class="mt-2 text-muted">No notes provided</div>
+                                        <?php if (!$gate_log_has_out && !$gate_log_has_in): ?>
+                                            <div class="mt-2 text-muted">No gate pass information recorded</div>
                                         <?php endif; ?>
                                     </div>
                                 <?php endforeach; ?>
@@ -654,10 +669,10 @@ $conn->close();
                 <?php endif; ?>
                 
                 <?php if (in_array($user_role, ['Security'])): ?>
-                    <button class="btn btn-outline-danger edit-transport-log mx-1" data-assignment-id="<?= $a_id ?>">
+                    <button class="btn btn-outline-danger edit-transport-log mx-1" data-assignment-id="<?= $a_id ?>" <?= $transport_log_complete ? 'disabled' : '' ?>>
                         <i class="fas fa-car me-1"></i> Update Transport Log
                     </button>
-                    <button class="btn btn-outline-info edit-gate-log mx-1" data-assignment-id="<?= $a_id ?>">
+                    <button class="btn btn-outline-info edit-gate-log mx-1" data-assignment-id="<?= $a_id ?>" <?= $latest_gate_pass_has_in ? 'disabled' : '' ?>>
                         <i class="fas fa-clipboard me-1"></i> Add Note
                     </button>
                 <?php endif; ?>
@@ -971,11 +986,18 @@ $conn->close();
             return value.replace(' ', 'T').slice(0, 16);
         }
 
-        function setOutFieldsReadonly(isReadonly) {
-            $('#security_out, #security_out_time, #security_notes').prop('readonly', isReadonly);
+        function setGatePassFieldMode(showOutFields) {
+            $('#gate-pass-out-fields').toggle(showOutFields);
+            $('#gate-pass-in-fields').toggle(!showOutFields);
+            $('#security_out, #security_out_time').prop('required', showOutFields);
+            $('#security_in, #security_in_time').prop('required', !showOutFields);
         }
 
         $('.edit-gate-log').on('click', function() {
+            if ($(this).prop('disabled')) {
+                return;
+            }
+
             var assignment_id = $(this).data('assignment-id');
             var gate_security_name = $('#gate_security_name').val();
             var latestGateLog = gatePassLogs.length ? gatePassLogs[0] : null;
@@ -984,9 +1006,10 @@ $conn->close();
             $('#gate_assignment_id').val(assignment_id);
             $('#security_in').val(gate_security_name);
             $('#gate_pass_log_id').val('');
-            setOutFieldsReadonly(false);
+            setGatePassFieldMode(true);
 
             if (latestGateLog) {
+                var hasOutFields = Boolean(latestGateLog.security_out && latestGateLog.security_out_time);
                 $('#gatePassLogModalLabel').text('Update Gate Pass Log');
                 $('#gate_pass_log_id').val(latestGateLog.id || '');
                 $('#security_out').val(latestGateLog.security_out || gate_security_name);
@@ -995,7 +1018,7 @@ $conn->close();
                 $('#security_in').val(latestGateLog.security_in || gate_security_name);
                 $('#security_in_time').val(toDatetimeLocal(latestGateLog.security_in_time));
                 $('#security_in_notes').val(latestGateLog.security_in_notes || '');
-                setOutFieldsReadonly(true);
+                setGatePassFieldMode(!hasOutFields);
             } else {
                 $('#gatePassLogModalLabel').text('Add Gate Pass Log');
                 $('#security_out').val(gate_security_name);
@@ -1007,6 +1030,10 @@ $conn->close();
 
         
         $('#updateTransportLogBtn').on('click', function() {
+            if ($(this).prop('disabled')) {
+                return;
+            }
+
             var formData = $('#updateTransportLogForm').serialize();
 
             $.ajax({
@@ -1031,6 +1058,11 @@ $conn->close();
         });
 
         $('#saveGatePassLogBtn').on('click', function() {
+            if (!$('#gatePassLogForm')[0].checkValidity()) {
+                $('#gatePassLogForm')[0].reportValidity();
+                return;
+            }
+
             var formData = $('#gatePassLogForm').serialize();
             
             $.ajax({

@@ -64,33 +64,36 @@
                 <form id="gatePassLogForm">
                     <input type="hidden" id="gate_pass_log_id" name="id">
                     <input type="hidden" id="gate_assignment_id" name="assignment_id">
-                    <input type="hidden" id="gate_security_name" value="<?= $login_firstname . ' ' . $_SESSION['login_lastname'] ?>">
-                    <h6 class="text-bold mb-3">Out</h6>
-                    <div class="form-group">
-                        <label for="security_out">Security Out Name</label>
-                        <input type="text" class="form-control" id="security_out" name="security_out" required>
+                    <!-- <input type="hidden" id="gate_security_name" value="<?= htmlspecialchars(trim(($_SESSION['login_firstname'] ?? '') . ' ' . ($_SESSION['login_lastname'] ?? ''))) ?>"> -->
+                    <div id="gate-pass-out-fields">
+                        <h6 class="text-bold mb-3">Out</h6>
+                        <div class="form-group">
+                            <label for="security_out">Security Out Name</label>
+                            <input type="text" class="form-control" id="security_out" name="security_out" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="security_out_time">Out Time</label>
+                            <input type="datetime-local" class="form-control" id="security_out_time" name="security_out_time" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="security_notes">Out Notes</label>
+                            <textarea class="form-control" id="security_notes" name="security_notes" rows="3"></textarea>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="security_out_time">Out Time</label>
-                        <input type="datetime-local" class="form-control" id="security_out_time" name="security_out_time" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="security_notes">Out Notes</label>
-                        <textarea class="form-control" id="security_notes" name="security_notes" rows="3"></textarea>
-                    </div>
-                    <hr>
-                    <h6 class="text-bold mb-3">In</h6>
-                    <div class="form-group">
-                        <label for="security_in">Security In Name</label>
-                        <input type="text" class="form-control" id="security_in" name="security_in">
-                    </div>
-                    <div class="form-group">
-                        <label for="security_in_time">In Time</label>
-                        <input type="datetime-local" class="form-control" id="security_in_time" name="security_in_time">
-                    </div>
-                    <div class="form-group">
-                        <label for="security_in_notes">In Notes</label>
-                        <textarea class="form-control" id="security_in_notes" name="security_in_notes" rows="3"></textarea>
+                    <div id="gate-pass-in-fields">
+                        <h6 class="text-bold mb-3">In</h6>
+                        <div class="form-group">
+                            <label for="security_in">Security In Name</label>
+                            <input type="text" class="form-control" id="security_in" name="security_in">
+                        </div>
+                        <div class="form-group">
+                            <label for="security_in_time">In Time</label>
+                            <input type="datetime-local" class="form-control" id="security_in_time" name="security_in_time">
+                        </div>
+                        <div class="form-group">
+                            <label for="security_in_notes">In Notes</label>
+                            <textarea class="form-control" id="security_in_notes" name="security_in_notes" rows="3"></textarea>
+                        </div>
                     </div>
                 </form>
             </div>
