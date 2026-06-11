@@ -501,6 +501,9 @@ $conn->close();
                 </div>
                 
                 <div class="col-lg-4">
+                    <?php
+                    $roles_to_check = array_merge($edit_roles, ['Security']);
+                    if (in_array($user_role, $roles_to_check)): ?>
                     <div class="card mb-4">
                         <div class="card-header bg-light">
                             <h6 class="text-bold mb-0">Security Notes</h6>
@@ -557,6 +560,7 @@ $conn->close();
                             <?php endif; ?>
                         </div>
                     </div>
+                    <?php endif; ?>
                     <!-- Permits -->
                     <?php if ($radio_staff): ?>
                     <div class="card mb-4">
