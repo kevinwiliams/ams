@@ -494,6 +494,11 @@ $conn->close();
                                             DJ Not Required
                                         </span>
                                     <?php endif; ?>
+                                     <?php if(str_contains($team_members,'NODRIVER')): ?>
+                                        <span class="font-weight-normal badge badge-danger p-2 m-1"  style="font-size: 0.9rem;">
+                                            No Driver available
+                                        </span>
+                                    <?php endif; ?>
                                 </div>
                             
                         </div>

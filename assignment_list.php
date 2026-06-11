@@ -315,6 +315,9 @@ if (!$assignment_list) {
                                         if (stripos($row['team_members'], 'NODJ') !== false) {
                                             $notAvailable[] = 'DJ Not Required';
                                         }
+                                        if (stripos($row['team_members'], 'NODRIVER') !== false) {
+                                            $notAvailable[] = 'Driver Not Available';
+                                        }
                                     }
                                     if (!empty($notAvailable)) {
                                         foreach ($notAvailable as $na) {

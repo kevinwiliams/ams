@@ -996,8 +996,9 @@ if ($id) {
                                                         <option value="<?= htmlspecialchars($driver['empid']) ?>" <?php  echo isset($drivers) && in_array($driver['empid'], $drivers) ? 'selected' : '' ?>>
                                                             <?= htmlspecialchars($driver['display_name']) ?> 
                                                         </option>
-                                                    <?php endforeach; else: ?>
-                                                        <option>No driver media available</option>
+                                                    <?php endforeach;  ?>
+                                                        <option value="NODRIVER" <?php  echo isset($drivers) && in_array('NODRIVER', $drivers) ? 'selected' : '' ?>>No drivers available</option>
+
                                                     <?php endif; ?>
                                                 </select>
                                             </div>
@@ -1043,6 +1044,7 @@ if ($id) {
                                                         echo "<option>No vehicles available</option>";
                                                     }
                                                     ?>
+                                                    <option value="">No Vehicle Assigned</option>
                                                 </select>
                                             </div>
                                         </div>

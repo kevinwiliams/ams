@@ -231,6 +231,7 @@ Class Action {
 			'NOSOCIAL' => 'No Social Media Available',
 			'NOPHOTO' => 'No Photographer Available',
 			'NOVIDEO' => 'No Videographer Available',
+			'NODRIVER' => 'No Driver Available',
 			'NODJ' => 'No DJ Required',
 		];
 		$real_ids = [];

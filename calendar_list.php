@@ -76,6 +76,7 @@ while ($row = $result->fetch_assoc()) {
     if (in_array('NOPHOTO', $teamMembersArr)) $notAvailable[] = 'Photo Not Available';
     if (in_array('NOVIDEO', $teamMembersArr)) $notAvailable[] = 'Video Not Available';
     if (in_array('NOSOCIAL', $teamMembersArr)) $notAvailable[] = 'Social Not Available';
+    if (in_array('NODRIVER', $teamMembersArr)) $notAvailable[] = 'Driver Not Available';
     if (in_array('NODJ', $teamMembersArr)) $notAvailable[] = 'No DJ Required';
     $notAvailableText = '';
     if (!empty($notAvailable)) {
