@@ -990,8 +990,11 @@ if ($id) {
                                                 <?php if($driver_qry):
                                                     foreach ($driver_qry as $driver): 
                                                         if(!empty($disabledDispatch) || !empty($disabledMedia))
-                                                                if(!empty($disabledMedia))
+                                                                if(!empty($disabledMedia) || in_array($user_role, ['Dispatcher']))
                                                                     $all_members = array_diff($all_members, [$driver['empid']]);
+                                                        
+                                                        if(!empty($disabledDispatch) || in_array($user_role, ['Dispatcher']))
+                                                                $all_members = array_diff($all_members, ['NODRIVER']);
                                                         ?>
                                                         <option value="<?= htmlspecialchars($driver['empid']) ?>" <?php  echo isset($drivers) && in_array($driver['empid'], $drivers) ? 'selected' : '' ?>>
                                                             <?= htmlspecialchars($driver['display_name']) ?> 
