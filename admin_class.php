@@ -1450,7 +1450,7 @@ Class Action {
         // Execute the query
         if ($stmt->execute()) {
 
-			$qry = "UPDATE assignment_list SET status = 'Complete' WHERE id = ?";
+			$qry = "UPDATE assignment_list SET status = 'Out' WHERE id = ?";
 			$stmt = $this->db->prepare($qry);
 			$stmt->bind_param("i", $assignment_id);
 			if ($stmt->execute()) {

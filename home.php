@@ -54,7 +54,7 @@ if(in_array($user_role, ['Dispatcher', 'Driver'])){
 }
 
 if(in_array($user_role, ['Security']))
-    $dispatchQry = " AND a.status = 'Approved' OR a.status = 'Endorsed' ";
+    $dispatchQry = " AND a.status = 'Approved' OR a.status = 'Endorsed' OR a.status = 'Out'";
 
 if(in_array($user_role,  ['Photo Editor', 'Multimedia', 'Manager']))
     $editorQry .= " OR FIND_IN_SET('".$db_empid."', REPLACE(a.team_members, ' ', '')) > 0 AND a.assignment_type <> 'Transport'";
