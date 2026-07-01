@@ -1007,6 +1007,10 @@ Class Action {
 			$ccEmails = str_replace(',', ';', $copyAssignEmail);			       
 			$fromEmail = $emailFrom;   
 			$assignDetails = json_decode($message, true); // Convert back to array
+			$noDriverCopyEmail = trim(str_replace(',', ';', $env->get('EMAIL_ASSIGNMENT_NODRIVER', '')));
+			$sendNoDriverCopy = !empty($noDriverCopyEmail)
+				&& isset($assignDetails['team'])
+				&& str_contains($assignDetails['team'], 'No Driver Available');
 			// Generate meeting request
 			//$cStatus = $assignDetails['is_cancelled'];
 
@@ -1070,8 +1074,12 @@ Class Action {
 			$emailBody = urlencode($htmlContent);
 			$attachment = urlencode($icsFilePath);
 			$mail = "encoding=UTF-8&to=$email&bcc=$bccEmails&cc=$ccEmails&from=$fromEmail&subject=$subjectTxt&msgbody=$emailBody&attachment=$attachment";
+			$noDriverMail = '';
+			if ($sendNoDriverCopy) {
+				$noDriverSubjectTxt = urlencode("NO DRIVER - " . $subject);
+				$noDriverMail = "encoding=UTF-8&to=$noDriverCopyEmail&bcc=&cc=&from=$fromEmail&subject=$noDriverSubjectTxt&msgbody=$emailBody&attachment=$attachment";
+			}
 
-			
 			$sql = "INSERT INTO ".$emailTable." (mess) VALUES (?)";
 			$stmt = sqlsrv_prepare($this->adhocDb, $sql, [$mail]);
 			
@@ -1080,6 +1088,12 @@ Class Action {
 			}
 
 			if (sqlsrv_execute($stmt)) {
+				if ($sendNoDriverCopy && !empty($noDriverMail)) {
+					$copyStmt = sqlsrv_prepare($this->adhocDb, $sql, [$noDriverMail]);
+					if ($copyStmt) {
+						sqlsrv_execute($copyStmt);
+					}
+				}
 				// $icsFolder = $_SERVER['DOCUMENT_ROOT'].'\calendar_attachments'; // Local storage folder
 				// // Extract the file name from the URL
 				// $icsFileName = basename($icsFilePath);
@@ -2085,6 +2099,15 @@ Class Action {
 					$security_in_notes,
 					$id
 				);
+				// Mark assignment as complete if security_in_time is provided
+				if ($security_in_time) {
+					$qry = "UPDATE assignment_list SET status = 'Complete' WHERE id = ?";
+					$_stmt = $this->db->prepare($qry);
+					$_stmt->bind_param("i", $assignment_id);
+					if ($_stmt->execute()) {
+						$_stmt->close();
+					}
+				}
 			} else {
 				$stmt = $this->db->prepare(
 					"UPDATE gate_pass_logs SET assignment_id = ?, security_out = ?, security_in = ?, security_out_time = ?, security_in_time = ?, security_notes = ? WHERE id = ?"
