@@ -23,21 +23,81 @@ $radio_staff = $_SESSION['login_sb_staff'] == 1 ? true : false;
 $assignment_list = null;
 
 // Fetch assignment data based on conditions
-$where = "WHERE (a.is_deleted = 0 OR a.is_deleted IS NULL)"; 
 $create_roles = ['Manager', 'ITAdmin', 'Editor', 'Dept Admin','Op Manager', 'Broadcast Coordinator' ];
 $edit_roles = ['Manager', 'ITAdmin', 'Editor', 'Multimedia', 'Dispatcher', 'Photo Editor', 'Dept Admin', 'Op Manager', 'Programme Director'];
 $delete_roles = ['Manager', 'ITAdmin', 'Editor', 'Dept Admin', 'Op Manager'];
 $digital_roles = ['Photo Editor'];
 $multimedia_roles = ['Multimedia'];
 $freelance_roles = ['Freelancer'];
+$startDateFilter = $_GET['start_date'] ?? '';
+$endDateFilter = $_GET['end_date'] ?? '';
+$teamMemberFilter = trim($_GET['team_member'] ?? '');
+$searchFilter = trim($_GET['q'] ?? '');
+$recordsPerPage = 25;
+$currentPage = max(1, intval($_GET['pg'] ?? 1));
+$conditions = ["(a.is_deleted = 0 OR a.is_deleted IS NULL)"];
 
 if(in_array($user_role,  $freelance_roles)){
-    $where .= " AND FIND_IN_SET('" . $sessionempid . "', a.team_members)";
+    $conditions[] = "FIND_IN_SET('" . $conn->real_escape_string($sessionempid) . "', a.team_members)";
 }
 
 $sbQry = ($radio_staff) ? " AND a.station_show <> '' AND a.assignment_type <> 'Transport'" : " AND a.station_show IS NULL AND a.assignment_type <> 'Transport'";
 $sbQry = (in_array($user_role, ['Multimedia', 'Dispatcher'])) ? " " : $sbQry; // Exclude Multimedia and Dispatcher from station_show filter
 $sbQry .= (in_array($user_role, ['Multimedia'])) ? " AND a.assignment_type <> 'Transport'" : $sbQry; // Exclude Multimedia and Dispatcher from station_show filter
+
+if (!empty($startDateFilter) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $startDateFilter)) {
+    $conditions[] = "a.assignment_date >= '" . $conn->real_escape_string($startDateFilter) . "'";
+}
+
+if (!empty($endDateFilter) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $endDateFilter)) {
+    $conditions[] = "a.assignment_date <= '" . $conn->real_escape_string($endDateFilter) . "'";
+}
+
+if (!empty($teamMemberFilter)) {
+    $teamMember = $conn->real_escape_string($teamMemberFilter);
+    $conditions[] = "EXISTS (
+        SELECT 1
+        FROM users filter_user
+        WHERE FIND_IN_SET(filter_user.empid, a.team_members)
+        AND (
+            filter_user.alias = '$teamMember'
+            OR CONCAT(filter_user.firstname, ' ', filter_user.lastname) = '$teamMember'
+        )
+    )";
+}
+
+if (!empty($searchFilter)) {
+    $searchTerm = '%' . $conn->real_escape_string($searchFilter) . '%';
+    $conditions[] = "(
+        a.title LIKE '$searchTerm'
+        OR a.location LIKE '$searchTerm'
+        OR a.description LIKE '$searchTerm'
+        OR EXISTS (
+            SELECT 1
+            FROM users search_user
+            WHERE FIND_IN_SET(search_user.empid, a.team_members)
+            AND (
+                search_user.alias LIKE '$searchTerm'
+                OR CONCAT(search_user.firstname, ' ', search_user.lastname) LIKE '$searchTerm'
+            )
+        )
+    )";
+}
+
+$where = "WHERE " . implode(" AND ", $conditions);
+$countQuery = "SELECT COUNT(*) AS total FROM assignment_list a $where $sbQry";
+$countResult = $conn->query($countQuery);
+$totalRecords = ($countResult && $countRow = $countResult->fetch_assoc()) ? intval($countRow['total']) : 0;
+$totalPages = max(1, (int) ceil($totalRecords / $recordsPerPage));
+$currentPage = min($currentPage, $totalPages);
+$offset = ($currentPage - 1) * $recordsPerPage;
+
+function assignment_list_page_url($pageNumber) {
+    $params = $_GET;
+    $params['page'] = 'assignment_list';
+    $params['pg'] = $pageNumber;
+    return 'index.php?' . http_build_query($params);
+}
 
 // if(!in_array($user_role,  $edit_roles)){
 //     $where .= " AND FIND_IN_SET('" . $sessionempid . "', a.team_members)";
@@ -126,7 +186,8 @@ $query = "SELECT a.*,
 FROM assignment_list a 
 LEFT JOIN users studio_engineer_user ON a.studio_engineer = studio_engineer_user.empid
             $where $sbQry
-            ORDER BY a.assignment_date DESC";
+            ORDER BY a.assignment_date DESC, a.start_time DESC, a.id DESC
+            LIMIT $recordsPerPage OFFSET $offset";
 $assignment_list = $conn->query($query);
 
 // Handle potential errors
@@ -136,28 +197,34 @@ if (!$assignment_list) {
 
 ?>
 
-<div class="row mb-3">
-    <!-- Start Date Filter -->
+<form id="assignmentFilters" method="GET" action="index.php" class="row mb-3">
+    <input type="hidden" name="page" value="assignment_list">
+    <!-- Search Filter -->
     <div class="col-md-3">
+        <label for="assignmentSearch">Search:</label>
+        <input type="text" id="assignmentSearch" name="q" class="form-control form-control-sm" placeholder="Assignment, venue, team member" value="<?= htmlspecialchars($searchFilter) ?>">
+    </div>
+    <!-- Start Date Filter -->
+    <div class="col-md-2">
         <label for="startDate">Start Date:</label>
-        <input type="text" id="startDate" class="form-control form-control-sm" placeholder="Start Date">
+        <input type="text" id="startDate" name="start_date" class="form-control form-control-sm" placeholder="Start Date" value="<?= htmlspecialchars($startDateFilter) ?>">
     </div>
 
     <!-- End Date Filter -->
-    <div class="col-md-3">
+    <div class="col-md-2">
         <label for="endDate">End Date:</label>
-        <input type="text" id="endDate" class="form-control form-control-sm" placeholder="End Date">
+        <input type="text" id="endDate" name="end_date" class="form-control form-control-sm" placeholder="End Date" value="<?= htmlspecialchars($endDateFilter) ?>">
     </div>
 
     <!-- Team Member Filter -->
     <?php if (in_array($user_role, $edit_roles)){?>
         <div class="col-md-3">
             <label for="teamMemberFilter">Filter by Team Member:</label>
-            <select id="teamMemberFilter" class="form-control form-control-sm custom-select-sm">
+            <select id="teamMemberFilter" name="team_member" class="form-control form-control-sm custom-select-sm">
                 <option value="">All Team Members</option>
                 <?php
                 $disAllowedRoles = "'ITAdmin', 'Dispatcher', 'Dept Admin', 'Driver'"; // Define allowed role names
-                $sbQry = ($radio_staff) ? " AND u.sb_staff = 1 " : " ";
+                $teamMemberStationFilter = ($radio_staff) ? " AND u.sb_staff = 1 " : " ";
                 $teamMembersList = $conn->query("
                     SELECT 
                         CASE 
@@ -167,21 +234,24 @@ if (!$assignment_list) {
                     FROM users u 
                     LEFT JOIN roles r ON u.role_id = r.role_id 
                     WHERE r.role_name NOT IN ($disAllowedRoles)
-                    AND u.is_deleted = 0 $sbQry
+                    AND u.is_deleted = 0 $teamMemberStationFilter
                     ORDER BY u.firstname
                 ");
                 while ($member = $teamMembersList->fetch_assoc()) {
-                    echo "<option value='" . $member['name'] . "'>" . $member['name'] . "</option>";
+                    $memberName = $member['name'];
+                    $selected = ($teamMemberFilter === $memberName) ? 'selected' : '';
+                    echo "<option value='" . htmlspecialchars($memberName, ENT_QUOTES, 'UTF-8') . "' $selected>" . htmlspecialchars($memberName) . "</option>";
                 }
                 ?>
             </select>
         </div>
     <?php } ?>
-    <!-- Clear Filters Button -->
-    <div class="col-md-3 d-flex align-items-end">
-        <button id="clearFilters" class="btn btn-warning btn-sm">Clear Filters</button>
+    <!-- Filter Buttons -->
+    <div class="col-md-2 d-flex align-items-end">
+        <button type="submit" class="btn btn-primary btn-sm mr-2">Apply</button>
+        <a id="clearFilters" href="index.php?page=assignment_list" class="btn btn-warning btn-sm">Clear</a>
     </div>
-</div>
+</form>
 <!-- HTML for displaying the assignment_list -->
 <div class="col-lg-12">
     <input type="hidden" name="deleted_by" value="<?php echo $login_empid ?>" />
@@ -358,9 +428,51 @@ if (!$assignment_list) {
                     <?php endwhile; ?>
                 </tbody>
             </table>
+            <?php
+            $startRecord = $totalRecords > 0 ? $offset + 1 : 0;
+            $endRecord = min($offset + $recordsPerPage, $totalRecords);
+            ?>
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mt-3">
+                <div class="small text-muted mb-2 mb-md-0">
+                    Showing <?= number_format($startRecord) ?> to <?= number_format($endRecord) ?> of <?= number_format($totalRecords) ?> assignments
+                </div>
+                <?php if ($totalPages > 1): ?>
+                <nav aria-label="Assignment pagination">
+                    <ul class="pagination pagination-sm mb-0">
+                        <li class="page-item <?= $currentPage <= 1 ? 'disabled' : '' ?>">
+                            <a class="page-link" href="<?= $currentPage <= 1 ? '#' : assignment_list_page_url($currentPage - 1) ?>">Previous</a>
+                        </li>
+                        <?php
+                        $pageWindowStart = max(1, $currentPage - 2);
+                        $pageWindowEnd = min($totalPages, $currentPage + 2);
+                        if ($pageWindowStart > 1):
+                        ?>
+                            <li class="page-item"><a class="page-link" href="<?= assignment_list_page_url(1) ?>">1</a></li>
+                            <?php if ($pageWindowStart > 2): ?>
+                                <li class="page-item disabled"><span class="page-link">...</span></li>
+                            <?php endif; ?>
+                        <?php endif; ?>
+                        <?php for ($pageNo = $pageWindowStart; $pageNo <= $pageWindowEnd; $pageNo++): ?>
+                            <li class="page-item <?= $pageNo === $currentPage ? 'active' : '' ?>">
+                                <a class="page-link" href="<?= assignment_list_page_url($pageNo) ?>"><?= $pageNo ?></a>
+                            </li>
+                        <?php endfor; ?>
+                        <?php if ($pageWindowEnd < $totalPages): ?>
+                            <?php if ($pageWindowEnd < $totalPages - 1): ?>
+                                <li class="page-item disabled"><span class="page-link">...</span></li>
+                            <?php endif; ?>
+                            <li class="page-item"><a class="page-link" href="<?= assignment_list_page_url($totalPages) ?>"><?= $totalPages ?></a></li>
+                        <?php endif; ?>
+                        <li class="page-item <?= $currentPage >= $totalPages ? 'disabled' : '' ?>">
+                            <a class="page-link" href="<?= $currentPage >= $totalPages ? '#' : assignment_list_page_url($currentPage + 1) ?>">Next</a>
+                        </li>
+                    </ul>
+                </nav>
+                <?php endif; ?>
+            </div>
         </div>
     </div>
-</div>
+	</div>
 
 
 <script>
@@ -371,19 +483,19 @@ if (!$assignment_list) {
         //for multiselect dropdowns
         $('.custom-select-sm').select2();
 
-        var table = $('#list').DataTable({
-            dom: "<'row'<'col-md-6'B><'col-md-6'f>>" + 
-                "<'row'<'col-sm-12'tr>>" + 
-                "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+        $('#list').DataTable({
+            dom: "<'row'<'col-md-6'B>>" +
+                "<'row'<'col-sm-12'tr>>",
             buttons: [
                 'copy', 'csv', 'excel', 'pdf', 'print'
             ],
-            pageLength: 10,
+            paging: false,
+            info: false,
+            searching: false,
+            ordering: false,
             columnDefs: [
                 { type: 'date', targets: 0 }
-            ],
-            order: [[0, 'desc']],
-            searching: true
+            ]
         });
 
         // Initialize DateTimePickers with constraints
@@ -407,42 +519,8 @@ if (!$assignment_list) {
             }
         });
 
-        // Date Range Filtering Function
-        function filterByDate() {
-            var startDate = $('#startDate').val();
-            var endDate = $('#endDate').val();
-
-            $.fn.dataTable.ext.search.push(function (settings, data) {
-                var assignmentDate = "";
-                assignmentDate = data[0]; // Adjust index based on table columns
-               
-                var formattedDate = moment(assignmentDate, 'ddd, MMM D, YYYY').format('YYYY-MM-DD');
-
-                if (startDate && formattedDate < startDate) return false;
-                if (endDate && formattedDate > endDate) return false;
-                return true;
-            });
-
-            table.draw();
-        }
-
-        // Apply Date Filters
-        $('#startDate, #endDate').on('change', function () {
-            $.fn.dataTable.ext.search = []; // Reset filters
-            filterByDate();
-            $('#teamMemberFilter').trigger('change');
-        });
-
-        // Team Member Filter
         $('#teamMemberFilter').on('change', function () {
-            table.column(4).search(this.value).draw(); // Adjust index based on table columns
-        });
-        // Clear Filters Button
-        $('#clearFilters').on('click', function () {
-            $('#startDate, #endDate').val('');
-            $('#teamMemberFilter').val('');
-            $.fn.dataTable.ext.search = []; // Reset all filters
-            table.search('').columns().search('').draw(); // Reset table
+            $('#assignmentFilters').submit();
         });
 
         // $('.edit-assignment').on('click', function () {
