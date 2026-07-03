@@ -285,7 +285,7 @@ $conn->close();
              <?php $secuirtyHide = (in_array($user_role, ['Security'])) ? 'd-none' : '';
              ?>
             <div class="row mb-4">
-                <div class="col-md-8 <?= $secuirtyHide ?>">
+                <div class="col-md-6 <?= $secuirtyHide ?>">
                     <h5 class="mb-3">
                         <?= $is_cancelled ? '<span class="text-danger">CANCELLED - </span>' : '' ?>
                         <?= htmlspecialchars_decode($title ?? 'No Title') ?>
@@ -387,6 +387,16 @@ $conn->close();
 
                         </div>
                     </div>
+                    <?php if (!empty(trim($dispatcher_note ?? ''))): ?>
+                    <div class="card bg-light mt-3">
+                        <div class="card-header bg-light">
+                            <h6 class="text-bold mb-0"><i class="fas fa-taxi mr-2"></i>Chartered Taxi Details</h6>
+                        </div>
+                        <div class="card-body small">
+                            <?= nl2br(htmlspecialchars(htmlspecialchars_decode($dispatcher_note), ENT_QUOTES, 'UTF-8')) ?>
+                        </div>
+                    </div>
+                    <?php endif; ?>
                 </div>
             </div>
 

@@ -569,7 +569,7 @@ Class Action {
 		foreach ($_POST as $key => $value) {
 			if (!empty($value) && !in_array($key, ['id', 'assignee', 'team', 'request', 'request_amount', 'assigned_by', 'alert_manager']) && !is_numeric($key)) {
 				// Escape specific fields for HTML entities and SQL
-				if (in_array($key, ['description', 'title', 'equipment', 'location', 'contact_information'])) {
+				if (in_array($key, ['description', 'title', 'equipment', 'location', 'contact_information', 'dispatcher_note'])) {
 					$value = $this->db->real_escape_string(htmlspecialchars($value, ENT_QUOTES, 'UTF-8'));
 				}
 	
@@ -604,6 +604,10 @@ Class Action {
 				// Append to $data array
 				$data[$key] = is_int($value) ? $value : "'$value'";
 			}
+		}
+		if (array_key_exists('dispatcher_note', $_POST)) {
+			$dispatcherNote = $this->db->real_escape_string(htmlspecialchars(trim($_POST['dispatcher_note']), ENT_QUOTES, 'UTF-8'));
+			$data['dispatcher_note'] = "'$dispatcherNote'";
 		}
 	
 // Combine assignees into a comma-separated string and dedupe any repeated empids
@@ -819,6 +823,7 @@ Class Action {
 			'show' => $_POST['station_show'] ?? '',
 			'contact_information' => $_POST['contact_information'] ?? '',
 			'details' => $_POST['description'] ?? '',
+			'dispatcher_note' => $_POST['dispatcher_note'] ?? '',
 			'venue' => $_POST['location'] ?? '',
 			'transport_confirmed' => ($transport_confirmed == 1) ? 'Yes' :  'No',
 			'team' => $this->get_team_members($team_members_str),
@@ -1032,8 +1037,8 @@ Class Action {
 			$htmlContent = '<h3>'.$mailtype.' Details</h3>';
 			$htmlContent .= '<table style="width: 100%; border-collapse: collapse;">';
 			foreach ($assignDetails as $key => $value) {
-				if($value && !in_array($key, ['uid', 'is_cancelled', 'sb_staff', 'transport_option'] )){
-				
+				if($value && !in_array($key, ['uid', 'is_cancelled', 'sb_staff', 'transport_option', 'dispatcher_note'] )){
+					
 					switch ($key) {
 						case 'assignment_date':
 							$value = date("l, M j, Y", strtotime($value));
@@ -1061,6 +1066,14 @@ Class Action {
 											<td style="padding: 8px; border-bottom: 1px solid #ddd;">' . $value . '</td>
 										</tr>';
 				}
+			}
+
+			if (!empty(trim($assignDetails['dispatcher_note'] ?? ''))) {
+				$dispatcherNote = nl2br(htmlspecialchars($assignDetails['dispatcher_note'], ENT_QUOTES, 'UTF-8'));
+				$htmlContent .= '<tr>
+									<td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Chartered Taxi Details</strong></td>
+									<td style="padding: 8px; border-bottom: 1px solid #ddd;">' . $dispatcherNote . '</td>
+								</tr>';
 			}
 
 			$htmlContent .= '<tr>

@@ -365,3 +365,6 @@ ADD COLUMN `security_in_time` DATETIME DEFAULT NULL;
 
 ALTER TABLE gate_pass_logs
 ADD COLUMN `security_in_notes` TEXT DEFAULT NULL;
+
+ALTER TABLE assignment_list
+ADD COLUMN `dispatcher_note` TEXT DEFAULT NULL;

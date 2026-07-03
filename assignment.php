@@ -508,6 +508,23 @@ if ($id) {
                                         </div>
                                     </div>
                                     <?php } ?>
+                                    <?php
+                                        $can_edit_dispatcher_note = in_array($user_role, ['Dispatcher', 'ITAdmin']);
+                                        if ($can_edit_dispatcher_note || !empty($dispatcher_note)):
+                                    ?>
+                                    <div class="form-group">
+                                        <label for="dispatcher_note" class="control-label">Chartered Taxi Details</label>
+                                        <textarea
+                                            name="dispatcher_note"
+                                            id="dispatcher_note"
+                                            class="form-control form-control-sm"
+                                            rows="4"
+                                            placeholder="Enter taxi make/model, driver name, contact number, plate number, or other dispatch details"
+                                            <?= $can_edit_dispatcher_note ? '' : 'readonly' ?>
+                                        ><?= htmlspecialchars(htmlspecialchars_decode($dispatcher_note ?? ''), ENT_QUOTES, 'UTF-8') ?></textarea>
+                                        <small class="text-muted">Included only on the No Driver notification copy.</small>
+                                    </div>
+                                    <?php endif; ?>
                                     <?php if ($radio_staff){ ?>
                                     <div class="form-group">
                                         <div class="custom-control custom-switch my-2">
