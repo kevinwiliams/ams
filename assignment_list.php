@@ -33,6 +33,8 @@ $startDateFilter = $_GET['start_date'] ?? '';
 $endDateFilter = $_GET['end_date'] ?? '';
 $teamMemberFilter = trim($_GET['team_member'] ?? '');
 $searchFilter = trim($_GET['q'] ?? '');
+$stationShowFilter = isset($_GET['station_show']) ? $_GET['station_show'] : 'ALL';
+$stationShowFilter = in_array($stationShowFilter, ['ALL', 'EDGE', 'FYAH'], true) ? $stationShowFilter : 'ALL';
 $recordsPerPage = 25;
 $currentPage = max(1, intval($_GET['pg'] ?? 1));
 $conditions = ["(a.is_deleted = 0 OR a.is_deleted IS NULL)"];
@@ -51,6 +53,11 @@ if (!empty($startDateFilter) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $startDateFi
 
 if (!empty($endDateFilter) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $endDateFilter)) {
     $conditions[] = "a.assignment_date <= '" . $conn->real_escape_string($endDateFilter) . "'";
+}
+
+if ($stationShowFilter !== 'ALL') {
+    $station = $conn->real_escape_string($stationShowFilter);
+    $conditions[] = "a.station_show LIKE '$station : %'";
 }
 
 if (!empty($teamMemberFilter)) {
@@ -215,6 +222,17 @@ if (!$assignment_list) {
         <label for="endDate">End Date:</label>
         <input type="text" id="endDate" name="end_date" class="form-control form-control-sm" placeholder="End Date" value="<?= htmlspecialchars($endDateFilter) ?>">
     </div>
+    <?php if($radio_staff) { ?>
+    <!-- Station Show Filter -->
+    <div class="col-md-2">
+        <label for="stationShowFilter">Show:</label>
+        <select id="stationShowFilter" name="station_show" class="form-control form-control-sm custom-select-sm">
+            <option value="ALL" <?= ($stationShowFilter === 'ALL') ? 'selected' : '' ?>>ALL</option>
+            <option value="EDGE" <?= ($stationShowFilter === 'EDGE') ? 'selected' : '' ?>>EDGE</option>
+            <option value="FYAH" <?= ($stationShowFilter === 'FYAH') ? 'selected' : '' ?>>FYAH</option>
+        </select>
+    </div>
+    <?php } ?>
 
     <!-- Team Member Filter -->
     <?php if (in_array($user_role, $edit_roles)){?>
